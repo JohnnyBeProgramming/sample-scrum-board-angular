@@ -1,28 +1,28 @@
-﻿angular.module('myScrumBoard.ui', [
+﻿angular.module('myScrumBoard.directives', [
     'ui.bootstrap',
 ])
-    .directive('myAppToolbar', function () {
+    .directive('appToolbar', function () {
         return {
             replace: true,
             restrict: 'AEM',
             templateUrl: 'views/common/toolbar.tpl.html'
         };
     })
-    .directive('myAppHeading', function () {
+    .directive('appHeading', function () {
         return {
             replace: true,
             restrict: 'AEM',
             templateUrl: 'views/common/heading.tpl.html'
         };
     })
-    .directive('myAppBody', function () {
+    .directive('appBody', function () {
         return {
             replace: true,
             restrict: 'AEM',
             templateUrl: 'views/common/body.tpl.html'
         };
     })
-    .directive('myAppFooter', function () {
+    .directive('appFooter', function () {
         return {
             replace: true,
             restrict: 'AEM',

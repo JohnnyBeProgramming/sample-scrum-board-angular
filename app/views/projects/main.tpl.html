@@ -1,35 +1,21 @@
 ﻿<div class="container">
-    <div class="jumbotron">
-        <span class="pull-right">
-            <a class="btn btn-default">New Project</a>
-        </span>
+    <div class="app-caption">
         <h2>
-            <i class="fa fa-home"></i> Projects <small>&raquo; <a>Show All Projects</a></small>
+            <i class="fa fa-home"></i> Projects
+            <small>&raquo; <a href="" ng-click="state.pilot=1">Show All Projects</a></small>
         </h2>
+        <a class="btn btn-primary" ng-click="state.pilot = 2">New Project</a>
     </div>
-
-    <h3>Simple Project Name <small>1 User(s), 3 Stories, 12 points</small></h3>
-    <div class="row">
-        <div class="col-md-3 btn btn-default">Previous (2 sprints)</div>
-        <div class="col-md-3 btn btn-default">Current (4 of 12 points)</div>
-        <div class="col-md-3 btn btn-default">Upcomming (2 sprints)</div>
-        <div class="col-md-3 btn btn-default">Backlog (4 items)</div>
-    </div>
-
-    <h3>Large Scale Project <small>6 User(s), 12 Stories, 91 points</small></h3>
-    <div class="row">
-        <div class="col-md-3 thumbnail">Sprint 1</div>
-        <div class="col-md-3 thumbnail">Sprint 2</div>
-        <div class="col-md-3 thumbnail">Sprint 3</div>
-        <div class="col-md-3 thumbnail">Sprint 4</div>
-        <div class="col-md-3 thumbnail">Sprint 5</div>
-        <div class="col-md-3 thumbnail">Sprint 6</div>
-        <div class="col-md-3 thumbnail">...</div>
-        <div class="col-md-3 thumbnail">...</div>
-        <div class="col-md-3 thumbnail">...</div>
-        <div class="col-md-3 thumbnail">...</div>
-        <div class="col-md-3 thumbnail">Testing</div>
-        <div class="col-md-3 thumbnail">Backlog</div>
+    <div class="app-panel" ng-switch="state.pilot">
+        <div ng-switch-default>
+            <div ng-include="'/views/projects/list.tpl.html'"></div>
+        </div>
+        <div ng-switch-when="1">
+            <div ng-include="'/views/projects/item.tpl.html'"></div>
+        </div>
+        <div ng-switch-when="2">
+            <div ng-include="'/views/projects/edit.tpl.html'"></div>
+        </div>
     </div>
 
 </div>

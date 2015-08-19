@@ -1,5 +1,5 @@
 /// <reference path="typings/imports.d.ts" />
-/*!
+/*
 * Prototyped Grunt file for a task based javascript builder
 */
 module.exports = function (grunt) {
@@ -68,6 +68,7 @@ module.exports = function (grunt) {
             targets: {
                 src: [
                     '<%= cfg.base %>modules**/*.ts',
+                    '<%= cfg.base %>views**/*.ts',
                     '!node_modules/**/*.ts'
                 ],
                 dest: '<%= cfg.base %>assets/lib/app.js',

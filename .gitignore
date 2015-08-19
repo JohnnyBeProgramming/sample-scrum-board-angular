@@ -1,1 +1,9 @@
 /build/node_modules
+/app/obj
+/app/bin
+/.vs/ScrumBoard/v14/*.suo
+/*.suo
+/app/*.user
+/.vs
+/ScrumBoard.sln
+/app/ScrumBoard.csproj
