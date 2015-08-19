@@ -1,3 +1,4 @@
 @echo off
 cd build
-npm start
+call npm start --silent
+call grunt watch
