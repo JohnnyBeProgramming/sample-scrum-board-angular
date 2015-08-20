@@ -1,12 +1,22 @@
 ﻿<div class="container">
     <div class="app-caption">
         <h2>
-            <i class="fa fa-home"></i> Backlogs
+            <i class="fa fa-sticky-note"></i> Backlogs
             <small>&raquo; <a href="" ng-click="state.pilot=1">Show All Projects</a></small>
         </h2>
-        <a class="btn btn-primary" ng-click="">Add Item</a>
+        <a class="btn btn-primary" 
+           ng-click="viewCtrl.createNew()"
+           ng-disabled="viewCtrl.tabIndex == 2">Create New Backlog</a>
     </div>
-    <div class="app-panel">
-        ...
+    <div class="app-panel" ng-switch="viewCtrl.tabIndex">
+        <div ng-switch-default>
+            <div ng-include="'/views/backlogs/list.tpl.html'"></div>
+        </div>
+        <div ng-switch-when="1">
+            <div ng-include="'/views/backlogs/item.tpl.html'"></div>
+        </div>
+        <div ng-switch-when="2">
+            <div ng-include="'/views/backlogs/new.tpl.html'"></div>
+        </div>
     </div>
 </div>

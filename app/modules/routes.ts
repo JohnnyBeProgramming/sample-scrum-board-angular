@@ -15,8 +15,8 @@
             views: {
                 'main@': {
                     templateUrl: 'views/dashboard/main.tpl.html',
-                    //controller: 'MainViewController',
-                    //controllerAs: 'mainCtrl',
+                    controller: 'DashboardController',
+                    controllerAs: 'viewCtrl',
                 },
             }
         })
@@ -26,6 +26,8 @@
             views: {
                 'main@': {
                     templateUrl: 'views/projects/main.tpl.html',
+                    controller: 'ProjectsController',
+                    controllerAs: 'viewCtrl',
                 },
             }
         })
@@ -35,6 +37,8 @@
             views: {
                 'main@': {
                     templateUrl: 'views/sprints/main.tpl.html',
+                    controller: 'SprintController',
+                    controllerAs: 'viewCtrl',
                 },
             }
         })
@@ -44,6 +48,8 @@
             views: {
                 'main@': {
                     templateUrl: 'views/backlogs/main.tpl.html',
+                    controller: 'BacklogController',
+                    controllerAs: 'viewCtrl',
                 },
             }
         })

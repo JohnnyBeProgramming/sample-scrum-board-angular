@@ -52,19 +52,76 @@
                 color: silver;
             }
 
+            .ctrl {
+                padding: 0 4px;
+            }
+
+            .input-no-border {
+                border: none;
+                font-size: inherit;
+                display: inline-block;
+                background-color: transparent;
+            }
+
             .contained {
                 padding: 3px;
-                margin: 0 0 32px 0;
+                margin: 0 0 8px 0;
                 background: rgba(136, 136, 136, 0.25);
                 border: solid 1px rgba(136, 136, 136, 0.5);
 
+                h3, h4 {
+                    color: #444;
+                    padding: 0;
+                    margin: 0;
+                    margin-bottom: 8px;
+                    border-bottom: solid 1px silver;
+                }
+
+                h5, h6 {
+                    color: #444;
+                    padding: 0;
+                    margin: 0;
+                    margin-bottom: 3px;
+                    border-bottom: solid 1px silver;
+                }
+
                 .board {
                     margin: 3px -8px;
-                    padding: 6px;                    
+                    padding: 6px;
                     display: block;
-                    min-height: 400px;
+                    min-height: 500px;
                     background: rgba(255, 255, 255, 0.95);
                     border: solid 1px rgba(136, 136, 136, 0.75);
+
+                    .tile {
+                        margin: 3px;
+                        padding: 6px;
+                        background: rgba(255, 255, 255, 0.95);
+                        border: solid 1px rgba(136, 136, 136, 0.75);
+                        font-size: xx-small;
+
+                        p {
+                            font-size: xx-small;
+                        }
+
+                        .inactive {
+                        }
+                    }
+                }
+
+                .horz-fill {
+                    width: 100%;
+                }
+
+                .free-text {
+                    width: 100%;
+                    display: block;
+                    border: solid 1px silver;
+                    text-align: left;
+                }
+
+                .pad-aside {
+                    padding: 8px 16px;
                 }
             }
         }

@@ -5,7 +5,6 @@ module app.data.repositories {
     import IDataModel = app.data.models.IDataModel;
 
     export interface IRepository<TModel> {
-        create(title: string, description?: string): TModel;
         load(): ng.IPromise<TModel[]>;
         save(): ng.IPromise<boolean>;
     }

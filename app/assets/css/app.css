@@ -46,19 +46,66 @@ body .app-container .app-panel small,
 body .app-container .app-panel small a {
   color: silver;
 }
+body .app-container .app-panel .ctrl {
+  padding: 0 4px;
+}
+body .app-container .app-panel .input-no-border {
+  border: none;
+  font-size: inherit;
+  display: inline-block;
+  background-color: transparent;
+}
 body .app-container .app-panel .contained {
   padding: 3px;
-  margin: 0 0 32px 0;
+  margin: 0 0 8px 0;
   background: rgba(136, 136, 136, 0.25);
   border: solid 1px rgba(136, 136, 136, 0.5);
+}
+body .app-container .app-panel .contained h3,
+body .app-container .app-panel .contained h4 {
+  color: #444;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 8px;
+  border-bottom: solid 1px silver;
+}
+body .app-container .app-panel .contained h5,
+body .app-container .app-panel .contained h6 {
+  color: #444;
+  padding: 0;
+  margin: 0;
+  margin-bottom: 3px;
+  border-bottom: solid 1px silver;
 }
 body .app-container .app-panel .contained .board {
   margin: 3px -8px;
   padding: 6px;
   display: block;
-  min-height: 400px;
+  min-height: 500px;
   background: rgba(255, 255, 255, 0.95);
   border: solid 1px rgba(136, 136, 136, 0.75);
+}
+body .app-container .app-panel .contained .board .tile {
+  margin: 3px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  border: solid 1px rgba(136, 136, 136, 0.75);
+  font-size: xx-small;
+}
+body .app-container .app-panel .contained .board .tile p {
+  font-size: xx-small;
+}
+body .app-container .app-panel .contained .horz-fill {
+  width: 100%;
+}
+body .app-container .app-panel .contained .free-text {
+  width: 100%;
+  display: block;
+  border: solid 1px silver;
+  text-align: left;
+}
+body .app-container .app-panel .contained .pad-aside {
+  padding: 8px 16px;
 }
 body .app-container .app-body {
   padding: 0;

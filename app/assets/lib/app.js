@@ -29,6 +29,7 @@ var Guid = (function () {
     Guid.s4 = function () {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
     };
+    Guid.Empty = '00000000-0000-0000-0000-000000000000';
     return Guid;
 })();
 /// <reference path="IDataModel.ts" />
@@ -66,6 +67,27 @@ var app;
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
 /// <reference path="IDataModel.ts" />
+var app;
+(function (app) {
+    var data;
+    (function (data) {
+        var models;
+        (function (models) {
+            (function (TaskType) {
+                TaskType[TaskType["Default"] = 0] = "Default";
+                TaskType[TaskType["Scheduled"] = 1] = "Scheduled";
+                TaskType[TaskType["InProgress"] = 2] = "InProgress";
+                TaskType[TaskType["Testing"] = 3] = "Testing";
+                TaskType[TaskType["Completed"] = 4] = "Completed";
+                TaskType[TaskType["Canceled"] = 5] = "Canceled";
+                TaskType[TaskType["Backlog"] = 6] = "Backlog";
+            })(models.TaskType || (models.TaskType = {}));
+            var TaskType = models.TaskType;
+        })(models = data.models || (data.models = {}));
+    })(data = app.data || (app.data = {}));
+})(app || (app = {}));
+/// <reference path="IDataModel.ts" />
+/// <reference path="TaskType.ts" />
 /// <reference path="IDataModel.ts" />
 /// <reference path="IDataModel.ts" />
 /// <reference path="../common/utils/Guid.ts" />
@@ -97,6 +119,159 @@ var app;
                     Key: Guid.New(),
                     Title: 'ToDo',
                     Description: 'A brief explanation goes here.',
+                },
+            ];
+            SampleData.Boards = [
+                // --------------------------------------------------------------
+                {
+                    Key: Guid.New(),
+                    Title: 'Scheduled Tasks',
+                    TaskType: data.models.TaskType.Scheduled,
+                    ProjectKey: SampleData.Projects[0].Key,
+                    SprintKey: null,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Scheduled Tasks',
+                    TaskType: data.models.TaskType.Scheduled,
+                    ProjectKey: SampleData.Projects[1].Key,
+                    SprintKey: null,
+                },
+                // --------------------------------------------------------------
+                // --------------------------------------------------------------
+                {
+                    Key: Guid.New(),
+                    Title: 'Tasks In Progress',
+                    TaskType: data.models.TaskType.InProgress,
+                    ProjectKey: SampleData.Projects[0].Key,
+                    SprintKey: null,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Tasks In Progress',
+                    TaskType: data.models.TaskType.InProgress,
+                    ProjectKey: SampleData.Projects[1].Key,
+                    SprintKey: null,
+                },
+                // --------------------------------------------------------------
+                // --------------------------------------------------------------
+                {
+                    Key: Guid.New(),
+                    Title: 'Tasks In Testing',
+                    TaskType: data.models.TaskType.Testing,
+                    ProjectKey: SampleData.Projects[0].Key,
+                    SprintKey: null,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Tasks In Testing',
+                    TaskType: data.models.TaskType.Testing,
+                    ProjectKey: SampleData.Projects[1].Key,
+                    SprintKey: null,
+                },
+                // --------------------------------------------------------------
+                // --------------------------------------------------------------
+                {
+                    Key: Guid.New(),
+                    Title: 'Backlogs',
+                    TaskType: data.models.TaskType.Backlog,
+                    ProjectKey: SampleData.Projects[0].Key,
+                    SprintKey: null,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Backlogs',
+                    TaskType: data.models.TaskType.Backlog,
+                    ProjectKey: SampleData.Projects[1].Key,
+                    SprintKey: null,
+                },
+            ];
+            SampleData.Tasks = [
+                // --------------------------------------------------------------
+                {
+                    Key: Guid.New(),
+                    Title: 'Reminder',
+                    Description: 'Create some more tasks and assign more work.',
+                    BoardKey: SampleData.Boards[0].Key,
+                    GroupKey: SampleData.Groups[0].Key,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Creative Design',
+                    Description: 'Create a mockup of the UI and draw some layouts.',
+                    BoardKey: SampleData.Boards[0].Key,
+                    GroupKey: SampleData.Groups[0].Key,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Scaffold web application',
+                    Description: 'Create the HTML, CSS and javascript folder structures for the web app.',
+                    BoardKey: SampleData.Boards[0].Key,
+                    GroupKey: SampleData.Groups[0].Key,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Add Grunt Build',
+                    Description: 'Create a build folder and install and setup grunt for continous builds.',
+                    BoardKey: SampleData.Boards[0].Key,
+                    GroupKey: SampleData.Groups[0].Key,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Create Git Repository',
+                    Description: 'Create a clean new repo to store the code.',
+                    BoardKey: SampleData.Boards[0].Key,
+                    GroupKey: SampleData.Groups[0].Key,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Commit Initial Release',
+                    Description: 'Publish to the git repository.',
+                    BoardKey: SampleData.Boards[0].Key,
+                    GroupKey: SampleData.Groups[0].Key,
+                },
+                // --------------------------------------------------------------
+                {
+                    Key: Guid.New(),
+                    Title: 'Do some task for me',
+                    Description: 'This is an example taskthat is just that: an example.',
+                    BoardKey: SampleData.Boards[1].Key,
+                    GroupKey: null,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Do some task for me',
+                    Description: 'This is an example taskthat is just that: an example.',
+                    BoardKey: SampleData.Boards[6].Key,
+                    GroupKey: null,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Do some task for me',
+                    Description: 'This is an example taskthat is just that: an example.',
+                    BoardKey: SampleData.Boards[6].Key,
+                    GroupKey: null,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Do some task for me',
+                    Description: 'This is an example taskthat is just that: an example.',
+                    BoardKey: SampleData.Boards[6].Key,
+                    GroupKey: null,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Do some task for me',
+                    Description: 'This is an example taskthat is just that: an example.',
+                    BoardKey: SampleData.Boards[7].Key,
+                    GroupKey: null,
+                },
+                {
+                    Key: Guid.New(),
+                    Title: 'Do some task for me',
+                    Description: 'This is an example taskthat is just that: an example.',
+                    BoardKey: SampleData.Boards[7].Key,
+                    GroupKey: null,
                 },
             ];
             return SampleData;
@@ -167,12 +342,52 @@ var app;
     (function (data) {
         var repositories;
         (function (repositories) {
-            var BoardRepository = (function () {
+            var BoardRepository = (function (_super) {
+                __extends(BoardRepository, _super);
                 function BoardRepository($q) {
+                    var _this = this;
+                    _super.call(this);
                     this.$q = $q;
+                    this.load()
+                        .then(function (list) {
+                        _this.memCache = list;
+                    });
                 }
+                BoardRepository.prototype.create = function (type, title) {
+                    var item = {
+                        Key: Guid.New(),
+                        Title: title,
+                        TaskType: type,
+                    };
+                    this.insert(item);
+                    return item;
+                };
+                BoardRepository.prototype.load = function () {
+                    var deferred = this.$q.defer();
+                    {
+                        deferred.resolve(data.SampleData.Boards);
+                    }
+                    return deferred.promise;
+                };
+                BoardRepository.prototype.save = function () {
+                    var deferred = this.$q.defer();
+                    {
+                        console.log(' - ToDo: Implement Save: ', this.memCache);
+                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
+                    }
+                    return deferred.promise;
+                };
+                BoardRepository.prototype.filterByType = function (type) {
+                    var list = [];
+                    this.memCache.forEach(function (item) {
+                        if (item.TaskType == type) {
+                            list.push(item);
+                        }
+                    });
+                    return list;
+                };
                 return BoardRepository;
-            })();
+            })(repositories.AbstractRepository);
             repositories.BoardRepository = BoardRepository;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
@@ -199,12 +414,54 @@ var app;
     (function (data) {
         var repositories;
         (function (repositories) {
-            var TaskRepository = (function () {
+            var TaskRepository = (function (_super) {
+                __extends(TaskRepository, _super);
                 function TaskRepository($q) {
+                    var _this = this;
+                    _super.call(this);
                     this.$q = $q;
+                    this.load().then(function (list) {
+                        _this.memCache = list;
+                    });
                 }
+                TaskRepository.prototype.create = function (board, title, description) {
+                    var item = {
+                        Key: Guid.New(),
+                        Title: title,
+                        Description: description,
+                        BoardKey: board.Key,
+                    };
+                    this.insert(item);
+                    return item;
+                };
+                TaskRepository.prototype.load = function () {
+                    var deferred = this.$q.defer();
+                    {
+                        deferred.resolve(data.SampleData.Tasks);
+                    }
+                    return deferred.promise;
+                };
+                TaskRepository.prototype.save = function () {
+                    var deferred = this.$q.defer();
+                    {
+                        console.log(' - ToDo: Implement Save: ', this.memCache);
+                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
+                    }
+                    return deferred.promise;
+                };
+                TaskRepository.prototype.filter = function (boardKey, groupKey) {
+                    var list = [];
+                    this.memCache.forEach(function (item) {
+                        if (boardKey && boardKey != item.BoardKey)
+                            return;
+                        if (groupKey && groupKey != item.BoardKey)
+                            return;
+                        list.push(item);
+                    });
+                    return list;
+                };
                 return TaskRepository;
-            })();
+            })(repositories.AbstractRepository);
             repositories.TaskRepository = TaskRepository;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
@@ -294,6 +551,147 @@ angular.module('myScrumBoard.common', [
     'myScrumBoard.directives',
 ])
     .service('ScrumBoardService', ['$q', app.common.services.ScrumBoardService]);
+var app;
+(function (app) {
+    var controllers;
+    (function (controllers) {
+        var models = app.data.models;
+        var BacklogController = (function () {
+            function BacklogController(scrumBoards) {
+                this.scrumBoards = scrumBoards;
+                this.tabIndex = 0;
+            }
+            Object.defineProperty(BacklogController.prototype, "boards", {
+                get: function () {
+                    return this.scrumBoards.Boards.filterByType(app.data.models.TaskType.Backlog);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            BacklogController.prototype.index = function () {
+                this.tabIndex = 0;
+            };
+            BacklogController.prototype.createNew = function (boardId) {
+                var board = {
+                    Key: Guid.Empty,
+                    Title: 'Project Backlog',
+                    TaskType: models.TaskType.Backlog,
+                };
+                this.current = board;
+                this.tabIndex = 2;
+            };
+            BacklogController.prototype.openBoard = function (board) {
+                this.current = board;
+                this.tabIndex = 1;
+            };
+            BacklogController.prototype.update = function (board) {
+                this.scrumBoards.Boards.save()
+                    .then(function (success) {
+                    if (success) {
+                    }
+                    else {
+                    }
+                });
+                this.index();
+            };
+            BacklogController.prototype.insert = function (board) {
+                if (board.Key == Guid.Empty) {
+                    board.Key = Guid.New();
+                    this.scrumBoards.Boards.insert(board);
+                }
+                this.scrumBoards.Boards.save()
+                    .then(function (success) {
+                    if (success) {
+                    }
+                    else {
+                    }
+                });
+                this.openBoard(board);
+            };
+            BacklogController.prototype.cancel = function () {
+                this.current = null;
+                this.index();
+            };
+            BacklogController.prototype.addTask = function () {
+                var task = {
+                    Key: Guid.Empty,
+                    Title: '',
+                    Description: '',
+                    BoardKey: this.current.Key,
+                };
+                this.newTask = task;
+            };
+            BacklogController.prototype.updateTask = function (task) {
+                if (task.Key == Guid.Empty) {
+                    task.Key = Guid.New();
+                    this.scrumBoards.Tasks.insert(task);
+                }
+                console.log(task);
+                this.scrumBoards.Tasks.save();
+                this.newTask = null;
+            };
+            BacklogController.prototype.cancelTask = function () {
+                this.newTask = null;
+            };
+            return BacklogController;
+        })();
+        controllers.BacklogController = BacklogController;
+    })(controllers = app.controllers || (app.controllers = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var controllers;
+    (function (controllers) {
+        var DashboardController = (function () {
+            function DashboardController(scrumBoards) {
+                this.scrumBoards = scrumBoards;
+                this.tabIndex = 0;
+            }
+            return DashboardController;
+        })();
+        controllers.DashboardController = DashboardController;
+    })(controllers = app.controllers || (app.controllers = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var controllers;
+    (function (controllers) {
+        var ProjectsController = (function () {
+            function ProjectsController(scrumBoards) {
+                this.scrumBoards = scrumBoards;
+                this.tabIndex = 0;
+            }
+            return ProjectsController;
+        })();
+        controllers.ProjectsController = ProjectsController;
+    })(controllers = app.controllers || (app.controllers = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var controllers;
+    (function (controllers) {
+        var SprintController = (function () {
+            function SprintController(scrumBoards) {
+                this.scrumBoards = scrumBoards;
+                this.tabIndex = 0;
+            }
+            return SprintController;
+        })();
+        controllers.SprintController = SprintController;
+    })(controllers = app.controllers || (app.controllers = {}));
+})(app || (app = {}));
+/// <reference path="../common/module.ts" />
+/// <reference path="backlogs/BacklogController.ts" />
+/// <reference path="dashboard/DashboardController.ts" />
+/// <reference path="projects/ProjectsController.ts" />
+/// <reference path="sprints/SprintController.ts" />
+angular.module('myScrumBoard.controllers', [
+    'myScrumBoard.common',
+])
+    .controller('BacklogController', ['ScrumBoardService', app.controllers.BacklogController])
+    .controller('DashboardController', ['ScrumBoardService', app.controllers.DashboardController])
+    .controller('ProjectsController', ['ScrumBoardService', app.controllers.ProjectsController])
+    .controller('SprintController', ['ScrumBoardService', app.controllers.SprintController]);
 angular.module('myScrumBoard.routes', [
     'ui.router',
 ])
@@ -309,6 +707,8 @@ angular.module('myScrumBoard.routes', [
             views: {
                 'main@': {
                     templateUrl: 'views/dashboard/main.tpl.html',
+                    controller: 'DashboardController',
+                    controllerAs: 'viewCtrl',
                 },
             }
         })
@@ -317,6 +717,8 @@ angular.module('myScrumBoard.routes', [
             views: {
                 'main@': {
                     templateUrl: 'views/projects/main.tpl.html',
+                    controller: 'ProjectsController',
+                    controllerAs: 'viewCtrl',
                 },
             }
         })
@@ -325,6 +727,8 @@ angular.module('myScrumBoard.routes', [
             views: {
                 'main@': {
                     templateUrl: 'views/sprints/main.tpl.html',
+                    controller: 'SprintController',
+                    controllerAs: 'viewCtrl',
                 },
             }
         })
@@ -333,6 +737,8 @@ angular.module('myScrumBoard.routes', [
             views: {
                 'main@': {
                     templateUrl: 'views/backlogs/main.tpl.html',
+                    controller: 'BacklogController',
+                    controllerAs: 'viewCtrl',
                 },
             }
         });
@@ -340,11 +746,13 @@ angular.module('myScrumBoard.routes', [
 /// <reference path="imports.d.ts" />
 /// <reference path="data/module.ts" />
 /// <reference path="common/module.ts" />
+/// <reference path="controllers/module.ts" />
 /// <reference path="routes.ts" />
 angular.module('myScrumBoard', [
-    'myScrumBoard.common',
-    'myScrumBoard.routes',
     'myScrumBoard.data',
+    'myScrumBoard.common',
+    'myScrumBoard.controllers',
+    'myScrumBoard.routes',
 ])
     .run(['$rootScope', 'ScrumBoardState', function ($rootScope, ScrumBoardState) {
         console.debug('Starting application...');

@@ -1,12 +1,14 @@
 ﻿/// <reference path="imports.d.ts" />
 /// <reference path="data/module.ts" />
 /// <reference path="common/module.ts" />
+/// <reference path="controllers/module.ts" />
 /// <reference path="routes.ts" />
 
 angular.module('myScrumBoard', [
-    'myScrumBoard.common',
-    'myScrumBoard.routes',
     'myScrumBoard.data',
+    'myScrumBoard.common',
+    'myScrumBoard.controllers',
+    'myScrumBoard.routes',
 ])
 
     .run(['$rootScope', 'ScrumBoardState', ($rootScope, ScrumBoardState: app.data.models.AppState) => {
