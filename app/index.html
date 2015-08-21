@@ -1,7 +1,17 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <base href="/">
+    <script id="setBaseTag" type="text/javascript">
+        // Force relative dir to this folder
+        var url = document.location.href;
+        var pos = url.lastIndexOf('/');
+        if (pos > 0) {
+            url = url.substring(0, pos + 1);
+            document.write("<base href='" + url + "' />");
+        } else {
+            document.write("<base href='/' />");
+        }
+    </script>
     <meta charset="utf-8" />
     <title>Scrum Boards</title>
     <style>
