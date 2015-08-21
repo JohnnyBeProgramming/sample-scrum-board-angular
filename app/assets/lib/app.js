@@ -753,6 +753,7 @@ angular.module('myScrumBoard', [
     'myScrumBoard.common',
     'myScrumBoard.controllers',
     'myScrumBoard.routes',
+    'myScrumBoard.templates',
 ])
     .run(['$rootScope', 'ScrumBoardState', function ($rootScope, ScrumBoardState) {
         console.debug('Starting application...');

@@ -78,11 +78,23 @@ module.exports = function (grunt) {
         },
         html2js: {
             options: {
-                // custom options, see below 
+                base: '<%= cfg.base %>',
+                quoteChar: '\'',
+                collapseBooleanAttributes: true,
+                collapseWhitespace: true,
+                removeAttributeQuotes: true,
+                removeComments: true,
+                removeEmptyAttributes: true,
+                removeRedundantAttributes: true,
+                removeScriptTypeAttributes: true,
+                removeStyleLinkTypeAttributes: true,
             },
             main: {
-                src: ['<%= cfg.base %>**/*.tpl.html'],
-                dest: '<%= cfg.base %>assets/lib/app.tpl.js'
+                src: [
+                    '<%= cfg.base %>**/*.tpl.html'
+                ],
+                dest: '<%= cfg.base %>assets/lib/app.tpl.js',
+                module: 'myScrumBoard.templates',
             },
         },
         watch: {
