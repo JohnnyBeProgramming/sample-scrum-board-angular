@@ -12,33 +12,22 @@
             <div class="board">
                 <div class="row">
                     <div class="col-md-8">
-                        <div ng-if="viewCtrl.newTask">
-                            <a href="" ng-click="viewCtrl.cancelTask()" class="pull-right ctrl"><i class="fa fa-times"></i></a>
-                            <a href="" ng-click="viewCtrl.updateTask(viewCtrl.newTask)" class="pull-right ctrl"><i class="fa fa-save"></i></a>
-                            <h4>
-                                <i class="fa fa-file-o"></i> 
-                                <input type="text" tabindex="1" class="input-no-border" placeholder="Attach New Task" ng-model="viewCtrl.newTask.Title" />
-                            </h4>
-                            <p>
-                                <textarea tabindex="2" class="free-text" rows="5" ng-model="viewCtrl.newTask.Description"></textarea>
-                            </p>
-                        </div>
                         <div>
                             <a href="" ng-click="viewCtrl.addTask()" ng-if="!viewCtrl.newTask" class="pull-right ctrl"><i class="fa fa-plus"></i></a>
                             <h4>
                                 <i class="fa fa-tags"></i> Unassigned Tasks
                             </h4>
                             <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(viewCtrl.current.Key)">
+                                <a href="" ng-click="viewCtrl.cancelTask()" class="pull-right ctrl"><i class="fa fa-times"></i></a>
+                                <a href="" ng-click="viewCtrl.updateTask(viewCtrl.newTask)" class="pull-right ctrl"><i class="fa fa-save"></i></a>
                                 <h5>{{ task.Title }}</h5>
                                 <p>
                                     {{ task.Description }}
                                 </p>
                             </div>
-                            <div class="tile inactive">
-                                <p>
-                                    Add Task
-                                </p>
-                            </div>
+                            <a href="" ng-click="viewCtrl.addTask()" class="tile add">
+                                <i class="fa fa-plus"></i> Add Task
+                            </a>
                         </div>
                     </div>
                     <div class="col-md-4">

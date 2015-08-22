@@ -10,6 +10,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-html2js');
 
     // Define the task(s)
     grunt.registerTask('default', [
@@ -25,6 +26,7 @@ module.exports = function (grunt) {
     ]);
     grunt.registerTask('build-scripts', [
         'typescript',
+        'html2js',
     ]);
 
     // Configure grunt
@@ -74,6 +76,27 @@ module.exports = function (grunt) {
                 dest: '<%= cfg.base %>assets/lib/app.js',
             }
         },
+        html2js: {
+            options: {
+                base: '<%= cfg.base %>',
+                quoteChar: '\'',
+                collapseBooleanAttributes: true,
+                collapseWhitespace: true,
+                removeAttributeQuotes: true,
+                removeComments: true,
+                removeEmptyAttributes: true,
+                removeRedundantAttributes: true,
+                removeScriptTypeAttributes: true,
+                removeStyleLinkTypeAttributes: true,
+            },
+            main: {
+                src: [
+                    '<%= cfg.base %>**/*.tpl.html'
+                ],
+                dest: '<%= cfg.base %>assets/lib/app.tpl.js',
+                module: 'myScrumBoard.templates',
+            },
+        },
         watch: {
             ts: {
                 tasks: ['typescript'],
@@ -93,7 +116,6 @@ module.exports = function (grunt) {
                 ],
             },
         },
-
     };
 
     grunt.initConfig(config)

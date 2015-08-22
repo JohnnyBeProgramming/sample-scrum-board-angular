@@ -8,7 +8,7 @@ angular.module('myScrumBoard.controllers', [
     'myScrumBoard.common',
 ])
 
-    .controller('BacklogController', ['ScrumBoardService', app.controllers.BacklogController])
+    .controller('BacklogController', ['$modal', 'ScrumBoardService', app.controllers.BacklogController])
     .controller('DashboardController', ['ScrumBoardService', app.controllers.DashboardController])
     .controller('ProjectsController', ['ScrumBoardService', app.controllers.ProjectsController])
     .controller('SprintController', ['ScrumBoardService', app.controllers.SprintController])

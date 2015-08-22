@@ -9,6 +9,7 @@ angular.module('myScrumBoard', [
     'myScrumBoard.common',
     'myScrumBoard.controllers',
     'myScrumBoard.routes',
+    'myScrumBoard.templates',
 ])
 
     .run(['$rootScope', 'ScrumBoardState', ($rootScope, ScrumBoardState: app.data.models.AppState) => {

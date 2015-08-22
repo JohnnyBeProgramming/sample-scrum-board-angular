@@ -135,22 +135,42 @@ declare module app.common.services {
         constructor($q: any);
     }
 }
+declare module app.common.modal {
+    class AddTaskController {
+        private $scope;
+        private $modalInstance;
+        private modalContext;
+        constructor($scope: any, $modalInstance: any, modalContext: any);
+        init(): void;
+    }
+}
+declare module app.common.modal {
+    class AddBoardController {
+        private $scope;
+        private $modalInstance;
+        private modalContext;
+        constructor($scope: any, $modalInstance: any, modalContext: any);
+        init(): void;
+    }
+}
 declare module app.controllers {
     import models = app.data.models;
     class BacklogController {
+        private $modal;
         private scrumBoards;
         tabIndex: number;
         current: models.IBoard;
         newTask: models.ITask;
         boards: models.IBoard[];
-        constructor(scrumBoards: app.common.services.ScrumBoardService);
+        constructor($modal: any, scrumBoards: app.common.services.ScrumBoardService);
         index(): void;
+        getBoards(): models.IBoard[];
         createNew(boardId?: string): void;
         openBoard(board: models.IBoard): void;
         update(board: models.IBoard): void;
         insert(board: models.IBoard): void;
         cancel(): void;
-        addTask(): void;
+        addTask(board?: models.IBoard): void;
         updateTask(task: models.ITask): void;
         cancelTask(): void;
     }

@@ -1,6 +1,22 @@
 body {
   height: 100%;
 }
+body .horz-fill {
+  width: 100%;
+  display: inline-block;
+}
+body .free-text {
+  width: 100%;
+  display: block;
+  border: solid 1px silver;
+  text-align: left;
+}
+body .pad-aside {
+  padding: 8px 16px;
+}
+body .modal {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+}
 body .app-container {
   top: 0;
   left: 0;
@@ -85,6 +101,16 @@ body .app-container .app-panel .contained .board {
   background: rgba(255, 255, 255, 0.95);
   border: solid 1px rgba(136, 136, 136, 0.75);
 }
+body .app-container .app-panel .contained .board.add {
+  opacity: 0.5;
+  font-size: 16px;
+  line-height: 50px;
+  text-align: center;
+  border: dashed 1px rgba(136, 136, 136, 0.75);
+}
+body .app-container .app-panel .contained .board.add:hover {
+  opacity: 1.0;
+}
 body .app-container .app-panel .contained .board .tile {
   margin: 3px;
   padding: 6px;
@@ -95,17 +121,16 @@ body .app-container .app-panel .contained .board .tile {
 body .app-container .app-panel .contained .board .tile p {
   font-size: xx-small;
 }
-body .app-container .app-panel .contained .horz-fill {
-  width: 100%;
-}
-body .app-container .app-panel .contained .free-text {
-  width: 100%;
+body .app-container .app-panel .contained .board .tile.add {
+  opacity: 0.5;
   display: block;
-  border: solid 1px silver;
-  text-align: left;
+  font-size: 16px;
+  line-height: 50px;
+  text-align: center;
+  border: dashed 1px rgba(136, 136, 136, 0.75);
 }
-body .app-container .app-panel .contained .pad-aside {
-  padding: 8px 16px;
+body .app-container .app-panel .contained .board .tile.add:hover {
+  opacity: 1.0;
 }
 body .app-container .app-body {
   padding: 0;

@@ -8,15 +8,18 @@
         public current: models.IBoard;
         public newTask: models.ITask;
 
-        public get boards(): models.IBoard[] {
-            return this.scrumBoards.Boards.filterByType(app.data.models.TaskType.Backlog);
-        }
+        public get boards(): models.IBoard[] { return this.getBoards(); }
 
-        constructor(private scrumBoards: app.common.services.ScrumBoardService) {
-        }
+        constructor(private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) { }
 
         public index() {
             this.tabIndex = 0;
+        }
+
+        public getBoards(): models.IBoard[] {
+            return this.scrumBoards
+                .Boards
+                .filterByType(app.data.models.TaskType.Backlog);
         }
 
         public createNew(boardId?: string) {
@@ -26,7 +29,32 @@
                 TaskType: models.TaskType.Backlog,
             };
             this.current = board;
-            this.tabIndex = 2;
+
+            // Open the modal dialog
+            var dialog = this.$modal.open({
+                size: 'md',
+                animation: true,
+                templateUrl: 'views/common/modal/addBoard.tpl.html',
+                controller: 'AddBoardController',
+                resolve: {
+                    modalContext: () => {
+                        return {
+                            board: board,
+                        };
+                    },
+                }
+            }).result.then(
+                // On Commit
+                (modalContext) => {
+                    console.info(' - Modal closed. Updating task.', modalContext);
+                    this.insert(modalContext.board);
+                },
+                // Dismissed
+                () => {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    this.index();
+                });
+
         }
 
         public openBoard(board: models.IBoard) {
@@ -65,14 +93,42 @@
             this.index();
         }
 
-        public addTask() {
+        public addTask(board?: models.IBoard) {
+            if (!board) board = this.current;
+            if (!board) return;
+
             var task: models.ITask = {
                 Key: Guid.Empty,
                 Title: '',
                 Description: '',
-                BoardKey: this.current.Key,
+                BoardKey: board.Key,
             };
             this.newTask = task;
+
+            // Open the modal dialog
+            var dialog = this.$modal.open({
+                size: 'md',
+                animation: true,
+                templateUrl: 'views/common/modal/addTask.tpl.html',
+                controller: 'AddTaskController',
+                resolve: {
+                    modalContext: () => {
+                        return {
+                            task: task,
+                        };
+                    },
+                }
+            }).result.then(
+                // On Commit
+                (modalContext) => {
+                    console.info(' - Modal closed. Updating task.', modalContext);
+                    this.updateTask(modalContext.task);
+                },
+                // Dismissed
+                () => {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    this.cancelTask();
+                });
         }
 
         public updateTask(task: models.ITask) {

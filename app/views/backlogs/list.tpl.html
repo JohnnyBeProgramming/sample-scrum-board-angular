@@ -19,12 +19,15 @@
                         {{ task.Description }}
                     </p>
                 </div>
-                <div class="tile inactive">
-                    <p>
-                        Add Task
-                    </p>
-                </div>
+                <a href="" ng-click="viewCtrl.addTask(item)" class="tile add">
+                    <i class="fa fa-plus"></i> Add Task
+                </a>
             </div>
+        </div>
+        <div class="col-md-3">
+            <a href="" ng-click="viewCtrl.createNew()" class="board add">
+                <i class="fa fa-plus"></i> New Backlog
+            </a>
         </div>
     </div>
 </div>

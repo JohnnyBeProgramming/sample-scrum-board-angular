@@ -11,6 +11,7 @@
     "grunt-contrib-cssmin": "^0.13.0",
     "grunt-contrib-less": "^1.0.1",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-html2js": "^0.3.4",
     "grunt-ts": "^4.2.0",
     "grunt-typescript": "^0.7.0"
   }

@@ -545,40 +545,148 @@ angular.module('myScrumBoard.directives', [
         templateUrl: 'views/common/footer.tpl.html'
     };
 });
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var modal;
+        (function (modal) {
+            var AddTaskController = (function () {
+                function AddTaskController($scope, $modalInstance, modalContext) {
+                    this.$scope = $scope;
+                    this.$modalInstance = $modalInstance;
+                    this.modalContext = modalContext;
+                    this.init();
+                }
+                AddTaskController.prototype.init = function () {
+                    var _this = this;
+                    this.$scope.data = this.modalContext.task;
+                    this.$scope.submit = function () {
+                        _this.$modalInstance.close(_this.modalContext);
+                    };
+                    this.$scope.cancel = function () {
+                        _this.$modalInstance.dismiss(_this.modalContext);
+                    };
+                    var intv = setInterval(function () {
+                        clearInterval(intv);
+                        $('#taskTitle').focus();
+                    }, 500);
+                    $('#taskTitle').focusout(function () {
+                        console.log(' - Blur');
+                        $('#taskBody').focus();
+                    });
+                };
+                return AddTaskController;
+            })();
+            modal.AddTaskController = AddTaskController;
+        })(modal = common.modal || (common.modal = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var modal;
+        (function (modal) {
+            var AddBoardController = (function () {
+                function AddBoardController($scope, $modalInstance, modalContext) {
+                    this.$scope = $scope;
+                    this.$modalInstance = $modalInstance;
+                    this.modalContext = modalContext;
+                    this.init();
+                }
+                AddBoardController.prototype.init = function () {
+                    var _this = this;
+                    this.$scope.data = this.modalContext.board;
+                    this.$scope.submit = function () {
+                        _this.$modalInstance.close(_this.modalContext);
+                    };
+                    this.$scope.cancel = function () {
+                        _this.$modalInstance.dismiss(_this.modalContext);
+                    };
+                    var intv = setInterval(function () {
+                        clearInterval(intv);
+                        $('#boardTitle').focus();
+                    }, 500);
+                    $('#taskTitle').focusout(function () {
+                        console.log(' - Blur');
+                        $('#boardBody').focus();
+                    });
+                };
+                return AddBoardController;
+            })();
+            modal.AddBoardController = AddBoardController;
+        })(modal = common.modal || (common.modal = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
 /// <reference path="services/ScrumBoardService.ts" />
 /// <reference path="directives/directives.ts" />
+/// <reference path="modal/AddTaskController.ts" />
+/// <reference path="modal/AddBoardController.ts" />
 angular.module('myScrumBoard.common', [
     'myScrumBoard.directives',
 ])
-    .service('ScrumBoardService', ['$q', app.common.services.ScrumBoardService]);
+    .service('ScrumBoardService', ['$q', app.common.services.ScrumBoardService])
+    .controller('AddTaskController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddTaskController])
+    .controller('AddBoardController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddBoardController]);
 var app;
 (function (app) {
     var controllers;
     (function (controllers) {
         var models = app.data.models;
         var BacklogController = (function () {
-            function BacklogController(scrumBoards) {
+            function BacklogController($modal, scrumBoards) {
+                this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
                 this.tabIndex = 0;
             }
             Object.defineProperty(BacklogController.prototype, "boards", {
-                get: function () {
-                    return this.scrumBoards.Boards.filterByType(app.data.models.TaskType.Backlog);
-                },
+                get: function () { return this.getBoards(); },
                 enumerable: true,
                 configurable: true
             });
             BacklogController.prototype.index = function () {
                 this.tabIndex = 0;
             };
+            BacklogController.prototype.getBoards = function () {
+                return this.scrumBoards
+                    .Boards
+                    .filterByType(app.data.models.TaskType.Backlog);
+            };
             BacklogController.prototype.createNew = function (boardId) {
+                var _this = this;
                 var board = {
                     Key: Guid.Empty,
                     Title: 'Project Backlog',
                     TaskType: models.TaskType.Backlog,
                 };
                 this.current = board;
-                this.tabIndex = 2;
+                // Open the modal dialog
+                var dialog = this.$modal.open({
+                    size: 'md',
+                    animation: true,
+                    templateUrl: 'views/common/modal/addBoard.tpl.html',
+                    controller: 'AddBoardController',
+                    resolve: {
+                        modalContext: function () {
+                            return {
+                                board: board,
+                            };
+                        },
+                    }
+                }).result.then(
+                // On Commit
+                // On Commit
+                function (modalContext) {
+                    console.info(' - Modal closed. Updating task.', modalContext);
+                    _this.insert(modalContext.board);
+                }, 
+                // Dismissed
+                // Dismissed
+                function () {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    _this.index();
+                });
             };
             BacklogController.prototype.openBoard = function (board) {
                 this.current = board;
@@ -612,14 +720,45 @@ var app;
                 this.current = null;
                 this.index();
             };
-            BacklogController.prototype.addTask = function () {
+            BacklogController.prototype.addTask = function (board) {
+                var _this = this;
+                if (!board)
+                    board = this.current;
+                if (!board)
+                    return;
                 var task = {
                     Key: Guid.Empty,
                     Title: '',
                     Description: '',
-                    BoardKey: this.current.Key,
+                    BoardKey: board.Key,
                 };
                 this.newTask = task;
+                // Open the modal dialog
+                var dialog = this.$modal.open({
+                    size: 'md',
+                    animation: true,
+                    templateUrl: 'views/common/modal/addTask.tpl.html',
+                    controller: 'AddTaskController',
+                    resolve: {
+                        modalContext: function () {
+                            return {
+                                task: task,
+                            };
+                        },
+                    }
+                }).result.then(
+                // On Commit
+                // On Commit
+                function (modalContext) {
+                    console.info(' - Modal closed. Updating task.', modalContext);
+                    _this.updateTask(modalContext.task);
+                }, 
+                // Dismissed
+                // Dismissed
+                function () {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    _this.cancelTask();
+                });
             };
             BacklogController.prototype.updateTask = function (task) {
                 if (task.Key == Guid.Empty) {
@@ -688,7 +827,7 @@ var app;
 angular.module('myScrumBoard.controllers', [
     'myScrumBoard.common',
 ])
-    .controller('BacklogController', ['ScrumBoardService', app.controllers.BacklogController])
+    .controller('BacklogController', ['$modal', 'ScrumBoardService', app.controllers.BacklogController])
     .controller('DashboardController', ['ScrumBoardService', app.controllers.DashboardController])
     .controller('ProjectsController', ['ScrumBoardService', app.controllers.ProjectsController])
     .controller('SprintController', ['ScrumBoardService', app.controllers.SprintController]);
@@ -753,6 +892,7 @@ angular.module('myScrumBoard', [
     'myScrumBoard.common',
     'myScrumBoard.controllers',
     'myScrumBoard.routes',
+    'myScrumBoard.templates',
 ])
     .run(['$rootScope', 'ScrumBoardState', function ($rootScope, ScrumBoardState) {
         console.debug('Starting application...');
