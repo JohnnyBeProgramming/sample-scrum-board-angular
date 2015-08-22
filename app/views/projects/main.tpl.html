@@ -2,11 +2,11 @@
     <div class="app-caption">
         <h2>
             <i class="fa fa-tags"></i> Projects
-            <small>&raquo; <a href="" ng-click="state.pilot=1">Show All Projects</a></small>
+            <small>&raquo; <a href="" ng-click="">Show All Projects</a></small>
         </h2>
-        <a class="btn btn-primary" ng-click="state.pilot = 2">New Project</a>
+        <a class="btn btn-primary" ng-click="viewCtrl.newProject()">New Project</a>
     </div>
-    <div class="app-panel" ng-switch="state.pilot">
+    <div class="app-panel">
         <ui-view name="contents"></ui-view>
     </div>
 

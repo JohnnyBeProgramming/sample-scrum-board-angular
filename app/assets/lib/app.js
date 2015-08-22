@@ -773,16 +773,16 @@ var app;
     (function (common) {
         var modal;
         (function (modal) {
-            var AddTaskController = (function () {
-                function AddTaskController($scope, $modalInstance, modalContext) {
+            var AddProjectController = (function () {
+                function AddProjectController($scope, $modalInstance, modalContext) {
                     this.$scope = $scope;
                     this.$modalInstance = $modalInstance;
                     this.modalContext = modalContext;
                     this.init();
                 }
-                AddTaskController.prototype.init = function () {
+                AddProjectController.prototype.init = function () {
                     var _this = this;
-                    this.$scope.data = this.modalContext.task;
+                    this.$scope.data = this.modalContext.project;
                     this.$scope.submit = function () {
                         _this.$modalInstance.close(_this.modalContext);
                     };
@@ -791,16 +791,16 @@ var app;
                     };
                     var intv = setInterval(function () {
                         clearInterval(intv);
-                        $('#taskTitle').focus();
+                        $('#projectTitle').focus();
                     }, 500);
                     $('#taskTitle').focusout(function () {
                         console.log(' - Blur');
-                        $('#taskBody').focus();
+                        $('#projectBody').focus();
                     });
                 };
-                return AddTaskController;
+                return AddProjectController;
             })();
-            modal.AddTaskController = AddTaskController;
+            modal.AddProjectController = AddProjectController;
         })(modal = common.modal || (common.modal = {}));
     })(common = app.common || (app.common = {}));
 })(app || (app = {}));
@@ -841,25 +841,64 @@ var app;
         })(modal = common.modal || (common.modal = {}));
     })(common = app.common || (app.common = {}));
 })(app || (app = {}));
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var modal;
+        (function (modal) {
+            var AddTaskController = (function () {
+                function AddTaskController($scope, $modalInstance, modalContext) {
+                    this.$scope = $scope;
+                    this.$modalInstance = $modalInstance;
+                    this.modalContext = modalContext;
+                    this.init();
+                }
+                AddTaskController.prototype.init = function () {
+                    var _this = this;
+                    this.$scope.data = this.modalContext.task;
+                    this.$scope.submit = function () {
+                        _this.$modalInstance.close(_this.modalContext);
+                    };
+                    this.$scope.cancel = function () {
+                        _this.$modalInstance.dismiss(_this.modalContext);
+                    };
+                    var intv = setInterval(function () {
+                        clearInterval(intv);
+                        $('#taskTitle').focus();
+                    }, 500);
+                    $('#taskTitle').focusout(function () {
+                        console.log(' - Blur');
+                        $('#taskBody').focus();
+                    });
+                };
+                return AddTaskController;
+            })();
+            modal.AddTaskController = AddTaskController;
+        })(modal = common.modal || (common.modal = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
 /// <reference path="services/ScrumBoardService.ts" />
 /// <reference path="directives/directives.ts" />
-/// <reference path="modal/AddTaskController.ts" />
+/// <reference path="modal/AddProjectController.ts" />
 /// <reference path="modal/AddBoardController.ts" />
+/// <reference path="modal/AddTaskController.ts" />
 angular.module('myScrumBoard.common', [
     'myScrumBoard.directives',
 ])
     .service('ScrumBoardService', ['$q', app.common.services.ScrumBoardService])
-    .controller('AddTaskController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddTaskController])
-    .controller('AddBoardController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddBoardController]);
+    .controller('AddProjectController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddProjectController])
+    .controller('AddBoardController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddBoardController])
+    .controller('AddTaskController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddTaskController]);
 var app;
 (function (app) {
     var controllers;
     (function (controllers) {
         var models = app.data.models;
         var BacklogItemController = (function () {
-            function BacklogItemController(board, scrumBoards) {
-                this.board = board;
+            function BacklogItemController(scrumBoards, board) {
                 this.scrumBoards = scrumBoards;
+                this.board = board;
             }
             return BacklogItemController;
         })();
@@ -1036,6 +1075,52 @@ var app;
             ProjectsController.prototype.openProject = function (project) {
                 this.$state.go('projects.item', { key: project.Key });
             };
+            ProjectsController.prototype.newProject = function () {
+                var _this = this;
+                var project = {
+                    Key: Guid.Empty,
+                    Title: '',
+                    Description: '',
+                };
+                // Open the modal dialog
+                var dialog = this.$modal.open({
+                    size: 'md',
+                    animation: true,
+                    templateUrl: 'views/common/modal/addProject.tpl.html',
+                    controller: 'AddProjectController',
+                    resolve: {
+                        modalContext: function () {
+                            return {
+                                project: project,
+                            };
+                        },
+                    }
+                }).result.then(
+                // On Commit
+                // On Commit
+                function (modalContext) {
+                    console.info(' - Modal closed. Updating task.', modalContext);
+                    _this.update(modalContext.project);
+                }, 
+                // Dismissed
+                // Dismissed
+                function () {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    _this.cancel();
+                });
+            };
+            ProjectsController.prototype.update = function (project) {
+                var _this = this;
+                if (project.Key == Guid.Empty) {
+                    project.Key = Guid.New(),
+                        this.scrumBoards.Projects.insert(project);
+                }
+                else {
+                    this.scrumBoards.Projects.save().then(function () {
+                        _this.index();
+                    });
+                }
+            };
             ProjectsController.prototype.cancel = function () {
                 this.index();
             };
@@ -1066,7 +1151,7 @@ var app;
                 this.$rootScope = $rootScope;
                 this.scrumBoards = scrumBoards;
                 this.project = project;
-                console.log(' - Project Item Controller...', project);
+                console.log(' - Project Item Controller...');
             }
             return ProjectItemController;
         })();
@@ -1079,11 +1164,14 @@ var app;
 (function (app) {
     var controllers;
     (function (controllers) {
+        var models = app.data.models;
         var SprintController = (function () {
-            function SprintController($state, $modal, scrumBoards) {
+            function SprintController($rootScope, $state, $modal, scrumBoards) {
+                this.$rootScope = $rootScope;
                 this.$state = $state;
                 this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
+                this.projectCache = {};
                 console.log(' - Sprint Controller...');
             }
             SprintController.prototype.getSprints = function () {
@@ -1100,13 +1188,153 @@ var app;
             SprintController.prototype.cancel = function () {
                 this.index();
             };
+            SprintController.prototype.addTask = function (board) {
+                var _this = this;
+                if (!board)
+                    return;
+                var task = {
+                    Key: Guid.Empty,
+                    Title: '',
+                    Description: '',
+                    BoardKey: board.Key,
+                };
+                // Open the modal dialog
+                var dialog = this.$modal.open({
+                    size: 'md',
+                    animation: true,
+                    templateUrl: 'views/common/modal/addTask.tpl.html',
+                    controller: 'AddTaskController',
+                    resolve: {
+                        modalContext: function () {
+                            return {
+                                task: task,
+                            };
+                        },
+                    }
+                }).result.then(
+                // On Commit
+                // On Commit
+                function (modalContext) {
+                    console.info(' - Modal closed. Updating task.', modalContext);
+                    _this.updateTask(modalContext.task);
+                }, 
+                // Dismissed
+                // Dismissed
+                function () {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    _this.cancel();
+                });
+            };
+            SprintController.prototype.updateTask = function (task) {
+                var _this = this;
+                if (task.Key == Guid.Empty) {
+                    task.Key = Guid.New();
+                    this.scrumBoards.Tasks.insert(task);
+                }
+                this.scrumBoards.Tasks.save().then(function () {
+                    _this.$rootScope.$applyAsync();
+                });
+            };
+            SprintController.prototype.getProjectLabel = function (projectKey) {
+                var _this = this;
+                if (projectKey in this.projectCache) {
+                    return this.projectCache[projectKey].Title;
+                }
+                else {
+                    this.scrumBoards.Projects
+                        .findByKey(projectKey)
+                        .then(function (result) {
+                        _this.projectCache[projectKey] = result;
+                    }).finally(function () {
+                        _this.$rootScope.$applyAsync();
+                    });
+                }
+                return null;
+            };
+            SprintController.prototype.getStateDesc = function (state) {
+                switch (state) {
+                    case models.SprintState.Default: return 'Scheduled';
+                    case models.SprintState.Completed: return 'Completed';
+                    case models.SprintState.Discarded: return 'Discarded';
+                    case models.SprintState.OnHold: return 'On Hold';
+                    case models.SprintState.Started: return 'In Progress';
+                    default: return '';
+                }
+            };
             return SprintController;
         })();
         controllers.SprintController = SprintController;
-        var SprintItemController = (function () {
-            function SprintItemController(sprint, scrumBoards) {
-                this.sprint = sprint;
+        var SprintListController = (function () {
+            function SprintListController($rootScope, scrumBoards, project) {
+                this.$rootScope = $rootScope;
                 this.scrumBoards = scrumBoards;
+                this.project = project;
+                this.showAll = true;
+                this.cached = [];
+                console.log(' - Sprint List Controller...');
+                this.init();
+            }
+            Object.defineProperty(SprintListController.prototype, "sprints", {
+                get: function () { return this.cached; },
+                enumerable: true,
+                configurable: true
+            });
+            SprintListController.prototype.init = function () {
+                var _this = this;
+                this.scrumBoards.Sprints.load().then(function (items) {
+                    _this.cached = [];
+                    if (items) {
+                        items.forEach(function (item) {
+                            if (_this.project && (_this.project.Key == item.ProjectKey)) {
+                                _this.cached.push(item);
+                            }
+                        });
+                    }
+                }).finally(function () {
+                    _this.$rootScope.$applyAsync();
+                });
+            };
+            return SprintListController;
+        })();
+        controllers.SprintListController = SprintListController;
+        var SprintsActiveController = (function () {
+            function SprintsActiveController($rootScope, scrumBoards) {
+                this.$rootScope = $rootScope;
+                this.scrumBoards = scrumBoards;
+                this.showAll = false;
+                this.cached = [];
+                this.active = [];
+                console.log(' - Sprint List Controller...');
+                this.init();
+            }
+            Object.defineProperty(SprintsActiveController.prototype, "sprints", {
+                get: function () { return this.showAll ? this.cached : this.active; },
+                enumerable: true,
+                configurable: true
+            });
+            SprintsActiveController.prototype.init = function () {
+                var _this = this;
+                this.scrumBoards.Sprints.load().then(function (items) {
+                    _this.active = [];
+                    _this.cached = items;
+                    if (items) {
+                        items.forEach(function (item) {
+                            if (item.State == models.SprintState.Started) {
+                                _this.active.push(item);
+                            }
+                        });
+                    }
+                }).finally(function () {
+                    _this.$rootScope.$applyAsync();
+                });
+            };
+            return SprintsActiveController;
+        })();
+        controllers.SprintsActiveController = SprintsActiveController;
+        var SprintItemController = (function () {
+            function SprintItemController(scrumBoards, sprint) {
+                this.scrumBoards = scrumBoards;
+                this.sprint = sprint;
                 console.log(' - Sprint Child Controller...', sprint);
             }
             return SprintItemController;
@@ -1126,10 +1354,12 @@ angular.module('myScrumBoard.controllers', [
     .controller('ProjectsController', ['$state', '$modal', 'ScrumBoardService', app.controllers.ProjectsController])
     .controller('ProjectListController', ['$rootScope', 'ScrumBoardService', app.controllers.ProjectListController])
     .controller('ProjectItemController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.ProjectItemController])
-    .controller('SprintController', ['ScrumBoardService', app.controllers.SprintController])
-    .controller('SprintItemController', ['sprint', 'ScrumBoardService', app.controllers.SprintItemController])
+    .controller('SprintController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.SprintController])
+    .controller('SprintsActiveController', ['$rootScope', 'ScrumBoardService', app.controllers.SprintsActiveController])
+    .controller('SprintListController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.SprintListController])
+    .controller('SprintItemController', ['ScrumBoardService', 'sprint', app.controllers.SprintItemController])
     .controller('BacklogController', ['$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
-    .controller('BacklogItemController', ['board', 'ScrumBoardService', app.controllers.BacklogItemController]);
+    .controller('BacklogItemController', ['ScrumBoardService', 'board', app.controllers.BacklogItemController]);
 angular.module('myScrumBoard.routes', [
     'ui.router',
 ])
@@ -1173,11 +1403,11 @@ angular.module('myScrumBoard.routes', [
             },
         })
             .state('projects.item', {
-            url: '^/{projectKey:string}/info',
-            parent: 'sprints',
+            url: '/{projectKey:string}',
+            parent: 'projects',
             views: {
                 'contents': {
-                    templateUrl: 'views/sprints/item.tpl.html',
+                    templateUrl: 'views/projects/item.tpl.html',
                     controller: 'ProjectItemController',
                     controllerAs: 'childCtrl',
                 },
@@ -1189,7 +1419,7 @@ angular.module('myScrumBoard.routes', [
             },
         })
             .state('sprints', {
-            url: '/sprint',
+            url: '/sprints',
             abstract: true,
             views: {
                 'main@': {
@@ -1199,18 +1429,36 @@ angular.module('myScrumBoard.routes', [
                 },
             }
         })
-            .state('sprints.list', {
-            url: '^/{projectKey:string}/sprint',
+            .state('sprints.active', {
+            url: '',
             parent: 'sprints',
             views: {
                 'contents': {
-                    templateUrl: 'views/sprints/list.tpl.html',
+                    templateUrl: 'views/sprints/active.tpl.html',
+                    controller: 'SprintsActiveController',
+                    controllerAs: 'childCtrl',
                 },
             },
             resolve: {
                 project: ['$stateParams', 'ScrumBoardService', function ($stateParams, svc) {
                         return $stateParams.projectKey ? svc.Projects.findByKey($stateParams.projectKey) : null;
                     }]
+            },
+        })
+            .state('sprints.list', {
+            url: '^/{projectKey:string}/sprints',
+            parent: 'sprints',
+            views: {
+                'contents': {
+                    templateUrl: 'views/sprints/list.tpl.html',
+                    controller: 'SprintListController',
+                    controllerAs: 'childCtrl',
+                },
+            },
+            resolve: {
+                project: ['$stateParams', 'ScrumBoardService', function ($stateParams, svc) {
+                        return $stateParams.projectKey ? svc.Projects.findByKey($stateParams.projectKey) : null;
+                    }],
             },
         })
             .state('sprints.item', {
@@ -1231,6 +1479,7 @@ angular.module('myScrumBoard.routes', [
         })
             .state('backlogs', {
             url: '/backlogs',
+            abstract: true,
             views: {
                 'main@': {
                     templateUrl: 'views/backlogs/main.tpl.html',
@@ -1240,7 +1489,7 @@ angular.module('myScrumBoard.routes', [
             }
         })
             .state('backlogs.list', {
-            url: '/list',
+            url: '',
             parent: 'backlogs',
             views: {
                 'contents': {

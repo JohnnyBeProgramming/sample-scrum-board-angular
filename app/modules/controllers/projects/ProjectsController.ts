@@ -16,6 +16,50 @@
             this.$state.go('projects.item', { key: project.Key });
         }
 
+        public newProject() {
+            var project: models.IProject = {
+                Key: Guid.Empty,
+                Title: '',
+                Description: '',
+            };
+
+            // Open the modal dialog
+            var dialog = this.$modal.open({
+                size: 'md',
+                animation: true,
+                templateUrl: 'views/common/modal/addProject.tpl.html',
+                controller: 'AddProjectController',
+                resolve: {
+                    modalContext: () => {
+                        return {
+                            project: project,
+                        };
+                    },
+                }
+            }).result.then(
+                // On Commit
+                (modalContext) => {
+                    console.info(' - Modal closed. Updating task.', modalContext);
+                    this.update(modalContext.project);
+                },
+                // Dismissed
+                () => {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    this.cancel();
+                });
+        }
+
+        public update(project: models.IProject) {
+            if (project.Key == Guid.Empty) {
+                project.Key = Guid.New(),
+                this.scrumBoards.Projects.insert(project);
+            } else {
+            this.scrumBoards.Projects.save().then(() => {
+                this.index();
+            });
+            }
+        }
+
         public cancel() {
             this.index();
         }
@@ -43,7 +87,7 @@
     export class ProjectItemController {
 
         constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) {
-            console.log(' - Project Item Controller...', project);
+            console.log(' - Project Item Controller...');
         }
 
     }

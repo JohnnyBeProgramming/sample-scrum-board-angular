@@ -1,4 +1,6 @@
 ﻿<div>
+    <span class="pull-right">
+    </span>
     <h3>
         Current Projects
         <small>2 Items, 1 Active Sprint(s)</small>
@@ -6,7 +8,8 @@
     <div class="row contained">
         <div class="col-md-12" ng-repeat="item in childCtrl.projects">
             <div class="project">
-                <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>
+                <a class="pull-right ctrl"><i class="fa fa-trash"></i></a>
+                <a ui-sref="projects.item({ projectKey: item.Key })" class="pull-right ctrl"><i class="fa fa-edit"></i></a>
                 <h4>
                     <a ui-sref="projects.item({ projectKey: item.Key })">
                         <i class="fa fa-tags"></i> {{ item.Title || 'Project Overview' }}
@@ -39,7 +42,8 @@
             </div>
         </div>
         <div class="col-md-12">
-            <a href="" class="project add">
+            <a href="" class="project add"
+               ng-click="viewCtrl.newProject()">
                 <i class="fa fa-plus"></i> Create Project
             </a>
         </div>

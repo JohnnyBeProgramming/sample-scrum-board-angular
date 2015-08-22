@@ -49,11 +49,11 @@
         })
         .state('projects.item',
         {
-            url: '^/{projectKey:string}/info',
-            parent: 'sprints',
+            url: '/{projectKey:string}',
+            parent: 'projects',
             views: {
                 'contents': {
-                    templateUrl: 'views/sprints/item.tpl.html',
+                    templateUrl: 'views/projects/item.tpl.html',
                     controller: 'ProjectItemController',
                     controllerAs: 'childCtrl',
                 },
@@ -67,7 +67,7 @@
 
         .state('sprints',
         {
-            url: '/sprint',
+            url: '/sprints',
             abstract: true,
             views: {
                 'main@': {
@@ -77,19 +77,38 @@
                 },
             }
         })        
-        .state('sprints.list',
+        .state('sprints.active',
         {
-            url: '^/{projectKey:string}/sprint',
+            url: '',
             parent: 'sprints',
             views: {
                 'contents': {
-                    templateUrl: 'views/sprints/list.tpl.html',
+                    templateUrl: 'views/sprints/active.tpl.html',
+                    controller: 'SprintsActiveController',
+                    controllerAs: 'childCtrl',
                 },
             },
             resolve: {
                 project: ['$stateParams', 'ScrumBoardService', ($stateParams, svc: app.common.services.ScrumBoardService) => {
                     return $stateParams.projectKey ? svc.Projects.findByKey($stateParams.projectKey) : null;
                 }]
+            },
+        })
+        .state('sprints.list',
+        {
+            url: '^/{projectKey:string}/sprints',
+            parent: 'sprints',
+            views: {
+                'contents': {
+                    templateUrl: 'views/sprints/list.tpl.html',
+                    controller: 'SprintListController',
+                    controllerAs: 'childCtrl',
+                },
+            },
+            resolve: {
+                project: ['$stateParams', 'ScrumBoardService', ($stateParams, svc: app.common.services.ScrumBoardService) => {
+                    return $stateParams.projectKey ? svc.Projects.findByKey($stateParams.projectKey) : null;
+                }],
             },
         })
         .state('sprints.item',
@@ -113,6 +132,7 @@
         .state('backlogs',
         {
             url: '/backlogs',
+            abstract: true,
             views: {
                 'main@': {
                     templateUrl: 'views/backlogs/main.tpl.html',
@@ -123,7 +143,7 @@
         })
         .state('backlogs.list',
         {
-            url: '/list',
+            url: '',
             parent: 'backlogs',
             views: {
                 'contents': {

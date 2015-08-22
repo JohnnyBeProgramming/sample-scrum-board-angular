@@ -4,7 +4,7 @@
 
     export class BacklogItemController {
 
-        constructor(public board: models.IBoard, private scrumBoards: app.common.services.ScrumBoardService) { }
+        constructor(private scrumBoards: app.common.services.ScrumBoardService, public board?: models.IBoard) { }
 
     }
 

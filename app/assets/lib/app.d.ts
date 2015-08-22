@@ -164,7 +164,7 @@ declare module app.common.services {
     }
 }
 declare module app.common.modal {
-    class AddTaskController {
+    class AddProjectController {
         private $scope;
         private $modalInstance;
         private modalContext;
@@ -181,12 +181,21 @@ declare module app.common.modal {
         init(): void;
     }
 }
+declare module app.common.modal {
+    class AddTaskController {
+        private $scope;
+        private $modalInstance;
+        private modalContext;
+        constructor($scope: any, $modalInstance: any, modalContext: any);
+        init(): void;
+    }
+}
 declare module app.controllers {
     import models = app.data.models;
     class BacklogItemController {
-        board: models.IBoard;
         private scrumBoards;
-        constructor(board: models.IBoard, scrumBoards: app.common.services.ScrumBoardService);
+        board: models.IBoard;
+        constructor(scrumBoards: app.common.services.ScrumBoardService, board?: models.IBoard);
     }
     class BacklogController {
         private $state;
@@ -224,6 +233,8 @@ declare module app.controllers {
         constructor($state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         index(): void;
         openProject(project: models.IProject): void;
+        newProject(): void;
+        update(project: models.IProject): void;
         cancel(): void;
     }
     class ProjectListController {
@@ -243,18 +254,44 @@ declare module app.controllers {
 declare module app.controllers {
     import models = app.data.models;
     class SprintController {
+        private $rootScope;
         private $state;
         private $modal;
         private scrumBoards;
-        constructor($state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
+        projectCache: any;
+        constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         getSprints(): ng.IPromise<models.ISprint[]>;
         index(): void;
         openBoard(sprint: models.ISprint): void;
         cancel(): void;
+        addTask(board?: models.IBoard): void;
+        updateTask(task: models.ITask): void;
+        getProjectLabel(projectKey: string): string;
+        getStateDesc(state: models.SprintState): string;
+    }
+    class SprintListController {
+        private $rootScope;
+        private scrumBoards;
+        project: models.IProject;
+        showAll: boolean;
+        sprints: models.ISprint[];
+        cached: models.ISprint[];
+        constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService, project?: models.IProject);
+        init(): void;
+    }
+    class SprintsActiveController {
+        private $rootScope;
+        private scrumBoards;
+        showAll: boolean;
+        sprints: models.ISprint[];
+        cached: models.ISprint[];
+        active: models.ISprint[];
+        constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService);
+        init(): void;
     }
     class SprintItemController {
-        sprint: models.ISprint;
         private scrumBoards;
-        constructor(sprint: models.ISprint, scrumBoards: app.common.services.ScrumBoardService);
+        sprint: models.ISprint;
+        constructor(scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
     }
 }

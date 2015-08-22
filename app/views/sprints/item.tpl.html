@@ -1,15 +1,15 @@
 ﻿<div>
-    <span class="pull-right">
-        <a class="btn btn-xs btn-default" href="" ng-click="viewCtrl.cancel()">Cancel</a>
-        <a class="btn btn-xs btn-primary" href="" ng-click="viewCtrl.update(childCtrl.board)">Update</a>
-    </span>
-    <div ng-if="!childCtrl.board">
-        <em>Board Not Found....</em>
+    <div ng-if="!childCtrl.sprint">
+        <em>Sprint Not Found....</em>
     </div>
-    <div ng-if="childCtrl.board">
+    <span class="pull-right" ng-if="childCtrl.sprint">
+        <a class="btn btn-xs btn-default" href="" ng-click="viewCtrl.cancel()">Cancel</a>
+        <a class="btn btn-xs btn-primary" href="" ng-click="viewCtrl.update(childCtrl.sprint)">Update</a>
+    </span>
+    <div ng-if="childCtrl.sprint">
         <h3>
-            {{ childCtrl.board.Title || 'Project Backlog' }}
-            <small>Large Scale Project</small>
+            Sprint #{{ (childCtrl.sprint.Number || 1) }}
+            <small>{{ viewCtrl.getProjectLabel(childCtrl.sprint.ProjectKey) }}</small>
         </h3>
         <div class="row contained">
             <div class="col-md-12">
@@ -21,7 +21,7 @@
                                 <h4>
                                     <i class="fa fa-tags"></i> Unassigned Tasks
                                 </h4>
-                                <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(childCtrl.board.Key)">
+                                <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(childCtrl.sprint.Key)">
                                     <a href="" ng-click="viewCtrl.cancelTask()" class="pull-right ctrl"><i class="fa fa-times"></i></a>
                                     <a href="" ng-click="viewCtrl.updateTask(viewCtrl.newTask)" class="pull-right ctrl"><i class="fa fa-save"></i></a>
                                     <h5>{{ task.Title }}</h5>
@@ -57,13 +57,13 @@
                                         <div class="form-group">
                                             <label for="lnkProject" class="col-sm-2 control-label">Project</label>
                                             <div class="col-sm-10">
-                                                <select id="lnkProject" class="form-control input-sm" ng-model="childCtrl.board.ProjectKey">
+                                                <select id="lnkProject" class="form-control input-sm" ng-model="childCtrl.sprint.ProjectKey">
                                                     <option value=""> - Select a Project -</option>
                                                     <option value="{{ opt.Key }}" ng-repeat="opt in viewCtrl.scrumBoards.Projects.list()">{{ opt.Title }}</option>
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="form-group" ng-if="childCtrl.board.ProjectKey">
+                                        <div class="form-group" ng-if="childCtrl.sprint.ProjectKey">
                                             <label for="lnkSprint" class="col-sm-2 control-label">Sprint</label>
                                             <div class="col-sm-10">
                                                 <select id="lnkSprint" class="form-control input-sm">

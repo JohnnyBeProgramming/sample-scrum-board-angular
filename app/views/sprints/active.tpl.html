@@ -3,7 +3,7 @@
         Status: <span class="label label-success">Active</span>
     </span>
     <h3>
-        Project Sprints
+        Active Sprints
         <small>5 Pending Tasks, 2 In Progress, 2 Completed</small>
     </h3>
     <div class="row contained">
@@ -13,10 +13,10 @@
                 <h4>
                     <a ui-sref="sprints.item({ key: item.Key })">
                         <i class="fa fa-tag"></i>
-                        Sprint #{{ (item.Number || '1') }}
+                        <b>Sprint #{{ (item.Number || '1') }}</b>
                     </a>
                     <small>
-                        {{ viewCtrl.getStateDesc(item.State) || 'Loading...' }}
+                        {{ viewCtrl.getProjectLabel(item.ProjectKey) || 'Loading...' }}
                     </small>
                 </h4>
                 <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(item.Key)">
