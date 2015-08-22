@@ -132,6 +132,82 @@ body .app-container .app-panel .contained .board .tile.add {
 body .app-container .app-panel .contained .board .tile.add:hover {
   opacity: 1.0;
 }
+body .app-container .app-panel .contained .project {
+  padding: 6px;
+  margin: 3px -8px;
+  display: block;
+  min-height: 160px;
+  background: rgba(255, 255, 255, 0.95);
+  border: solid 1px rgba(136, 136, 136, 0.75);
+}
+body .app-container .app-panel .contained .project.add {
+  opacity: 0.5;
+  font-size: 16px;
+  line-height: 160px;
+  text-align: center;
+  border: dashed 1px rgba(136, 136, 136, 0.75);
+}
+body .app-container .app-panel .contained .project.add:hover {
+  opacity: 1.0;
+}
+body .app-container .app-panel .contained .project .proj-body {
+  display: flex;
+  min-height: 128px;
+}
+body .app-container .app-panel .contained .project .proj-logo {
+  margin: 0 3px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 128px;
+  line-height: 128px;
+  text-align: center;
+  border: dotted 1px rgba(136, 136, 136, 0.75);
+}
+body .app-container .app-panel .contained .project .proj-info {
+  margin: 0 3px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: 200px;
+}
+body .app-container .app-panel .contained .project .proj-history {
+  margin: 0 3px;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+body .app-container .app-panel .contained .project .tile {
+  padding: 3px;
+  margin: 0 3px;
+  background: rgba(255, 255, 255, 0.95);
+  border: solid 1px rgba(136, 136, 136, 0.75);
+  font-size: xx-small;
+}
+body .app-container .app-panel .contained .project .tile p {
+  font-size: xx-small;
+}
+body .app-container .app-panel .contained .project .tile.add {
+  opacity: 0.5;
+  display: block;
+  font-size: 16px;
+  line-height: 100px;
+  text-align: center;
+  border: dashed 1px rgba(136, 136, 136, 0.75);
+}
+body .app-container .app-panel .contained .project .tile.add:hover {
+  opacity: 1.0;
+}
+body .app-container .app-panel .contained .project .tile.empty {
+  opacity: 0.5;
+  display: block;
+  font-size: 16px;
+  line-height: 100px;
+  text-align: center;
+  user-select: none;
+  color: rgba(136, 136, 136, 0.5);
+  border: dotted 1px rgba(136, 136, 136, 0.5);
+}
+body .app-container .app-panel .contained .project .tile.empty:hover {
+  opacity: 1.0;
+}
 body .app-container .app-body {
   padding: 0;
   margin: 0;

@@ -7,15 +7,7 @@
         <a class="btn btn-primary" ng-click="state.pilot = 2">New Project</a>
     </div>
     <div class="app-panel" ng-switch="state.pilot">
-        <div ng-switch-default>
-            <div ng-include="'/views/projects/list.tpl.html'"></div>
-        </div>
-        <div ng-switch-when="1">
-            <div ng-include="'/views/projects/item.tpl.html'"></div>
-        </div>
-        <div ng-switch-when="2">
-            <div ng-include="'/views/projects/edit.tpl.html'"></div>
-        </div>
+        <ui-view name="contents"></ui-view>
     </div>
 
 </div>

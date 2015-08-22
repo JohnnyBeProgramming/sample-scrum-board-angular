@@ -1,8 +1,9 @@
 ﻿/// <reference path="../common/utils/Guid.ts" />
-/// <reference path="models/Project.ts" />
-/// <reference path="models/Board.ts" />
-/// <reference path="models/Group.ts" />
-/// <reference path="models/Task.ts" />
+/// <reference path="models/IProject.ts" />
+/// <reference path="models/ISprint.ts" />
+/// <reference path="models/IBoard.ts" />
+/// <reference path="models/IGroup.ts" />
+/// <reference path="models/ITask.ts" />
 
 module app.data {
 
@@ -21,6 +22,66 @@ module app.data {
             },
         ];
 
+        public static Sprints: models.ISprint[] = [
+            // --------------------------------------------------------------
+            {
+                Number: 1,
+                Key: Guid.New(),
+                State: models.SprintState.Started,
+                ProjectKey: SampleData.Projects[0].Key,
+            },
+            {
+                Number: 2,
+                Key: Guid.New(),
+                State: models.SprintState.Default,
+                ProjectKey: SampleData.Projects[0].Key,
+            },
+            // --------------------------------------------------------------
+            {
+                Number: 1,
+                Key: Guid.New(),
+                State: models.SprintState.Completed,
+                ProjectKey: SampleData.Projects[1].Key,
+            },
+            {
+                Number: 2,
+                Key: Guid.New(),
+                State: models.SprintState.Completed,
+                ProjectKey: SampleData.Projects[1].Key,
+            },
+            {
+                Number: 3,
+                Key: Guid.New(),
+                State: models.SprintState.Started,
+                ProjectKey: SampleData.Projects[1].Key,
+            },
+            {
+                Number: 4,
+                Key: Guid.New(),
+                State: models.SprintState.OnHold,
+                ProjectKey: SampleData.Projects[1].Key,
+            },
+            {
+                Number: 5,
+                Key: Guid.New(),
+                State: models.SprintState.Default,
+                ProjectKey: SampleData.Projects[1].Key,
+            },
+            {
+                Number: 6,
+                Key: Guid.New(),
+                State: models.SprintState.Default,
+                ProjectKey: SampleData.Projects[1].Key,
+            },
+            {
+                Number: 7,
+                Key: Guid.New(),
+                State: models.SprintState.Discarded,
+                ProjectKey: SampleData.Projects[1].Key,
+            },
+            // --------------------------------------------------------------
+        ];
+
         public static Groups: models.IGroup[] = [
             {
                 Key: Guid.New(),
@@ -30,42 +91,42 @@ module app.data {
         ];
 
         public static Boards: models.IBoard[] = [
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
             {
                 Key: Guid.New(),
                 Title: 'Scheduled Tasks',
                 TaskType: models.TaskType.Scheduled,
                 ProjectKey: SampleData.Projects[0].Key,
-                SprintKey: null,
+                SprintKey: SampleData.Sprints[0].Key,
             },
             {
                 Key: Guid.New(),
                 Title: 'Scheduled Tasks',
                 TaskType: models.TaskType.Scheduled,
                 ProjectKey: SampleData.Projects[1].Key,
-                SprintKey: null,
+                SprintKey: SampleData.Sprints[0].Key,
             },
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
 
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
             {
                 Key: Guid.New(),
                 Title: 'Tasks In Progress',
                 TaskType: models.TaskType.InProgress,
                 ProjectKey: SampleData.Projects[0].Key,
-                SprintKey: null,
+                SprintKey: SampleData.Sprints[0].Key,
             },
             {
                 Key: Guid.New(),
                 Title: 'Tasks In Progress',
                 TaskType: models.TaskType.InProgress,
                 ProjectKey: SampleData.Projects[1].Key,
-                SprintKey: null,
+                SprintKey: SampleData.Sprints[4].Key,
             },
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
 
 
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
             {
                 Key: Guid.New(),
                 Title: 'Tasks In Testing',
@@ -80,9 +141,9 @@ module app.data {
                 ProjectKey: SampleData.Projects[1].Key,
                 SprintKey: null,
             },
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
 
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
             {
                 Key: Guid.New(),
                 Title: 'Backlogs',
@@ -97,11 +158,11 @@ module app.data {
                 ProjectKey: SampleData.Projects[1].Key,
                 SprintKey: null,
             },
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
         ];
 
         public static Tasks: models.ITask[] = [
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
             {
                 Key: Guid.New(),
                 Title: 'Reminder',
@@ -144,7 +205,7 @@ module app.data {
                 BoardKey: SampleData.Boards[0].Key,
                 GroupKey: SampleData.Groups[0].Key,
             },
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
             {
                 Key: Guid.New(),
                 Title: 'Do some task for me',
@@ -187,7 +248,7 @@ module app.data {
                 BoardKey: SampleData.Boards[7].Key,
                 GroupKey: null,
             },
-        // --------------------------------------------------------------
+            // --------------------------------------------------------------
 
         ];
 

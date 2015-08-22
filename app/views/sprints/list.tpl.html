@@ -1,0 +1,35 @@
+﻿<div>
+    <span class="pull-right">
+        Status: <span class="label label-success">Active</span>
+    </span>
+    <h3>
+        Current: Sprint #2
+        <small>5 Pending Tasks, 2 In Progress, 2 Completed</small>
+    </h3>
+    <div class="row contained">
+        <div class="col-md-3" ng-repeat="item in viewCtrl.sprints">
+            <div class="board">
+                <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>
+                <h4>
+                    <a ui-sref="backlogs.item({ key: item.Key })" xxxng-click="viewCtrl.openBoard(item)">
+                        <i class="fa fa-sticky-note-o"></i> {{ item.Title || 'Project Backlog' }}
+                    </a>
+                </h4>
+                <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(item.Key)">
+                    <h5>{{ task.Title }}</h5>
+                    <p>
+                        {{ task.Description }}
+                    </p>
+                </div>
+                <a href="" ng-click="viewCtrl.addTask(item)" class="tile add">
+                    <i class="fa fa-plus"></i> Add Task
+                </a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <a href="" ng-click="viewCtrl.createNew()" class="board add">
+                <i class="fa fa-plus"></i> Add Sprint
+            </a>
+        </div>
+    </div>
+</div>

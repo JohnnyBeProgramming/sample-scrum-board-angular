@@ -17,6 +17,11 @@ var app;
         })(models = data.models || (data.models = {}));
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
+/// <reference path="models/AppState.ts" />
+angular.module('myScrumBoard.data', [
+    'ui.router',
+])
+    .constant('ScrumBoardState', app.data.models.LoadAppState());
 var Guid = (function () {
     function Guid() {
     }
@@ -32,7 +37,6 @@ var Guid = (function () {
     Guid.Empty = '00000000-0000-0000-0000-000000000000';
     return Guid;
 })();
-/// <reference path="IDataModel.ts" />
 /// <reference path="../../common/utils/Guid.ts" />
 var app;
 (function (app) {
@@ -68,6 +72,25 @@ var app;
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
 /// <reference path="IDataModel.ts" />
+/// <reference path="IDataModel.ts" />
+var app;
+(function (app) {
+    var data;
+    (function (data) {
+        var models;
+        (function (models) {
+            (function (SprintState) {
+                SprintState[SprintState["Default"] = 0] = "Default";
+                SprintState[SprintState["Started"] = 1] = "Started";
+                SprintState[SprintState["Completed"] = 2] = "Completed";
+                SprintState[SprintState["Discarded"] = 3] = "Discarded";
+                SprintState[SprintState["OnHold"] = 4] = "OnHold";
+            })(models.SprintState || (models.SprintState = {}));
+            var SprintState = models.SprintState;
+        })(models = data.models || (data.models = {}));
+    })(data = app.data || (app.data = {}));
+})(app || (app = {}));
+/// <reference path="IDataModel.ts" />
 var app;
 (function (app) {
     var data;
@@ -92,10 +115,11 @@ var app;
 /// <reference path="IDataModel.ts" />
 /// <reference path="IDataModel.ts" />
 /// <reference path="../common/utils/Guid.ts" />
-/// <reference path="models/Project.ts" />
-/// <reference path="models/Board.ts" />
-/// <reference path="models/Group.ts" />
-/// <reference path="models/Task.ts" />
+/// <reference path="models/IProject.ts" />
+/// <reference path="models/ISprint.ts" />
+/// <reference path="models/IBoard.ts" />
+/// <reference path="models/IGroup.ts" />
+/// <reference path="models/ITask.ts" />
 var app;
 (function (app) {
     var data;
@@ -115,6 +139,64 @@ var app;
                     Description: 'This is a larger project with many groups, users and sprints.',
                 },
             ];
+            SampleData.Sprints = [
+                // --------------------------------------------------------------
+                {
+                    Number: 1,
+                    Key: Guid.New(),
+                    State: data.models.SprintState.Started,
+                    ProjectKey: SampleData.Projects[0].Key,
+                },
+                {
+                    Number: 2,
+                    Key: Guid.New(),
+                    State: data.models.SprintState.Default,
+                    ProjectKey: SampleData.Projects[0].Key,
+                },
+                // --------------------------------------------------------------
+                {
+                    Number: 1,
+                    Key: Guid.New(),
+                    State: data.models.SprintState.Completed,
+                    ProjectKey: SampleData.Projects[1].Key,
+                },
+                {
+                    Number: 2,
+                    Key: Guid.New(),
+                    State: data.models.SprintState.Completed,
+                    ProjectKey: SampleData.Projects[1].Key,
+                },
+                {
+                    Number: 3,
+                    Key: Guid.New(),
+                    State: data.models.SprintState.Started,
+                    ProjectKey: SampleData.Projects[1].Key,
+                },
+                {
+                    Number: 4,
+                    Key: Guid.New(),
+                    State: data.models.SprintState.OnHold,
+                    ProjectKey: SampleData.Projects[1].Key,
+                },
+                {
+                    Number: 5,
+                    Key: Guid.New(),
+                    State: data.models.SprintState.Default,
+                    ProjectKey: SampleData.Projects[1].Key,
+                },
+                {
+                    Number: 6,
+                    Key: Guid.New(),
+                    State: data.models.SprintState.Default,
+                    ProjectKey: SampleData.Projects[1].Key,
+                },
+                {
+                    Number: 7,
+                    Key: Guid.New(),
+                    State: data.models.SprintState.Discarded,
+                    ProjectKey: SampleData.Projects[1].Key,
+                },
+            ];
             SampleData.Groups = [
                 {
                     Key: Guid.New(),
@@ -129,14 +211,14 @@ var app;
                     Title: 'Scheduled Tasks',
                     TaskType: data.models.TaskType.Scheduled,
                     ProjectKey: SampleData.Projects[0].Key,
-                    SprintKey: null,
+                    SprintKey: SampleData.Sprints[0].Key,
                 },
                 {
                     Key: Guid.New(),
                     Title: 'Scheduled Tasks',
                     TaskType: data.models.TaskType.Scheduled,
                     ProjectKey: SampleData.Projects[1].Key,
-                    SprintKey: null,
+                    SprintKey: SampleData.Sprints[0].Key,
                 },
                 // --------------------------------------------------------------
                 // --------------------------------------------------------------
@@ -145,14 +227,14 @@ var app;
                     Title: 'Tasks In Progress',
                     TaskType: data.models.TaskType.InProgress,
                     ProjectKey: SampleData.Projects[0].Key,
-                    SprintKey: null,
+                    SprintKey: SampleData.Sprints[0].Key,
                 },
                 {
                     Key: Guid.New(),
                     Title: 'Tasks In Progress',
                     TaskType: data.models.TaskType.InProgress,
                     ProjectKey: SampleData.Projects[1].Key,
-                    SprintKey: null,
+                    SprintKey: SampleData.Sprints[4].Key,
                 },
                 // --------------------------------------------------------------
                 // --------------------------------------------------------------
@@ -281,8 +363,8 @@ var app;
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
 /// <reference path="../../common/utils/Guid.ts" />
-/// <reference path="../models/Project.ts" />
 /// <reference path="AbstractRepository.ts" />
+/// <reference path="../models/IProject.ts" />
 /// <reference path="../samples.ts" />
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
@@ -330,9 +412,131 @@ var app;
                     }
                     return deferred.promise;
                 };
+                ProjectRepository.prototype.findByKey = function (key) {
+                    var _this = this;
+                    var found = false;
+                    var deferred = this.$q.defer();
+                    this.load()
+                        .then(function (items) {
+                        if (items) {
+                            items.forEach(function (item) {
+                                if (found)
+                                    return;
+                                if (item.Key == key) {
+                                    deferred.resolve(item);
+                                    found = true;
+                                }
+                            });
+                        }
+                        if (!found) {
+                            deferred.resolve(null);
+                        }
+                    }).catch(function (error) {
+                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
+                    });
+                    return deferred.promise;
+                };
                 return ProjectRepository;
             })(repositories.AbstractRepository);
             repositories.ProjectRepository = ProjectRepository;
+        })(repositories = data.repositories || (data.repositories = {}));
+    })(data = app.data || (app.data = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var data;
+    (function (data) {
+        var repositories;
+        (function (repositories) {
+            var SprintRepository = (function (_super) {
+                __extends(SprintRepository, _super);
+                function SprintRepository($q) {
+                    var _this = this;
+                    _super.call(this, $q);
+                    this.load().then(function (list) {
+                        _this.memCache = list;
+                    });
+                }
+                SprintRepository.prototype.create = function (projectKey, number) {
+                    var item = {
+                        Key: Guid.New(),
+                        Number: number ? number : this.getNextSprintNumber(projectKey),
+                        State: data.models.SprintState.Default,
+                        ProjectKey: projectKey,
+                    };
+                    this.insert(item);
+                    return item;
+                };
+                SprintRepository.prototype.load = function () {
+                    var deferred = this.$q.defer();
+                    {
+                        deferred.resolve(data.SampleData.Sprints);
+                    }
+                    return deferred.promise;
+                };
+                SprintRepository.prototype.save = function () {
+                    var deferred = this.$q.defer();
+                    {
+                        console.log(' - ToDo: Implement Save: ', this.memCache);
+                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
+                    }
+                    return deferred.promise;
+                };
+                SprintRepository.prototype.findByKey = function (key) {
+                    var _this = this;
+                    var found = false;
+                    var deferred = this.$q.defer();
+                    this.load().then(function (items) {
+                        if (items) {
+                            items.forEach(function (item) {
+                                if (found)
+                                    return;
+                                if (item.Key == key) {
+                                    deferred.resolve(item);
+                                    found = true;
+                                }
+                            });
+                        }
+                        if (!found) {
+                            deferred.resolve(null);
+                        }
+                    }).catch(function (error) {
+                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
+                    });
+                    return deferred.promise;
+                };
+                SprintRepository.prototype.filterByProject = function (key) {
+                    var _this = this;
+                    var list = [];
+                    var deferred = this.$q.defer();
+                    this.load().then(function (items) {
+                        if (items) {
+                            items.forEach(function (item) {
+                                if (item.ProjectKey == key) {
+                                    list.push(item);
+                                }
+                            });
+                        }
+                        deferred.resolve(list);
+                    }).catch(function (error) {
+                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
+                    });
+                    return deferred.promise;
+                };
+                SprintRepository.prototype.getNextSprintNumber = function (projectKey) {
+                    var sprintMax = 0;
+                    if (this.memCache) {
+                        this.memCache.forEach(function (item) {
+                            if (item.ProjectKey == projectKey && item.Number > sprintMax) {
+                                sprintMax = item.Number;
+                            }
+                        });
+                    }
+                    return sprintMax + 1;
+                };
+                return SprintRepository;
+            })(repositories.AbstractRepository);
+            repositories.SprintRepository = SprintRepository;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
@@ -503,17 +707,13 @@ var app;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
-/// <reference path="models/AppState.ts" />
-/// <reference path="../data/repositories/ProjectRepository.ts" />
-/// <reference path="../data/repositories/BoardRepository.ts" />
-/// <reference path="../data/repositories/GroupRepository.ts" />
-/// <reference path="../data/repositories/TaskRepository.ts" />
-/// <reference path="../data/repositories/UserRepository.ts" />
-angular.module('myScrumBoard.data', [
-    'ui.router',
-])
-    .constant('ScrumBoardState', app.data.models.LoadAppState());
 /// <reference path="../../data/module.ts" />
+/// <reference path="../../data/repositories/ProjectRepository.ts" />
+/// <reference path="../../data/repositories/SprintRepository.ts" />
+/// <reference path="../../data/repositories/BoardRepository.ts" />
+/// <reference path="../../data/repositories/GroupRepository.ts" />
+/// <reference path="../../data/repositories/TaskRepository.ts" />
+/// <reference path="../../data/repositories/UserRepository.ts" />
 var app;
 (function (app) {
     var common;
@@ -524,6 +724,7 @@ var app;
                 function ScrumBoardService($q) {
                     this.$q = $q;
                     this.Projects = new app.data.repositories.ProjectRepository($q);
+                    this.Sprints = new app.data.repositories.SprintRepository($q);
                     this.Boards = new app.data.repositories.BoardRepository($q);
                     this.Groups = new app.data.repositories.GroupRepository($q);
                     this.Tasks = new app.data.repositories.TaskRepository($q);
@@ -823,27 +1024,94 @@ var app;
     var controllers;
     (function (controllers) {
         var ProjectsController = (function () {
-            function ProjectsController(scrumBoards) {
+            function ProjectsController($state, $modal, scrumBoards) {
+                this.$state = $state;
+                this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
-                this.tabIndex = 0;
+                console.log(' - Projects Controller...');
             }
+            ProjectsController.prototype.index = function () {
+                this.$state.go('projects.list');
+            };
+            ProjectsController.prototype.openProject = function (project) {
+                this.$state.go('projects.item', { key: project.Key });
+            };
+            ProjectsController.prototype.cancel = function () {
+                this.index();
+            };
             return ProjectsController;
         })();
         controllers.ProjectsController = ProjectsController;
+        var ProjectListController = (function () {
+            function ProjectListController($rootScope, scrumBoards) {
+                this.$rootScope = $rootScope;
+                this.scrumBoards = scrumBoards;
+                this.projects = [];
+                console.log(' - Sprint Projects Controller...');
+                this.init();
+            }
+            ProjectListController.prototype.init = function () {
+                var _this = this;
+                this.scrumBoards.Projects.load().then(function (items) {
+                    _this.projects = items;
+                }).finally(function () {
+                    _this.$rootScope.$applyAsync();
+                });
+            };
+            return ProjectListController;
+        })();
+        controllers.ProjectListController = ProjectListController;
+        var ProjectItemController = (function () {
+            function ProjectItemController($rootScope, scrumBoards, project) {
+                this.$rootScope = $rootScope;
+                this.scrumBoards = scrumBoards;
+                this.project = project;
+                console.log(' - Project Item Controller...', project);
+            }
+            return ProjectItemController;
+        })();
+        controllers.ProjectItemController = ProjectItemController;
     })(controllers = app.controllers || (app.controllers = {}));
 })(app || (app = {}));
+/// <reference path="../../data/module.ts" />
+/// <reference path="../../common/module.ts" />
 var app;
 (function (app) {
     var controllers;
     (function (controllers) {
         var SprintController = (function () {
-            function SprintController(scrumBoards) {
+            function SprintController($state, $modal, scrumBoards) {
+                this.$state = $state;
+                this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
-                this.tabIndex = 0;
+                console.log(' - Sprint Controller...');
             }
+            SprintController.prototype.getSprints = function () {
+                return this.scrumBoards
+                    .Sprints
+                    .filterByProject(Guid.New());
+            };
+            SprintController.prototype.index = function () {
+                this.$state.go('sprints.list');
+            };
+            SprintController.prototype.openBoard = function (sprint) {
+                this.$state.go('sprints.item', { key: sprint.Key });
+            };
+            SprintController.prototype.cancel = function () {
+                this.index();
+            };
             return SprintController;
         })();
         controllers.SprintController = SprintController;
+        var SprintItemController = (function () {
+            function SprintItemController(sprint, scrumBoards) {
+                this.sprint = sprint;
+                this.scrumBoards = scrumBoards;
+                console.log(' - Sprint Child Controller...', sprint);
+            }
+            return SprintItemController;
+        })();
+        controllers.SprintItemController = SprintItemController;
     })(controllers = app.controllers || (app.controllers = {}));
 })(app || (app = {}));
 /// <reference path="../common/module.ts" />
@@ -854,11 +1122,14 @@ var app;
 angular.module('myScrumBoard.controllers', [
     'myScrumBoard.common',
 ])
-    .controller('BacklogController', ['$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
-    .controller('BacklogItemController', ['board', 'ScrumBoardService', app.controllers.BacklogItemController])
     .controller('DashboardController', ['ScrumBoardService', app.controllers.DashboardController])
-    .controller('ProjectsController', ['ScrumBoardService', app.controllers.ProjectsController])
-    .controller('SprintController', ['ScrumBoardService', app.controllers.SprintController]);
+    .controller('ProjectsController', ['$state', '$modal', 'ScrumBoardService', app.controllers.ProjectsController])
+    .controller('ProjectListController', ['$rootScope', 'ScrumBoardService', app.controllers.ProjectListController])
+    .controller('ProjectItemController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.ProjectItemController])
+    .controller('SprintController', ['ScrumBoardService', app.controllers.SprintController])
+    .controller('SprintItemController', ['sprint', 'ScrumBoardService', app.controllers.SprintItemController])
+    .controller('BacklogController', ['$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
+    .controller('BacklogItemController', ['board', 'ScrumBoardService', app.controllers.BacklogItemController]);
 angular.module('myScrumBoard.routes', [
     'ui.router',
 ])
@@ -881,6 +1152,7 @@ angular.module('myScrumBoard.routes', [
         })
             .state('projects', {
             url: '/projects',
+            abstract: true,
             views: {
                 'main@': {
                     templateUrl: 'views/projects/main.tpl.html',
@@ -889,8 +1161,36 @@ angular.module('myScrumBoard.routes', [
                 },
             }
         })
+            .state('projects.list', {
+            url: '',
+            parent: 'projects',
+            views: {
+                'contents': {
+                    templateUrl: 'views/projects/list.tpl.html',
+                    controller: 'ProjectListController',
+                    controllerAs: 'childCtrl',
+                },
+            },
+        })
+            .state('projects.item', {
+            url: '^/{projectKey:string}/info',
+            parent: 'sprints',
+            views: {
+                'contents': {
+                    templateUrl: 'views/sprints/item.tpl.html',
+                    controller: 'ProjectItemController',
+                    controllerAs: 'childCtrl',
+                },
+            },
+            resolve: {
+                project: ['$stateParams', 'ScrumBoardService', function ($stateParams, svc) {
+                        return $stateParams.projectKey ? svc.Projects.findByKey($stateParams.projectKey) : null;
+                    }]
+            },
+        })
             .state('sprints', {
-            url: '/sprints',
+            url: '/sprint',
+            abstract: true,
             views: {
                 'main@': {
                     templateUrl: 'views/sprints/main.tpl.html',
@@ -898,6 +1198,36 @@ angular.module('myScrumBoard.routes', [
                     controllerAs: 'viewCtrl',
                 },
             }
+        })
+            .state('sprints.list', {
+            url: '^/{projectKey:string}/sprint',
+            parent: 'sprints',
+            views: {
+                'contents': {
+                    templateUrl: 'views/sprints/list.tpl.html',
+                },
+            },
+            resolve: {
+                project: ['$stateParams', 'ScrumBoardService', function ($stateParams, svc) {
+                        return $stateParams.projectKey ? svc.Projects.findByKey($stateParams.projectKey) : null;
+                    }]
+            },
+        })
+            .state('sprints.item', {
+            url: '/{key:string}',
+            parent: 'sprints',
+            views: {
+                'contents': {
+                    templateUrl: 'views/sprints/item.tpl.html',
+                    controller: 'SprintItemController',
+                    controllerAs: 'childCtrl',
+                },
+            },
+            resolve: {
+                sprint: ['$stateParams', 'ScrumBoardService', function ($stateParams, svc) {
+                        return $stateParams.key ? svc.Sprints.findByKey($stateParams.key) : null;
+                    }]
+            },
         })
             .state('backlogs', {
             url: '/backlogs',
@@ -910,7 +1240,7 @@ angular.module('myScrumBoard.routes', [
             }
         })
             .state('backlogs.list', {
-            url: '/backlogs/list',
+            url: '/list',
             parent: 'backlogs',
             views: {
                 'contents': {
@@ -919,7 +1249,7 @@ angular.module('myScrumBoard.routes', [
             },
         })
             .state('backlogs.item', {
-            url: '/backlogs/{key:string}',
+            url: '/{key:string}',
             parent: 'backlogs',
             views: {
                 'contents': {
