@@ -2,7 +2,8 @@
     'ui.router',
 ])
 
-.config(['$stateProvider', '$urlRouterProvider', function ($stateProvider, $urlRouterProvider) {
+    .config(['$stateProvider', '$urlRouterProvider', ($stateProvider, $urlRouterProvider) => {
+
     // Configure defaults
     $urlRouterProvider
         .when('', '/')
@@ -10,7 +11,8 @@
 
     // Configure client-side routing
     $stateProvider
-        .state('default', {
+        .state('default',
+        {
             url: '/',
             views: {
                 'main@': {
@@ -21,7 +23,8 @@
             }
         })
 
-        .state('projects', {
+        .state('projects',
+        {
             url: '/projects',
             views: {
                 'main@': {
@@ -32,7 +35,8 @@
             }
         })
 
-        .state('sprints', {
+        .state('sprints',
+        {
             url: '/sprints',
             views: {
                 'main@': {
@@ -43,7 +47,8 @@
             }
         })
 
-        .state('backlogs', {
+        .state('backlogs',
+        {
             url: '/backlogs',
             views: {
                 'main@': {
@@ -52,6 +57,33 @@
                     controllerAs: 'viewCtrl',
                 },
             }
+        })
+        .state('backlogs.list',
+        {
+            url: '/backlogs/list',
+            parent: 'backlogs',
+            views: {
+                'contents': {
+                    templateUrl: 'views/backlogs/list.tpl.html',
+                },
+            },
+        })
+        .state('backlogs.item',
+        {
+            url: '/backlogs/{key:string}',
+            parent: 'backlogs',
+            views: {
+                'contents': {
+                    templateUrl: 'views/backlogs/item.tpl.html',
+                    controller: 'BacklogItemController',
+                    controllerAs: 'childCtrl',
+                },
+            },
+            resolve: {
+                board: ['$stateParams', 'ScrumBoardService', ($stateParams, svc: app.common.services.ScrumBoardService) => {
+                    return $stateParams.key ? svc.Boards.findByKey($stateParams.key) : null;
+                }]
+            },
         })
 
 }]) 

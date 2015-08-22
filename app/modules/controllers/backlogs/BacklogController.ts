@@ -2,24 +2,32 @@
 
     import models = app.data.models;
 
-    export class BacklogController {
+    export class BacklogItemController {
 
-        public tabIndex: number = 0;
-        public current: models.IBoard;
+        constructor(public board: models.IBoard, private scrumBoards: app.common.services.ScrumBoardService) { }
+
+    }
+
+    export class BacklogController {
         public newTask: models.ITask;
+        public current: models.IBoard;
 
         public get boards(): models.IBoard[] { return this.getBoards(); }
 
-        constructor(private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) { }
-
-        public index() {
-            this.tabIndex = 0;
-        }
+        constructor(private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) {}
 
         public getBoards(): models.IBoard[] {
             return this.scrumBoards
                 .Boards
                 .filterByType(app.data.models.TaskType.Backlog);
+        }
+
+        public index() {
+            this.$state.go('backlogs.list');
+        }
+
+        public openBoard(board: models.IBoard) {
+            this.$state.go('backlogs.item', { key: board.Key });
         }
 
         public createNew(boardId?: string) {
@@ -57,11 +65,6 @@
 
         }
 
-        public openBoard(board: models.IBoard) {
-            this.current = board;
-            this.tabIndex = 1;
-        }
-
         public update(board: models.IBoard) {
             this.scrumBoards.Boards.save()
                 .then((success) => {
@@ -89,7 +92,6 @@
         }
 
         public cancel() {
-            this.current = null;
             this.index();
         }
 

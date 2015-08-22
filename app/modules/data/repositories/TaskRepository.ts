@@ -5,8 +5,8 @@ module app.data.repositories {
 
     export class TaskRepository extends AbstractRepository<models.ITask> implements IRepository<models.ITask> {
 
-        constructor(private $q: ng.IQService) {
-            super();
+        constructor($q: ng.IQService) {
+            super($q);
             this.load().then((list) => {
                 this.memCache = list;
             });

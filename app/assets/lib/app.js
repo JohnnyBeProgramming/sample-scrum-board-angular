@@ -41,7 +41,8 @@ var app;
         var repositories;
         (function (repositories) {
             var AbstractRepository = (function () {
-                function AbstractRepository() {
+                function AbstractRepository($q) {
+                    this.$q = $q;
                     this.memCache = [];
                 }
                 AbstractRepository.prototype.list = function () {
@@ -299,8 +300,7 @@ var app;
                 __extends(ProjectRepository, _super);
                 function ProjectRepository($q) {
                     var _this = this;
-                    _super.call(this);
-                    this.$q = $q;
+                    _super.call(this, $q);
                     this.load()
                         .then(function (list) {
                         _this.memCache = list;
@@ -346,10 +346,8 @@ var app;
                 __extends(BoardRepository, _super);
                 function BoardRepository($q) {
                     var _this = this;
-                    _super.call(this);
-                    this.$q = $q;
-                    this.load()
-                        .then(function (list) {
+                    _super.call(this, $q);
+                    this.load().then(function (list) {
                         _this.memCache = list;
                     });
                 }
@@ -386,6 +384,30 @@ var app;
                     });
                     return list;
                 };
+                BoardRepository.prototype.findByKey = function (key) {
+                    var _this = this;
+                    var found = false;
+                    var deferred = this.$q.defer();
+                    this.load()
+                        .then(function (items) {
+                        if (items) {
+                            items.forEach(function (item) {
+                                if (found)
+                                    return;
+                                if (item.Key == key) {
+                                    deferred.resolve(item);
+                                    found = true;
+                                }
+                            });
+                        }
+                        if (!found) {
+                            deferred.resolve(null);
+                        }
+                    }).catch(function (error) {
+                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
+                    });
+                    return deferred.promise;
+                };
                 return BoardRepository;
             })(repositories.AbstractRepository);
             repositories.BoardRepository = BoardRepository;
@@ -418,8 +440,7 @@ var app;
                 __extends(TaskRepository, _super);
                 function TaskRepository($q) {
                     var _this = this;
-                    _super.call(this);
-                    this.$q = $q;
+                    _super.call(this, $q);
                     this.load().then(function (list) {
                         _this.memCache = list;
                     });
@@ -634,24 +655,35 @@ var app;
     var controllers;
     (function (controllers) {
         var models = app.data.models;
+        var BacklogItemController = (function () {
+            function BacklogItemController(board, scrumBoards) {
+                this.board = board;
+                this.scrumBoards = scrumBoards;
+            }
+            return BacklogItemController;
+        })();
+        controllers.BacklogItemController = BacklogItemController;
         var BacklogController = (function () {
-            function BacklogController($modal, scrumBoards) {
+            function BacklogController($state, $modal, scrumBoards) {
+                this.$state = $state;
                 this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
-                this.tabIndex = 0;
             }
             Object.defineProperty(BacklogController.prototype, "boards", {
                 get: function () { return this.getBoards(); },
                 enumerable: true,
                 configurable: true
             });
-            BacklogController.prototype.index = function () {
-                this.tabIndex = 0;
-            };
             BacklogController.prototype.getBoards = function () {
                 return this.scrumBoards
                     .Boards
                     .filterByType(app.data.models.TaskType.Backlog);
+            };
+            BacklogController.prototype.index = function () {
+                this.$state.go('backlogs.list');
+            };
+            BacklogController.prototype.openBoard = function (board) {
+                this.$state.go('backlogs.item', { key: board.Key });
             };
             BacklogController.prototype.createNew = function (boardId) {
                 var _this = this;
@@ -688,10 +720,6 @@ var app;
                     _this.index();
                 });
             };
-            BacklogController.prototype.openBoard = function (board) {
-                this.current = board;
-                this.tabIndex = 1;
-            };
             BacklogController.prototype.update = function (board) {
                 this.scrumBoards.Boards.save()
                     .then(function (success) {
@@ -717,7 +745,6 @@ var app;
                 this.openBoard(board);
             };
             BacklogController.prototype.cancel = function () {
-                this.current = null;
                 this.index();
             };
             BacklogController.prototype.addTask = function (board) {
@@ -827,7 +854,8 @@ var app;
 angular.module('myScrumBoard.controllers', [
     'myScrumBoard.common',
 ])
-    .controller('BacklogController', ['$modal', 'ScrumBoardService', app.controllers.BacklogController])
+    .controller('BacklogController', ['$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
+    .controller('BacklogItemController', ['board', 'ScrumBoardService', app.controllers.BacklogItemController])
     .controller('DashboardController', ['ScrumBoardService', app.controllers.DashboardController])
     .controller('ProjectsController', ['ScrumBoardService', app.controllers.ProjectsController])
     .controller('SprintController', ['ScrumBoardService', app.controllers.SprintController]);
@@ -880,6 +908,31 @@ angular.module('myScrumBoard.routes', [
                     controllerAs: 'viewCtrl',
                 },
             }
+        })
+            .state('backlogs.list', {
+            url: '/backlogs/list',
+            parent: 'backlogs',
+            views: {
+                'contents': {
+                    templateUrl: 'views/backlogs/list.tpl.html',
+                },
+            },
+        })
+            .state('backlogs.item', {
+            url: '/backlogs/{key:string}',
+            parent: 'backlogs',
+            views: {
+                'contents': {
+                    templateUrl: 'views/backlogs/item.tpl.html',
+                    controller: 'BacklogItemController',
+                    controllerAs: 'childCtrl',
+                },
+            },
+            resolve: {
+                board: ['$stateParams', 'ScrumBoardService', function ($stateParams, svc) {
+                        return $stateParams.key ? svc.Boards.findByKey($stateParams.key) : null;
+                    }]
+            },
         });
     }]);
 /// <reference path="imports.d.ts" />

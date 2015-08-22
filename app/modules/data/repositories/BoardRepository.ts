@@ -4,10 +4,9 @@
 
     export class BoardRepository extends AbstractRepository<IBoard> implements IRepository<IBoard> {
 
-        constructor(private $q: ng.IQService) {
-            super();
-            this.load()
-                .then((list) => {
+        constructor($q: ng.IQService) {
+            super($q);
+            this.load().then((list) => {
                 this.memCache = list;
             });
         }
@@ -39,7 +38,7 @@
             return deferred.promise;
         }
 
-        public filterByType(type: app.data.models.TaskType): IBoard[]{
+        public filterByType(type: app.data.models.TaskType): IBoard[] {
             var list = [];
             this.memCache.forEach((item) => {
                 if (item.TaskType == type) {
@@ -47,6 +46,29 @@
                 }
             });
             return list;
+        }
+
+        public findByKey(key: string): ng.IPromise<IBoard> {
+            var found = false;
+            var deferred = this.$q.defer<IBoard>();
+            this.load()
+                .then((items) => {
+                if (items) {
+                    items.forEach((item) => {
+                        if (found) return;
+                        if (item.Key == key) {
+                            deferred.resolve(item);
+                            found = true;
+                        }
+                    });
+                }
+                if (!found) {
+                    deferred.resolve(null);
+                }
+            }).catch((error) => {
+                deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof this));
+            });
+            return deferred.promise;
         }
     }
 

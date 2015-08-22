@@ -9,8 +9,8 @@ module app.data.repositories {
 
     export class ProjectRepository extends AbstractRepository<IProject> implements IRepository<IProject> {
 
-        constructor(private $q: ng.IQService) {
-            super();
+        constructor($q: ng.IQService) {
+            super($q);
             this.load()
                 .then((list) => {
                     this.memCache = list;

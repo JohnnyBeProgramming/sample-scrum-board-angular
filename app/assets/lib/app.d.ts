@@ -32,8 +32,9 @@ declare module app.data.repositories {
         save(): ng.IPromise<boolean>;
     }
     class AbstractRepository<TModel extends IDataModel> {
+        $q: ng.IQService;
         memCache: TModel[];
-        constructor();
+        constructor($q: ng.IQService);
         list(): TModel[];
         insert(item: TModel): TModel;
         remove(item: TModel): void;
@@ -83,7 +84,6 @@ declare module app.data {
 declare module app.data.repositories {
     import IProject = app.data.models.IProject;
     class ProjectRepository extends AbstractRepository<IProject> implements IRepository<IProject> {
-        private $q;
         constructor($q: ng.IQService);
         create(title: string, description?: string): IProject;
         load(): ng.IPromise<IProject[]>;
@@ -93,12 +93,12 @@ declare module app.data.repositories {
 declare module app.data.repositories {
     import IBoard = app.data.models.IBoard;
     class BoardRepository extends AbstractRepository<IBoard> implements IRepository<IBoard> {
-        private $q;
         constructor($q: ng.IQService);
         create(type: app.data.models.TaskType, title?: string): IBoard;
         load(): ng.IPromise<IBoard[]>;
         save(): ng.IPromise<boolean>;
         filterByType(type: app.data.models.TaskType): IBoard[];
+        findByKey(key: string): ng.IPromise<IBoard>;
     }
 }
 declare module app.data.repositories {
@@ -110,7 +110,6 @@ declare module app.data.repositories {
 declare module app.data.repositories {
     import models = app.data.models;
     class TaskRepository extends AbstractRepository<models.ITask> implements IRepository<models.ITask> {
-        private $q;
         constructor($q: ng.IQService);
         create(board: models.IBoard, title: string, description?: string): models.ITask;
         load(): ng.IPromise<models.ITask[]>;
@@ -155,18 +154,23 @@ declare module app.common.modal {
 }
 declare module app.controllers {
     import models = app.data.models;
+    class BacklogItemController {
+        board: models.IBoard;
+        private scrumBoards;
+        constructor(board: models.IBoard, scrumBoards: app.common.services.ScrumBoardService);
+    }
     class BacklogController {
+        private $state;
         private $modal;
         private scrumBoards;
-        tabIndex: number;
-        current: models.IBoard;
         newTask: models.ITask;
+        current: models.IBoard;
         boards: models.IBoard[];
-        constructor($modal: any, scrumBoards: app.common.services.ScrumBoardService);
-        index(): void;
+        constructor($state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         getBoards(): models.IBoard[];
-        createNew(boardId?: string): void;
+        index(): void;
         openBoard(board: models.IBoard): void;
+        createNew(boardId?: string): void;
         update(board: models.IBoard): void;
         insert(board: models.IBoard): void;
         cancel(): void;
