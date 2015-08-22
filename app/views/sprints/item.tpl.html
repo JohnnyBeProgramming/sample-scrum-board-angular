@@ -8,73 +8,89 @@
     </span>
     <div ng-if="childCtrl.sprint">
         <h3>
-            Sprint #{{ (childCtrl.sprint.Number || 1) }}
-            <small>{{ viewCtrl.getProjectLabel(childCtrl.sprint.ProjectKey) }}</small>
+            {{ viewCtrl.getProjectLabel(childCtrl.sprint.ProjectKey) }}
+            <small>
+                Sprint #{{ (childCtrl.sprint.Number || 1) }}
+            </small>
         </h3>
         <div class="row contained">
-            <div class="col-md-12">
+            <div class="col-md-3">
                 <div class="board">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div>
-                                <a href="" ng-click="viewCtrl.addTask()" ng-if="!viewCtrl.newTask" class="pull-right ctrl"><i class="fa fa-plus"></i></a>
-                                <h4>
-                                    <i class="fa fa-tags"></i> Unassigned Tasks
-                                </h4>
-                                <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(childCtrl.sprint.Key)">
-                                    <a href="" ng-click="viewCtrl.cancelTask()" class="pull-right ctrl"><i class="fa fa-times"></i></a>
-                                    <a href="" ng-click="viewCtrl.updateTask(viewCtrl.newTask)" class="pull-right ctrl"><i class="fa fa-save"></i></a>
-                                    <h5>{{ task.Title }}</h5>
-                                    <p>
-                                        {{ task.Description }}
-                                    </p>
-                                </div>
-                                <a href="" ng-click="viewCtrl.addTask()" class="tile add">
-                                    <i class="fa fa-plus"></i> Add Task
-                                </a>
-                            </div>
+                    <div>
+                        <h4>
+                            <i class="fa fa-tags"></i> Unassigned Tasks
+                        </h4>
+                        <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(childCtrl.sprint.Key)">
+                            <a href="" ng-click="viewCtrl.cancelTask()" class="pull-right ctrl"><i class="fa fa-times"></i></a>
+                            <a href="" ng-click="viewCtrl.updateTask(viewCtrl.newTask)" class="pull-right ctrl"><i class="fa fa-save"></i></a>
+                            <h5>{{ task.Title }}</h5>
+                            <p>
+                                {{ task.Description }}
+                            </p>
                         </div>
-                        <div class="col-md-4">
-                            <div>
-                                <a href="" ng-click="viewCtrl.cancel()" class="pull-right ctrl"><i class="fa fa-trash"></i></a>
-                                <h4>
-                                    <i class="fa fa-file-o"></i> Actions Menu
-                                </h4>
-                                <div class="thumbnail pad-aside">
-                                    <div class="btn-group-vertical horz-fill" role="group" aria-label="...">
-                                        <a ng-click="viewCtrl.addTask()" ng-disabled="viewCtrl.newTask" class="btn btn-primary horz-fill">Add New Task</a>
-                                        <a ng-click="viewCtrl.addGroup()" class="btn btn-info horz-fill disabled">Create Group</a>
-                                        <a ng-click="viewCtrl.inviteUser()" class="btn btn-default horz-fill disabled">Invite User</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <h4>
-                                    <i class="fa fa-cog"></i> Linked Resources
-                                </h4>
-                                <div class="thumbnail pad-aside">
-                                    <form class="form-horizontal">
-                                        <div class="form-group">
-                                            <label for="lnkProject" class="col-sm-2 control-label">Project</label>
-                                            <div class="col-sm-10">
-                                                <select id="lnkProject" class="form-control input-sm" ng-model="childCtrl.sprint.ProjectKey">
-                                                    <option value=""> - Select a Project -</option>
-                                                    <option value="{{ opt.Key }}" ng-repeat="opt in viewCtrl.scrumBoards.Projects.list()">{{ opt.Title }}</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="form-group" ng-if="childCtrl.sprint.ProjectKey">
-                                            <label for="lnkSprint" class="col-sm-2 control-label">Sprint</label>
-                                            <div class="col-sm-10">
-                                                <select id="lnkSprint" class="form-control input-sm">
-                                                    <option> - No Sprint Selected - </option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
+                        <a href="" ng-click="viewCtrl.addTask()" class="tile add">
+                            <i class="fa fa-plus"></i> Add Task
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="board">
+                    <div>
+                        <h4>
+                            <i class="fa fa-tags"></i> In Progress
+                        </h4>
+                        <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(childCtrl.sprint.Key)">
+                            <a href="" ng-click="viewCtrl.cancelTask()" class="pull-right ctrl"><i class="fa fa-times"></i></a>
+                            <a href="" ng-click="viewCtrl.updateTask(viewCtrl.newTask)" class="pull-right ctrl"><i class="fa fa-save"></i></a>
+                            <h5>{{ task.Title }}</h5>
+                            <p>
+                                {{ task.Description }}
+                            </p>
                         </div>
+                        <a href="" ng-click="viewCtrl.addTask()" class="tile add">
+                            <i class="fa fa-plus"></i> Add Task
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="board">
+                    <div>
+                        <h4>
+                            <i class="fa fa-tags"></i> In Testing
+                        </h4>
+                        <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(childCtrl.sprint.Key)">
+                            <a href="" ng-click="viewCtrl.cancelTask()" class="pull-right ctrl"><i class="fa fa-times"></i></a>
+                            <a href="" ng-click="viewCtrl.updateTask(viewCtrl.newTask)" class="pull-right ctrl"><i class="fa fa-save"></i></a>
+                            <h5>{{ task.Title }}</h5>
+                            <p>
+                                {{ task.Description }}
+                            </p>
+                        </div>
+                        <a href="" ng-click="viewCtrl.addTask()" class="tile add">
+                            <i class="fa fa-plus"></i> Add Task
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="board">
+                    <div>
+                        <h4>
+                            <i class="fa fa-tags"></i> Completed
+                        </h4>
+                        <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(childCtrl.sprint.Key)">
+                            <a href="" ng-click="viewCtrl.cancelTask()" class="pull-right ctrl"><i class="fa fa-times"></i></a>
+                            <a href="" ng-click="viewCtrl.updateTask(viewCtrl.newTask)" class="pull-right ctrl"><i class="fa fa-save"></i></a>
+                            <h5>{{ task.Title }}</h5>
+                            <p>
+                                {{ task.Description }}
+                            </p>
+                        </div>
+                        <a href="" ng-click="viewCtrl.addTask()" class="tile add">
+                            <i class="fa fa-plus"></i> Add Task
+                        </a>
                     </div>
                 </div>
             </div>

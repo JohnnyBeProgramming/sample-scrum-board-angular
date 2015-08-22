@@ -294,4 +294,9 @@ declare module app.controllers {
         sprint: models.ISprint;
         constructor(scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
     }
+    class SprintEditController {
+        private scrumBoards;
+        sprint: models.ISprint;
+        constructor(scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
+    }
 }

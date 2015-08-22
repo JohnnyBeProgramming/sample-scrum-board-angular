@@ -1340,6 +1340,15 @@ var app;
             return SprintItemController;
         })();
         controllers.SprintItemController = SprintItemController;
+        var SprintEditController = (function () {
+            function SprintEditController(scrumBoards, sprint) {
+                this.scrumBoards = scrumBoards;
+                this.sprint = sprint;
+                console.log(' - Sprint Edit Controller...', sprint);
+            }
+            return SprintEditController;
+        })();
+        controllers.SprintEditController = SprintEditController;
     })(controllers = app.controllers || (app.controllers = {}));
 })(app || (app = {}));
 /// <reference path="../common/module.ts" />
@@ -1358,6 +1367,7 @@ angular.module('myScrumBoard.controllers', [
     .controller('SprintsActiveController', ['$rootScope', 'ScrumBoardService', app.controllers.SprintsActiveController])
     .controller('SprintListController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.SprintListController])
     .controller('SprintItemController', ['ScrumBoardService', 'sprint', app.controllers.SprintItemController])
+    .controller('SprintEditController', ['ScrumBoardService', 'sprint', app.controllers.SprintEditController])
     .controller('BacklogController', ['$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
     .controller('BacklogItemController', ['ScrumBoardService', 'board', app.controllers.BacklogItemController]);
 angular.module('myScrumBoard.routes', [
@@ -1468,6 +1478,22 @@ angular.module('myScrumBoard.routes', [
                 'contents': {
                     templateUrl: 'views/sprints/item.tpl.html',
                     controller: 'SprintItemController',
+                    controllerAs: 'childCtrl',
+                },
+            },
+            resolve: {
+                sprint: ['$stateParams', 'ScrumBoardService', function ($stateParams, svc) {
+                        return $stateParams.key ? svc.Sprints.findByKey($stateParams.key) : null;
+                    }]
+            },
+        })
+            .state('sprints.edit', {
+            url: '/{key:string}/edit',
+            parent: 'sprints',
+            views: {
+                'contents': {
+                    templateUrl: 'views/sprints/edit.tpl.html',
+                    controller: 'SprintEditController',
                     controllerAs: 'childCtrl',
                 },
             },

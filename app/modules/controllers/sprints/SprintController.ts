@@ -170,4 +170,12 @@ module app.controllers {
         }
 
     }
+
+    export class SprintEditController {
+
+        constructor(private scrumBoards: app.common.services.ScrumBoardService, public sprint?: models.ISprint) {
+            console.log(' - Sprint Edit Controller...', sprint);
+        }
+
+    }
 }

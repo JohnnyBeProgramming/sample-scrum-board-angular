@@ -128,6 +128,23 @@
                 }]
             },
         })
+        .state('sprints.edit',
+        {
+            url: '/{key:string}/edit',
+            parent: 'sprints',
+            views: {
+                'contents': {
+                    templateUrl: 'views/sprints/edit.tpl.html',
+                    controller: 'SprintEditController',
+                    controllerAs: 'childCtrl',
+                },
+            },
+            resolve: {
+                sprint: ['$stateParams', 'ScrumBoardService', ($stateParams, svc: app.common.services.ScrumBoardService) => {
+                    return $stateParams.key ? svc.Sprints.findByKey($stateParams.key) : null;
+                }]
+            },
+        })
 
         .state('backlogs',
         {
