@@ -202,7 +202,8 @@ declare module app.common.modal {
         private $scope;
         private $modalInstance;
         private modalContext;
-        constructor($scope: any, $modalInstance: any, modalContext: any);
+        scrumBoardService: app.common.services.ScrumBoardService;
+        constructor($scope: any, $modalInstance: any, modalContext: any, scrumBoardService: app.common.services.ScrumBoardService);
         init(): void;
     }
 }
@@ -284,12 +285,18 @@ declare module app.controllers {
         index(): void;
         openBoard(sprint: models.ISprint): void;
         cancel(): void;
-        addTask(board?: models.IBoard): void;
+        addTask(task?: models.ITask): void;
+        addTaskToBoard(board?: models.IBoard, callback?: (task: models.ITask) => void): void;
+        addTaskToSprint(sprint: models.ISprint): void;
+        addSprint(project?: models.IProject, state?: models.SprintState, callback?: (sprint: models.ISprint) => void): void;
         updateTask(task: models.ITask): void;
+        updateSprint(sprint: models.ISprint): void;
+        refreshData(ctx: any): void;
         getProjectLabel(projectKey: string): string;
         getStateDesc(state: models.SprintState): string;
+        getBoardByType(sprint: models.ISprint, type?: models.TaskType): models.IBoard;
         getBoards(sprintKey: string): models.IBoard[];
-        defineBoard(sprintKey: any, type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): models.IBoard[];
+        firstOrDefaultBoard(sprintKey: string, type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): models.IBoard;
     }
     class SprintListController {
         private $rootScope;
@@ -310,6 +317,8 @@ declare module app.controllers {
         active: models.ISprint[];
         constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService);
         init(): void;
+        load(): void;
+        reload(): void;
     }
     class SprintItemController {
         private $rootScope;
@@ -320,7 +329,7 @@ declare module app.controllers {
         constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
         init(): void;
         getColumnCss(size: number): string;
-        defineBoard(type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): void;
+        firstOrDefaultBoard(type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): void;
     }
     class SprintEditController {
         private scrumBoards;

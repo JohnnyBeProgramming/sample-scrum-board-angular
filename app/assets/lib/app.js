@@ -866,7 +866,6 @@ var app;
                         $('#projectTitle').focus();
                     }, 500);
                     $('#taskTitle').focusout(function () {
-                        console.log(' - Blur');
                         $('#projectBody').focus();
                     });
                 };
@@ -903,7 +902,6 @@ var app;
                         $('#boardTitle').focus();
                     }, 500);
                     $('#taskTitle').focusout(function () {
-                        console.log(' - Blur');
                         $('#boardBody').focus();
                     });
                 };
@@ -940,7 +938,6 @@ var app;
                         $('#taskTitle').focus();
                     }, 500);
                     $('#taskTitle').focusout(function () {
-                        console.log(' - Blur');
                         $('#taskBody').focus();
                     });
                 };
@@ -957,14 +954,16 @@ var app;
         var modal;
         (function (modal) {
             var AddSprintController = (function () {
-                function AddSprintController($scope, $modalInstance, modalContext) {
+                function AddSprintController($scope, $modalInstance, modalContext, scrumBoardService) {
                     this.$scope = $scope;
                     this.$modalInstance = $modalInstance;
                     this.modalContext = modalContext;
+                    this.scrumBoardService = scrumBoardService;
                     this.init();
                 }
                 AddSprintController.prototype.init = function () {
                     var _this = this;
+                    this.$scope.model = this.scrumBoardService;
                     this.$scope.data = this.modalContext.sprint;
                     this.$scope.submit = function () {
                         _this.$modalInstance.close(_this.modalContext);
@@ -991,7 +990,7 @@ angular.module('myScrumBoard.common', [
     .service('ScrumBoardService', ['$q', app.common.services.ScrumBoardService])
     .controller('AddProjectController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddProjectController])
     .controller('AddBoardController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddBoardController])
-    .controller('AddSprintController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddSprintController])
+    .controller('AddSprintController', ['$scope', '$modalInstance', 'modalContext', 'ScrumBoardService', app.common.modal.AddSprintController])
     .controller('AddTaskController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddTaskController]);
 var app;
 (function (app) {
@@ -1171,7 +1170,6 @@ var app;
                 this.$state = $state;
                 this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
-                console.log(' - Projects Controller...');
             }
             ProjectsController.prototype.index = function () {
                 this.$state.go('projects.list');
@@ -1236,7 +1234,6 @@ var app;
                 this.$rootScope = $rootScope;
                 this.scrumBoards = scrumBoards;
                 this.projects = [];
-                console.log(' - Sprint Projects Controller...');
                 this.init();
             }
             ProjectListController.prototype.init = function () {
@@ -1255,7 +1252,6 @@ var app;
                 this.$rootScope = $rootScope;
                 this.scrumBoards = scrumBoards;
                 this.project = project;
-                console.log(' - Project Item Controller...');
             }
             return ProjectItemController;
         })();
@@ -1304,7 +1300,6 @@ var app;
                 this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
                 this.projectCache = {};
-                console.log(' - Sprint Controller...');
             }
             SprintController.prototype.getSprints = function () {
                 return this.scrumBoards
@@ -1320,16 +1315,16 @@ var app;
             SprintController.prototype.cancel = function () {
                 this.index();
             };
-            SprintController.prototype.addTask = function (board) {
+            SprintController.prototype.addTask = function (task) {
                 var _this = this;
-                if (!board)
-                    return;
-                var task = {
+                task = task ? task : {
                     Key: Guid.Empty,
-                    TaskType: models.TaskType.Default,
                     Title: '',
                     Description: '',
-                    BoardKey: board.Key,
+                    BoardKey: null,
+                    ProjectKey: null,
+                    SprintKey: null,
+                    TaskType: models.TaskType.Default,
                 };
                 // Open the modal dialog
                 var dialog = this.$modal.open({
@@ -1358,15 +1353,100 @@ var app;
                     _this.cancel();
                 });
             };
+            SprintController.prototype.addTaskToBoard = function (board, callback) {
+                if (!board)
+                    return;
+                var task = {
+                    Key: Guid.Empty,
+                    Title: '',
+                    Description: '',
+                    BoardKey: board.Key,
+                    ProjectKey: board.ProjectKey,
+                    SprintKey: board.SprintKey,
+                    TaskType: board.TaskType ? board.TaskType : models.TaskType.Default,
+                };
+                this.addTask(task);
+            };
+            SprintController.prototype.addTaskToSprint = function (sprint) {
+                var board = this.firstOrDefaultBoard(sprint.Key, models.TaskType.Default, function (type) { return {
+                    Key: Guid.Empty,
+                    Title: ControllerUtils.TaskDescription(type),
+                    TaskType: type,
+                    SprintKey: sprint.Key,
+                    ProjectKey: sprint.ProjectKey,
+                }; });
+                var task = {
+                    Key: Guid.Empty,
+                    Title: '',
+                    Description: '',
+                    TaskType: board.TaskType,
+                    ProjectKey: sprint.ProjectKey,
+                    SprintKey: sprint.Key,
+                    BoardKey: board.Key,
+                };
+                this.addTask(task);
+            };
+            SprintController.prototype.addSprint = function (project, state, callback) {
+                var _this = this;
+                var sprint = {
+                    Number: 0,
+                    Key: Guid.Empty,
+                    State: state ? state : models.SprintState.Started,
+                    ProjectKey: project != null ? project.Key : null,
+                };
+                // Open the modal dialog
+                var dialog = this.$modal.open({
+                    size: 'md',
+                    animation: true,
+                    templateUrl: 'views/common/modal/addSprint.tpl.html',
+                    controller: 'AddSprintController',
+                    resolve: {
+                        modalContext: function () {
+                            return {
+                                sprint: sprint,
+                            };
+                        },
+                    }
+                }).result.then(
+                // On Commit
+                // On Commit
+                function (modalContext) {
+                    console.info(' - Modal closed. Updating sprint.', modalContext);
+                    if (callback)
+                        callback(modalContext.sprint);
+                    _this.updateSprint(modalContext.sprint);
+                }, 
+                // Dismissed
+                // Dismissed
+                function () {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    _this.cancel();
+                });
+            };
             SprintController.prototype.updateTask = function (task) {
                 var _this = this;
                 if (task.Key == Guid.Empty) {
                     task.Key = Guid.New();
                     this.scrumBoards.Tasks.insert(task);
                 }
-                this.scrumBoards.Tasks.save().then(function () {
+                this.scrumBoards.Tasks.save().finally(function () {
+                    _this.refreshData({ task: task });
                     _this.$rootScope.$applyAsync();
                 });
+            };
+            SprintController.prototype.updateSprint = function (sprint) {
+                var _this = this;
+                if (sprint.Key == Guid.Empty) {
+                    sprint.Key = Guid.New();
+                    this.scrumBoards.Sprints.insert(sprint);
+                }
+                this.scrumBoards.Sprints.save().finally(function () {
+                    _this.refreshData({ sprint: sprint });
+                    _this.$rootScope.$applyAsync();
+                });
+            };
+            SprintController.prototype.refreshData = function (ctx) {
+                this.$rootScope.$broadcast('RefreshData', ctx);
             };
             SprintController.prototype.getProjectLabel = function (projectKey) {
                 var _this = this;
@@ -1387,6 +1467,20 @@ var app;
             SprintController.prototype.getStateDesc = function (state) {
                 return ControllerUtils.StateDescription(state);
             };
+            SprintController.prototype.getBoardByType = function (sprint, type) {
+                var found = null;
+                var boards = this.getBoards(sprint.Key);
+                if (boards) {
+                    boards.forEach(function (item) {
+                        if (found)
+                            return;
+                        if (item.TaskType == (type ? type : models.TaskType.Default)) {
+                            found = item;
+                        }
+                    });
+                }
+                return found;
+            };
             SprintController.prototype.getBoards = function (sprintKey) {
                 var _this = this;
                 var list = this.scrumBoards.Boards.filterBySprint(sprintKey);
@@ -1394,7 +1488,7 @@ var app;
                     var tasks = this.scrumBoards.Tasks.filterBySprint(sprintKey);
                     if (tasks && tasks.length) {
                         tasks.forEach(function (item) {
-                            _this.defineBoard(sprintKey, item.TaskType, function (type) { return {
+                            _this.firstOrDefaultBoard(sprintKey, item.TaskType, function (type) { return {
                                 Key: Guid.Empty,
                                 Title: ControllerUtils.TaskDescription(type),
                                 TaskType: type,
@@ -1402,24 +1496,38 @@ var app;
                                 ProjectKey: item.ProjectKey,
                             }; });
                         });
-                        list = this.scrumBoards.Boards.filterBySprint(sprintKey);
                     }
+                    list = this.scrumBoards.Boards.filterBySprint(sprintKey);
                 }
                 return list;
             };
-            SprintController.prototype.defineBoard = function (sprintKey, type, defaults) {
+            SprintController.prototype.firstOrDefaultBoard = function (sprintKey, type, defaults) {
                 var _this = this;
+                var target = null;
                 var boards = this.scrumBoards.Boards.filterBySprint(sprintKey, type);
-                if (!boards.length) {
+                if (boards.length) {
+                    boards.forEach(function (item) {
+                        if (target)
+                            return;
+                        if (item.TaskType == type) {
+                            target = item;
+                        }
+                    });
+                }
+                if (!target) {
                     boards = defaults ? [defaults(type)] : [];
+                    console.log('Defaults:', boards);
                     boards.forEach(function (item) {
                         if (item.Key == Guid.Empty) {
                             item.Key = Guid.New();
                             _this.scrumBoards.Boards.insert(item);
                         }
+                        if (item.TaskType == type) {
+                            target = item;
+                        }
                     });
                 }
-                return boards;
+                return target;
             };
             return SprintController;
         })();
@@ -1431,7 +1539,6 @@ var app;
                 this.project = project;
                 this.showAll = true;
                 this.cached = [];
-                console.log(' - Sprint List Controller...');
                 this.init();
             }
             Object.defineProperty(SprintListController.prototype, "sprints", {
@@ -1464,7 +1571,6 @@ var app;
                 this.showAll = false;
                 this.cached = [];
                 this.active = [];
-                console.log(' - Sprint List Controller...');
                 this.init();
             }
             Object.defineProperty(SprintsActiveController.prototype, "sprints", {
@@ -1474,19 +1580,30 @@ var app;
             });
             SprintsActiveController.prototype.init = function () {
                 var _this = this;
+                this.load();
+                this.$rootScope.$on('RefreshData', function (event, data) {
+                    _this.load();
+                });
+            };
+            SprintsActiveController.prototype.load = function () {
+                var _this = this;
                 this.scrumBoards.Sprints.load().then(function (items) {
-                    _this.active = [];
-                    _this.cached = items;
                     if (items) {
+                        var active = [];
                         items.forEach(function (item) {
                             if (item.State == models.SprintState.Started) {
-                                _this.active.push(item);
+                                active.push(item);
                             }
                         });
+                        _this.active = active;
+                        _this.cached = items;
                     }
                 }).finally(function () {
                     _this.$rootScope.$applyAsync();
                 });
+            };
+            SprintsActiveController.prototype.reload = function () {
+                this.$rootScope.$broadcast('RefreshParent');
             };
             return SprintsActiveController;
         })();
@@ -1510,7 +1627,7 @@ var app;
                     // Define the boards
                     _this.boards = [];
                     // Scheduled Tasks
-                    _this.defineBoard(models.TaskType.Scheduled, function (type) { return {
+                    _this.firstOrDefaultBoard(models.TaskType.Scheduled, function (type) { return {
                         Key: Guid.Empty,
                         TaskType: type,
                         Title: ControllerUtils.TaskDescription(type),
@@ -1518,7 +1635,7 @@ var app;
                         SprintKey: _this.sprint ? _this.sprint.Key : null,
                     }; });
                     // In Progress Tasks
-                    _this.defineBoard(models.TaskType.InProgress, function (type) { return {
+                    _this.firstOrDefaultBoard(models.TaskType.InProgress, function (type) { return {
                         Key: Guid.Empty,
                         TaskType: type,
                         Title: ControllerUtils.TaskDescription(type),
@@ -1526,7 +1643,7 @@ var app;
                         SprintKey: _this.sprint ? _this.sprint.Key : null,
                     }; });
                     // Testing (if required)
-                    _this.defineBoard(models.TaskType.Testing, function (type) { return !_this.requiresTesting ? null : {
+                    _this.firstOrDefaultBoard(models.TaskType.Testing, function (type) { return !_this.requiresTesting ? null : {
                         Key: Guid.Empty,
                         TaskType: type,
                         Title: ControllerUtils.TaskDescription(type),
@@ -1534,7 +1651,7 @@ var app;
                         SprintKey: _this.sprint ? _this.sprint.Key : null,
                     }; });
                     // Completed Tasks
-                    _this.defineBoard(models.TaskType.Completed, function (type) { return {
+                    _this.firstOrDefaultBoard(models.TaskType.Completed, function (type) { return {
                         Key: Guid.Empty,
                         TaskType: type,
                         Title: ControllerUtils.TaskDescription(type),
@@ -1554,7 +1671,7 @@ var app;
                     return 'col-md-' + Math.floor(12 / size);
                 }
             };
-            SprintItemController.prototype.defineBoard = function (type, defaults) {
+            SprintItemController.prototype.firstOrDefaultBoard = function (type, defaults) {
                 var _this = this;
                 var projKey = this.sprint ? this.sprint.ProjectKey : null;
                 var boards = this.scrumBoards.Boards.filterByProject(projKey, type);
@@ -1575,7 +1692,6 @@ var app;
             function SprintEditController(scrumBoards, sprint) {
                 this.scrumBoards = scrumBoards;
                 this.sprint = sprint;
-                console.log(' - Sprint Edit Controller...', sprint);
             }
             return SprintEditController;
         })();

@@ -10,28 +10,27 @@
         <div class="col-md-3" ng-repeat="item in childCtrl.sprints">
             <div class="row contained">
                 <div class="container-title">
+                    <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>
                     {{ viewCtrl.getProjectLabel(item.ProjectKey) || 'Loading...' }}
                 </div>
                 <div class="col-md-12">
                     <div class="board">
-                        <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>
                         <h4>
                             <a ui-sref="sprints.item({ key: item.Key })">
                                 <i class="fa fa-tag"></i>
                                 <b>Sprint #{{ (item.Number || '1') }}</b>
                             </a>
                         </h4>
-                        <div class="tile" ng-repeat="task in viewCtrl.getBoards(item.Key)">
-                            <h5>{{ task.Title }}</h5>
-                            <p>
-                                {{ task.Description }}
-                            </p>
+                        <div class="tile" ng-repeat="boards in viewCtrl.getBoards(item.Key)">
+                            <div class="board-group">
+                                {{ boards.Title }}
+                            </div>
                         </div>
                         <div>
                             <a href="" ng-click="" class="tile aside">
                                 <i class="fa fa-share"></i> From Backlog
                             </a>
-                            <a href="" ng-click="viewCtrl.addTask(item)" class="tile aside">
+                            <a href="" ng-click="viewCtrl.addTaskToSprint(item)" class="tile aside">
                                 <i class="fa fa-plus"></i> Add Task
                             </a>
                         </div>
@@ -40,7 +39,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <a href="" ng-click="viewCtrl.createNew()" class="board add">
+            <a href="" ng-click="viewCtrl.addSprint()" class="board add">
                 <i class="fa fa-plus"></i> Add Sprint
             </a>
         </div>

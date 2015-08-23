@@ -36,9 +36,7 @@ module app.controllers {
     export class SprintController {
         public projectCache: any = {};
 
-        constructor(private $rootScope: any, private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) {
-            console.log(' - Sprint Controller...');
-        }
+        constructor(private $rootScope: any, private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) { }
 
         public getSprints(): ng.IPromise<models.ISprint[]> {
             return this.scrumBoards
@@ -58,15 +56,15 @@ module app.controllers {
             this.index();
         }
 
-        public addTask(board?: models.IBoard) {
-            if (!board) return;
-
-            var task: models.ITask = {
+        public addTask(task?: models.ITask) {
+            task = task ? task : <models.ITask>{
                 Key: Guid.Empty,
-                TaskType: models.TaskType.Default,
                 Title: '',
                 Description: '',
-                BoardKey: board.Key,
+                BoardKey: null,
+                ProjectKey: null,
+                SprintKey: null,
+                TaskType: models.TaskType.Default,
             };
 
             // Open the modal dialog
@@ -95,14 +93,100 @@ module app.controllers {
                 });
         }
 
+        public addTaskToBoard(board?: models.IBoard, callback?: (task: models.ITask) => void) {
+            if (!board) return;
+
+            var task: models.ITask = {
+                Key: Guid.Empty,
+                Title: '',
+                Description: '',
+                BoardKey: board.Key,
+                ProjectKey: board.ProjectKey,
+                SprintKey: board.SprintKey,
+                TaskType: board.TaskType ? board.TaskType : models.TaskType.Default,
+            };
+            this.addTask(task);
+        }
+
+        public addTaskToSprint(sprint: models.ISprint) {
+            var board = this.firstOrDefaultBoard(sprint.Key, models.TaskType.Default,(type) => <models.IBoard>{
+                Key: Guid.Empty,
+                Title: ControllerUtils.TaskDescription(type),
+                TaskType: type,
+                SprintKey: sprint.Key,
+                ProjectKey: sprint.ProjectKey,
+            });
+            var task: models.ITask = {
+                Key: Guid.Empty,
+                Title: '',
+                Description: '',
+                TaskType: board.TaskType,
+                ProjectKey: sprint.ProjectKey,
+                SprintKey: sprint.Key,
+                BoardKey: board.Key,
+            };
+            this.addTask(task);
+        }
+
+        public addSprint(project?: models.IProject, state?: models.SprintState, callback?: (sprint: models.ISprint) => void) {
+            var sprint: models.ISprint = {
+                Number: 0,
+                Key: Guid.Empty,
+                State: state ? state : models.SprintState.Started,
+                ProjectKey: project != null ? project.Key : null,
+            };
+
+            // Open the modal dialog
+            var dialog = this.$modal.open({
+                size: 'md',
+                animation: true,
+                templateUrl: 'views/common/modal/addSprint.tpl.html',
+                controller: 'AddSprintController',
+                resolve: {
+                    modalContext: () => {
+                        return {
+                            sprint: sprint,
+                        };
+                    },
+                }
+            }).result.then(
+                // On Commit
+                (modalContext) => {
+                    console.info(' - Modal closed. Updating sprint.', modalContext);
+                    if (callback) callback(modalContext.sprint);
+                    this.updateSprint(modalContext.sprint);
+                },
+                // Dismissed
+                () => {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    this.cancel();
+                });
+        }
+
         public updateTask(task: models.ITask) {
             if (task.Key == Guid.Empty) {
                 task.Key = Guid.New();
                 this.scrumBoards.Tasks.insert(task);
             }
-            this.scrumBoards.Tasks.save().then(() => {
+            this.scrumBoards.Tasks.save().finally(() => {
+                this.refreshData({ task: task });
                 this.$rootScope.$applyAsync();
             });
+        }
+
+        public updateSprint(sprint: models.ISprint) {
+            if (sprint.Key == Guid.Empty) {
+                sprint.Key = Guid.New();
+                this.scrumBoards.Sprints.insert(sprint);
+            }
+            this.scrumBoards.Sprints.save().finally(() => {
+                this.refreshData({ sprint: sprint });
+                this.$rootScope.$applyAsync();
+            });
+        }
+
+        public refreshData(ctx: any) {
+            this.$rootScope.$broadcast('RefreshData', ctx);
         }
 
         public getProjectLabel(projectKey: string): string {
@@ -124,13 +208,27 @@ module app.controllers {
             return ControllerUtils.StateDescription(state);
         }
 
+        public getBoardByType(sprint: models.ISprint, type?: models.TaskType): models.IBoard {
+            var found = null;
+            var boards = this.getBoards(sprint.Key);
+            if (boards) {
+                boards.forEach((item) => {
+                    if (found) return;
+                    if (item.TaskType == (type ? type : models.TaskType.Default)) {
+                        found = item;
+                    }
+                });
+            }
+            return found;
+        }
+
         public getBoards(sprintKey: string): models.IBoard[] {
             var list = this.scrumBoards.Boards.filterBySprint(sprintKey);
             if (!list.length) {
                 var tasks = this.scrumBoards.Tasks.filterBySprint(sprintKey);
                 if (tasks && tasks.length) {
                     tasks.forEach((item) => {
-                        this.defineBoard(sprintKey, item.TaskType,(type) => <models.IBoard>{
+                        this.firstOrDefaultBoard(sprintKey, item.TaskType,(type) => <models.IBoard>{
                             Key: Guid.Empty,
                             Title: ControllerUtils.TaskDescription(type),
                             TaskType: type,
@@ -138,24 +236,38 @@ module app.controllers {
                             ProjectKey: item.ProjectKey,
                         });
                     });
-                    list = this.scrumBoards.Boards.filterBySprint(sprintKey);
                 }
+                list = this.scrumBoards.Boards.filterBySprint(sprintKey);
             }
             return list;
         }
 
-        public defineBoard(sprintKey, type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard) {
+        public firstOrDefaultBoard(sprintKey: string, type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): models.IBoard {
+            var target = null;
             var boards = this.scrumBoards.Boards.filterBySprint(sprintKey, type);
-            if (!boards.length) {
+            if (boards.length) {
+                boards.forEach((item) => {
+                    if (target) return;
+                    if (item.TaskType == type) {
+                        target = item;
+                    }
+                });
+            }
+
+            if (!target) {
                 boards = defaults ? [defaults(type)] : [];
+                console.log('Defaults:', boards);
                 boards.forEach((item) => {
                     if (item.Key == Guid.Empty) {
                         item.Key = Guid.New();
                         this.scrumBoards.Boards.insert(item);
                     }
-                })
+                    if (item.TaskType == type) {
+                        target = item;
+                    }
+                });
             }
-            return boards;
+            return target;
         }
 
     }
@@ -168,7 +280,6 @@ module app.controllers {
         public cached: models.ISprint[] = [];
 
         constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) {
-            console.log(' - Sprint List Controller...');
             this.init();
         }
 
@@ -198,26 +309,36 @@ module app.controllers {
         public active: models.ISprint[] = [];
 
         constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService) {
-            console.log(' - Sprint List Controller...');
             this.init();
         }
 
         public init() {
+            this.load();
+            this.$rootScope.$on('RefreshData',(event, data) => {
+                this.load();
+            });
+        }
+
+        public load() {
             this.scrumBoards.Sprints.load().then((items) => {
-                this.active = [];
-                this.cached = items;
                 if (items) {
+                    var active = [];
                     items.forEach((item) => {
                         if (item.State == models.SprintState.Started) {
-                            this.active.push(item);
+                            active.push(item);
                         }
                     });
+                    this.active = active;
+                    this.cached = items;
                 }
             }).finally(() => {
                 this.$rootScope.$applyAsync();
             });
         }
 
+        public reload() {
+            this.$rootScope.$broadcast('RefreshParent');
+        }
     }
 
     export class SprintItemController {
@@ -236,7 +357,7 @@ module app.controllers {
                 this.boards = [];
 
                 // Scheduled Tasks
-                this.defineBoard(models.TaskType.Scheduled,(type) => <models.IBoard>{
+                this.firstOrDefaultBoard(models.TaskType.Scheduled,(type) => <models.IBoard>{
                     Key: Guid.Empty,
                     TaskType: type,
                     Title: ControllerUtils.TaskDescription(type),
@@ -245,7 +366,7 @@ module app.controllers {
                 });
 
                 // In Progress Tasks
-                this.defineBoard(models.TaskType.InProgress,(type) => <models.IBoard>{
+                this.firstOrDefaultBoard(models.TaskType.InProgress,(type) => <models.IBoard>{
                     Key: Guid.Empty,
                     TaskType: type,
                     Title: ControllerUtils.TaskDescription(type),
@@ -254,7 +375,7 @@ module app.controllers {
                 });
 
                 // Testing (if required)
-                this.defineBoard(models.TaskType.Testing,(type) => !this.requiresTesting ? null : < models.IBoard > {
+                this.firstOrDefaultBoard(models.TaskType.Testing,(type) => !this.requiresTesting ? null : < models.IBoard > {
                     Key: Guid.Empty,
                     TaskType: type,
                     Title: ControllerUtils.TaskDescription(type),
@@ -263,7 +384,7 @@ module app.controllers {
                 });
 
                 // Completed Tasks
-                this.defineBoard(models.TaskType.Completed,(type) => <models.IBoard>{
+                this.firstOrDefaultBoard(models.TaskType.Completed,(type) => <models.IBoard>{
                     Key: Guid.Empty,
                     TaskType: type,
                     Title: ControllerUtils.TaskDescription(type),
@@ -285,7 +406,7 @@ module app.controllers {
             }
         }
 
-        public defineBoard(type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard) {
+        public firstOrDefaultBoard(type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard) {
             var projKey = this.sprint ? this.sprint.ProjectKey : null;
             var boards = this.scrumBoards.Boards.filterByProject(projKey, type);
             if (!boards.length) {
@@ -301,9 +422,7 @@ module app.controllers {
 
     export class SprintEditController {
 
-        constructor(private scrumBoards: app.common.services.ScrumBoardService, public sprint?: models.ISprint) {
-            console.log(' - Sprint Edit Controller...', sprint);
-        }
+        constructor(private scrumBoards: app.common.services.ScrumBoardService, public sprint?: models.ISprint) { }
 
     }
 }

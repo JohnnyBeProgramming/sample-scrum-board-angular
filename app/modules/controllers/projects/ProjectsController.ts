@@ -4,9 +4,7 @@
 
     export class ProjectsController {
 
-        constructor(private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) {
-            console.log(' - Projects Controller...');
-        }
+        constructor(private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) {}
 
         public index() {
             this.$state.go('projects.list');
@@ -70,7 +68,6 @@
         public projects: models.IProject[] = [];
 
         constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService) {
-            console.log(' - Sprint Projects Controller...');
             this.init();
         }
 
@@ -86,9 +83,7 @@
 
     export class ProjectItemController {
 
-        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) {
-            console.log(' - Project Item Controller...');
-        }
+        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) {}
 
     }
 

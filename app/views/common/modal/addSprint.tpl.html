@@ -7,11 +7,10 @@
     <div class="modal-body">
         <p>
             <label>Project</label>
-            <input id="boardTitle" 
-                   tabindex="0" type="text" 
-                   class="input-no-border horz-fill"
-                   placeholder="New Board Title"
-                   ng-model="data.Title" />
+            <select id="lnkProject" class="form-control input-sm" ng-model="data.ProjectKey">
+                <option value=""> - Select a Project -</option>
+                <option value="{{ opt.Key }}" ng-repeat="opt in model.Projects.list()">{{ opt.Title }}</option>
+            </select>
         </p>
     </div>
     <div class="modal-footer">
@@ -23,7 +22,7 @@
         <button type="button" tabindex="3"
                 class="btn btn-primary" 
                 ng-click="submit()"
-                ng-disabled="!data.Title">
+                ng-disabled="!data.ProjectKey">
             Create
         </button>
     </div>

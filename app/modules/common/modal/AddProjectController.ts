@@ -22,7 +22,6 @@
             }, 500);
 
             $('#taskTitle').focusout(() => {
-                console.log(' - Blur');
                 $('#projectBody').focus();
             });
         }

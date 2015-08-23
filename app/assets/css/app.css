@@ -150,6 +150,12 @@ body .app-container .app-panel .board .tile.aside {
 body .app-container .app-panel .board .tile.aside:hover {
   opacity: 1.0;
 }
+body .app-container .app-panel .board .board-group {
+  margin: 0;
+  padding: 0;
+  font-size: 11px;
+  font-weight: bold;
+}
 body .app-container .app-panel .project {
   padding: 6px;
   margin: 3px -8px;
