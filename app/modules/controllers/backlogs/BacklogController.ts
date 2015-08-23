@@ -101,6 +101,7 @@
 
             var task: models.ITask = {
                 Key: Guid.Empty,
+                TaskType: models.TaskType.Default,
                 Title: '',
                 Description: '',
                 BoardKey: board.Key,

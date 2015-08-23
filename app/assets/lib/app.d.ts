@@ -83,6 +83,9 @@ declare module app.data.models {
     interface ITask extends IDataModel {
         Title: string;
         Description: string;
+        TaskType: TaskType;
+        ProjectKey?: string;
+        SprintKey?: string;
         BoardKey?: string;
         GroupKey?: string;
     }
@@ -125,6 +128,8 @@ declare module app.data.repositories {
         create(type: app.data.models.TaskType, title?: string): IBoard;
         load(): ng.IPromise<IBoard[]>;
         save(): ng.IPromise<boolean>;
+        filterByProject(projectKey: string, type?: app.data.models.TaskType): IBoard[];
+        filterBySprint(sprintKey: string, type?: app.data.models.TaskType): IBoard[];
         filterByType(type: app.data.models.TaskType): IBoard[];
         findByKey(key: string): ng.IPromise<IBoard>;
     }
@@ -143,6 +148,8 @@ declare module app.data.repositories {
         load(): ng.IPromise<models.ITask[]>;
         save(): ng.IPromise<boolean>;
         filter(boardKey: string, groupKey?: string): models.ITask[];
+        filterByProject(projectKey: string, groupKey?: string): models.ITask[];
+        filterBySprint(sprintKey: string, groupKey?: string): models.ITask[];
     }
 }
 declare module app.data.repositories {
@@ -183,6 +190,15 @@ declare module app.common.modal {
 }
 declare module app.common.modal {
     class AddTaskController {
+        private $scope;
+        private $modalInstance;
+        private modalContext;
+        constructor($scope: any, $modalInstance: any, modalContext: any);
+        init(): void;
+    }
+}
+declare module app.common.modal {
+    class AddSprintController {
         private $scope;
         private $modalInstance;
         private modalContext;
@@ -253,6 +269,10 @@ declare module app.controllers {
 }
 declare module app.controllers {
     import models = app.data.models;
+    class ControllerUtils {
+        static TaskDescription(type: models.TaskType): string;
+        static StateDescription(state: models.SprintState): string;
+    }
     class SprintController {
         private $rootScope;
         private $state;
@@ -268,6 +288,8 @@ declare module app.controllers {
         updateTask(task: models.ITask): void;
         getProjectLabel(projectKey: string): string;
         getStateDesc(state: models.SprintState): string;
+        getBoards(sprintKey: string): models.IBoard[];
+        defineBoard(sprintKey: any, type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): models.IBoard[];
     }
     class SprintListController {
         private $rootScope;
@@ -290,9 +312,15 @@ declare module app.controllers {
         init(): void;
     }
     class SprintItemController {
+        private $rootScope;
         private scrumBoards;
         sprint: models.ISprint;
-        constructor(scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
+        boards: models.IBoard[];
+        requiresTesting: boolean;
+        constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
+        init(): void;
+        getColumnCss(size: number): string;
+        defineBoard(type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): void;
     }
     class SprintEditController {
         private scrumBoards;

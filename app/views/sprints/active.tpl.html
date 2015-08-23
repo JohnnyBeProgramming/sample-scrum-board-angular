@@ -6,28 +6,37 @@
         Active Sprints
         <small>5 Pending Tasks, 2 In Progress, 2 Completed</small>
     </h3>
-    <div class="row contained">
+    <div class="row">
         <div class="col-md-3" ng-repeat="item in childCtrl.sprints">
-            <div class="board">
-                <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>
-                <h4>
-                    <a ui-sref="sprints.item({ key: item.Key })">
-                        <i class="fa fa-tag"></i>
-                        <b>Sprint #{{ (item.Number || '1') }}</b>
-                    </a>
-                    <small>
-                        {{ viewCtrl.getProjectLabel(item.ProjectKey) || 'Loading...' }}
-                    </small>
-                </h4>
-                <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(item.Key)">
-                    <h5>{{ task.Title }}</h5>
-                    <p>
-                        {{ task.Description }}
-                    </p>
+            <div class="row contained">
+                <div class="container-title">
+                    {{ viewCtrl.getProjectLabel(item.ProjectKey) || 'Loading...' }}
                 </div>
-                <a href="" ng-click="viewCtrl.addTask(item)" class="tile add">
-                    <i class="fa fa-plus"></i> Add Task
-                </a>
+                <div class="col-md-12">
+                    <div class="board">
+                        <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>
+                        <h4>
+                            <a ui-sref="sprints.item({ key: item.Key })">
+                                <i class="fa fa-tag"></i>
+                                <b>Sprint #{{ (item.Number || '1') }}</b>
+                            </a>
+                        </h4>
+                        <div class="tile" ng-repeat="task in viewCtrl.getBoards(item.Key)">
+                            <h5>{{ task.Title }}</h5>
+                            <p>
+                                {{ task.Description }}
+                            </p>
+                        </div>
+                        <div>
+                            <a href="" ng-click="" class="tile aside">
+                                <i class="fa fa-share"></i> From Backlog
+                            </a>
+                            <a href="" ng-click="viewCtrl.addTask(item)" class="tile aside">
+                                <i class="fa fa-plus"></i> Add Task
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="col-md-3">

@@ -38,6 +38,32 @@
             return deferred.promise;
         }
 
+        public filterByProject(projectKey: string, type?: app.data.models.TaskType): IBoard[] {
+            var list = [];
+            this.memCache.forEach((item) => {
+                if (item.ProjectKey != projectKey) return;
+                if (!type) {
+                    list.push(item);
+                } else if (item.TaskType == type) {
+                    list.push(item);
+                }
+            });
+            return list;
+        }
+
+        public filterBySprint(sprintKey: string, type?: app.data.models.TaskType): IBoard[] {
+            var list = [];
+            this.memCache.forEach((item) => {
+                if (item.SprintKey != sprintKey) return;
+                if (!type) {
+                    list.push(item);
+                } else if (item.TaskType == type) {
+                    list.push(item);
+                }
+            });
+            return list;
+        }
+
         public filterByType(type: app.data.models.TaskType): IBoard[] {
             var list = [];
             this.memCache.forEach((item) => {

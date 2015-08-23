@@ -274,6 +274,7 @@ var app;
                 {
                     Key: Guid.New(),
                     Title: 'Reminder',
+                    TaskType: data.models.TaskType.Completed,
                     Description: 'Create some more tasks and assign more work.',
                     BoardKey: SampleData.Boards[0].Key,
                     GroupKey: SampleData.Groups[0].Key,
@@ -281,6 +282,7 @@ var app;
                 {
                     Key: Guid.New(),
                     Title: 'Creative Design',
+                    TaskType: data.models.TaskType.Testing,
                     Description: 'Create a mockup of the UI and draw some layouts.',
                     BoardKey: SampleData.Boards[0].Key,
                     GroupKey: SampleData.Groups[0].Key,
@@ -288,6 +290,7 @@ var app;
                 {
                     Key: Guid.New(),
                     Title: 'Scaffold web application',
+                    TaskType: data.models.TaskType.InProgress,
                     Description: 'Create the HTML, CSS and javascript folder structures for the web app.',
                     BoardKey: SampleData.Boards[0].Key,
                     GroupKey: SampleData.Groups[0].Key,
@@ -295,6 +298,7 @@ var app;
                 {
                     Key: Guid.New(),
                     Title: 'Add Grunt Build',
+                    TaskType: data.models.TaskType.Default,
                     Description: 'Create a build folder and install and setup grunt for continous builds.',
                     BoardKey: SampleData.Boards[0].Key,
                     GroupKey: SampleData.Groups[0].Key,
@@ -302,20 +306,31 @@ var app;
                 {
                     Key: Guid.New(),
                     Title: 'Create Git Repository',
+                    TaskType: data.models.TaskType.Scheduled,
                     Description: 'Create a clean new repo to store the code.',
                     BoardKey: SampleData.Boards[0].Key,
                     GroupKey: SampleData.Groups[0].Key,
                 },
                 {
                     Key: Guid.New(),
+                    TaskType: data.models.TaskType.Backlog,
                     Title: 'Commit Initial Release',
                     Description: 'Publish to the git repository.',
+                    BoardKey: SampleData.Boards[0].Key,
+                    GroupKey: SampleData.Groups[0].Key,
+                },
+                {
+                    Key: Guid.New(),
+                    TaskType: data.models.TaskType.Canceled,
+                    Title: 'Canceled Task',
+                    Description: 'This is a sample of a canceled task.',
                     BoardKey: SampleData.Boards[0].Key,
                     GroupKey: SampleData.Groups[0].Key,
                 },
                 // --------------------------------------------------------------
                 {
                     Key: Guid.New(),
+                    TaskType: data.models.TaskType.Default,
                     Title: 'Do some task for me',
                     Description: 'This is an example taskthat is just that: an example.',
                     BoardKey: SampleData.Boards[1].Key,
@@ -323,6 +338,7 @@ var app;
                 },
                 {
                     Key: Guid.New(),
+                    TaskType: data.models.TaskType.Default,
                     Title: 'Do some task for me',
                     Description: 'This is an example taskthat is just that: an example.',
                     BoardKey: SampleData.Boards[6].Key,
@@ -330,6 +346,7 @@ var app;
                 },
                 {
                     Key: Guid.New(),
+                    TaskType: data.models.TaskType.Default,
                     Title: 'Do some task for me',
                     Description: 'This is an example taskthat is just that: an example.',
                     BoardKey: SampleData.Boards[6].Key,
@@ -337,6 +354,7 @@ var app;
                 },
                 {
                     Key: Guid.New(),
+                    TaskType: data.models.TaskType.Default,
                     Title: 'Do some task for me',
                     Description: 'This is an example taskthat is just that: an example.',
                     BoardKey: SampleData.Boards[6].Key,
@@ -344,6 +362,7 @@ var app;
                 },
                 {
                     Key: Guid.New(),
+                    TaskType: data.models.TaskType.Default,
                     Title: 'Do some task for me',
                     Description: 'This is an example taskthat is just that: an example.',
                     BoardKey: SampleData.Boards[7].Key,
@@ -351,6 +370,7 @@ var app;
                 },
                 {
                     Key: Guid.New(),
+                    TaskType: data.models.TaskType.Default,
                     Title: 'Do some task for me',
                     Description: 'This is an example taskthat is just that: an example.',
                     BoardKey: SampleData.Boards[7].Key,
@@ -579,6 +599,34 @@ var app;
                     }
                     return deferred.promise;
                 };
+                BoardRepository.prototype.filterByProject = function (projectKey, type) {
+                    var list = [];
+                    this.memCache.forEach(function (item) {
+                        if (item.ProjectKey != projectKey)
+                            return;
+                        if (!type) {
+                            list.push(item);
+                        }
+                        else if (item.TaskType == type) {
+                            list.push(item);
+                        }
+                    });
+                    return list;
+                };
+                BoardRepository.prototype.filterBySprint = function (sprintKey, type) {
+                    var list = [];
+                    this.memCache.forEach(function (item) {
+                        if (item.SprintKey != sprintKey)
+                            return;
+                        if (!type) {
+                            list.push(item);
+                        }
+                        else if (item.TaskType == type) {
+                            list.push(item);
+                        }
+                    });
+                    return list;
+                };
                 BoardRepository.prototype.filterByType = function (type) {
                     var list = [];
                     this.memCache.forEach(function (item) {
@@ -640,6 +688,7 @@ var app;
     (function (data) {
         var repositories;
         (function (repositories) {
+            var models = app.data.models;
             var TaskRepository = (function (_super) {
                 __extends(TaskRepository, _super);
                 function TaskRepository($q) {
@@ -652,6 +701,7 @@ var app;
                 TaskRepository.prototype.create = function (board, title, description) {
                     var item = {
                         Key: Guid.New(),
+                        TaskType: models.TaskType.Default,
                         Title: title,
                         Description: description,
                         BoardKey: board.Key,
@@ -679,7 +729,29 @@ var app;
                     this.memCache.forEach(function (item) {
                         if (boardKey && boardKey != item.BoardKey)
                             return;
-                        if (groupKey && groupKey != item.BoardKey)
+                        if (groupKey && groupKey != item.GroupKey)
+                            return;
+                        list.push(item);
+                    });
+                    return list;
+                };
+                TaskRepository.prototype.filterByProject = function (projectKey, groupKey) {
+                    var list = [];
+                    this.memCache.forEach(function (item) {
+                        if (projectKey && projectKey != item.ProjectKey)
+                            return;
+                        if (groupKey && groupKey != item.GroupKey)
+                            return;
+                        list.push(item);
+                    });
+                    return list;
+                };
+                TaskRepository.prototype.filterBySprint = function (sprintKey, groupKey) {
+                    var list = [];
+                    this.memCache.forEach(function (item) {
+                        if (sprintKey && sprintKey != item.SprintKey)
+                            return;
+                        if (groupKey && groupKey != item.GroupKey)
                             return;
                         list.push(item);
                     });
@@ -878,17 +950,48 @@ var app;
         })(modal = common.modal || (common.modal = {}));
     })(common = app.common || (app.common = {}));
 })(app || (app = {}));
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var modal;
+        (function (modal) {
+            var AddSprintController = (function () {
+                function AddSprintController($scope, $modalInstance, modalContext) {
+                    this.$scope = $scope;
+                    this.$modalInstance = $modalInstance;
+                    this.modalContext = modalContext;
+                    this.init();
+                }
+                AddSprintController.prototype.init = function () {
+                    var _this = this;
+                    this.$scope.data = this.modalContext.sprint;
+                    this.$scope.submit = function () {
+                        _this.$modalInstance.close(_this.modalContext);
+                    };
+                    this.$scope.cancel = function () {
+                        _this.$modalInstance.dismiss(_this.modalContext);
+                    };
+                };
+                return AddSprintController;
+            })();
+            modal.AddSprintController = AddSprintController;
+        })(modal = common.modal || (common.modal = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
 /// <reference path="services/ScrumBoardService.ts" />
 /// <reference path="directives/directives.ts" />
 /// <reference path="modal/AddProjectController.ts" />
 /// <reference path="modal/AddBoardController.ts" />
 /// <reference path="modal/AddTaskController.ts" />
+/// <reference path="modal/AddSprintController.ts" />
 angular.module('myScrumBoard.common', [
     'myScrumBoard.directives',
 ])
     .service('ScrumBoardService', ['$q', app.common.services.ScrumBoardService])
     .controller('AddProjectController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddProjectController])
     .controller('AddBoardController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddBoardController])
+    .controller('AddSprintController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddSprintController])
     .controller('AddTaskController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddTaskController]);
 var app;
 (function (app) {
@@ -995,6 +1098,7 @@ var app;
                     return;
                 var task = {
                     Key: Guid.Empty,
+                    TaskType: models.TaskType.Default,
                     Title: '',
                     Description: '',
                     BoardKey: board.Key,
@@ -1165,6 +1269,34 @@ var app;
     var controllers;
     (function (controllers) {
         var models = app.data.models;
+        var ControllerUtils = (function () {
+            function ControllerUtils() {
+            }
+            ControllerUtils.TaskDescription = function (type) {
+                switch (type) {
+                    case models.TaskType.Default: return 'Unassigned Tasks';
+                    case models.TaskType.Backlog: return 'Backlog';
+                    case models.TaskType.Canceled: return 'Canceled';
+                    case models.TaskType.Completed: return 'Completed';
+                    case models.TaskType.InProgress: return 'In Progress';
+                    case models.TaskType.Scheduled: return 'Scheduled';
+                    case models.TaskType.Testing: return 'Testing';
+                    default: return '';
+                }
+            };
+            ControllerUtils.StateDescription = function (state) {
+                switch (state) {
+                    case models.SprintState.Default: return 'Scheduled';
+                    case models.SprintState.Completed: return 'Completed';
+                    case models.SprintState.Discarded: return 'Discarded';
+                    case models.SprintState.OnHold: return 'On Hold';
+                    case models.SprintState.Started: return 'In Progress';
+                    default: return '';
+                }
+            };
+            return ControllerUtils;
+        })();
+        controllers.ControllerUtils = ControllerUtils;
         var SprintController = (function () {
             function SprintController($rootScope, $state, $modal, scrumBoards) {
                 this.$rootScope = $rootScope;
@@ -1180,7 +1312,7 @@ var app;
                     .filterByProject(Guid.New());
             };
             SprintController.prototype.index = function () {
-                this.$state.go('sprints.list');
+                this.$state.go('sprints');
             };
             SprintController.prototype.openBoard = function (sprint) {
                 this.$state.go('sprints.item', { key: sprint.Key });
@@ -1194,6 +1326,7 @@ var app;
                     return;
                 var task = {
                     Key: Guid.Empty,
+                    TaskType: models.TaskType.Default,
                     Title: '',
                     Description: '',
                     BoardKey: board.Key,
@@ -1252,14 +1385,41 @@ var app;
                 return null;
             };
             SprintController.prototype.getStateDesc = function (state) {
-                switch (state) {
-                    case models.SprintState.Default: return 'Scheduled';
-                    case models.SprintState.Completed: return 'Completed';
-                    case models.SprintState.Discarded: return 'Discarded';
-                    case models.SprintState.OnHold: return 'On Hold';
-                    case models.SprintState.Started: return 'In Progress';
-                    default: return '';
+                return ControllerUtils.StateDescription(state);
+            };
+            SprintController.prototype.getBoards = function (sprintKey) {
+                var _this = this;
+                var list = this.scrumBoards.Boards.filterBySprint(sprintKey);
+                if (!list.length) {
+                    var tasks = this.scrumBoards.Tasks.filterBySprint(sprintKey);
+                    if (tasks && tasks.length) {
+                        tasks.forEach(function (item) {
+                            _this.defineBoard(sprintKey, item.TaskType, function (type) { return {
+                                Key: Guid.Empty,
+                                Title: ControllerUtils.TaskDescription(type),
+                                TaskType: type,
+                                SprintKey: sprintKey,
+                                ProjectKey: item.ProjectKey,
+                            }; });
+                        });
+                        list = this.scrumBoards.Boards.filterBySprint(sprintKey);
+                    }
                 }
+                return list;
+            };
+            SprintController.prototype.defineBoard = function (sprintKey, type, defaults) {
+                var _this = this;
+                var boards = this.scrumBoards.Boards.filterBySprint(sprintKey, type);
+                if (!boards.length) {
+                    boards = defaults ? [defaults(type)] : [];
+                    boards.forEach(function (item) {
+                        if (item.Key == Guid.Empty) {
+                            item.Key = Guid.New();
+                            _this.scrumBoards.Boards.insert(item);
+                        }
+                    });
+                }
+                return boards;
             };
             return SprintController;
         })();
@@ -1332,11 +1492,82 @@ var app;
         })();
         controllers.SprintsActiveController = SprintsActiveController;
         var SprintItemController = (function () {
-            function SprintItemController(scrumBoards, sprint) {
+            function SprintItemController($rootScope, scrumBoards, sprint) {
+                this.$rootScope = $rootScope;
                 this.scrumBoards = scrumBoards;
                 this.sprint = sprint;
-                console.log(' - Sprint Child Controller...', sprint);
+                this.boards = [];
+                this.init();
             }
+            Object.defineProperty(SprintItemController.prototype, "requiresTesting", {
+                get: function () { return !!this.sprint; },
+                enumerable: true,
+                configurable: true
+            });
+            SprintItemController.prototype.init = function () {
+                var _this = this;
+                this.scrumBoards.Boards.load().then(function (items) {
+                    // Define the boards
+                    _this.boards = [];
+                    // Scheduled Tasks
+                    _this.defineBoard(models.TaskType.Scheduled, function (type) { return {
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        Title: ControllerUtils.TaskDescription(type),
+                        ProjectKey: _this.sprint ? _this.sprint.ProjectKey : null,
+                        SprintKey: _this.sprint ? _this.sprint.Key : null,
+                    }; });
+                    // In Progress Tasks
+                    _this.defineBoard(models.TaskType.InProgress, function (type) { return {
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        Title: ControllerUtils.TaskDescription(type),
+                        ProjectKey: _this.sprint ? _this.sprint.ProjectKey : null,
+                        SprintKey: _this.sprint ? _this.sprint.Key : null,
+                    }; });
+                    // Testing (if required)
+                    _this.defineBoard(models.TaskType.Testing, function (type) { return !_this.requiresTesting ? null : {
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        Title: ControllerUtils.TaskDescription(type),
+                        ProjectKey: _this.sprint ? _this.sprint.ProjectKey : null,
+                        SprintKey: _this.sprint ? _this.sprint.Key : null,
+                    }; });
+                    // Completed Tasks
+                    _this.defineBoard(models.TaskType.Completed, function (type) { return {
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        Title: ControllerUtils.TaskDescription(type),
+                        ProjectKey: _this.sprint ? _this.sprint.ProjectKey : null,
+                        SprintKey: _this.sprint ? _this.sprint.Key : null,
+                    }; });
+                }).finally(function () {
+                    _this.$rootScope.$applyAsync();
+                });
+            };
+            SprintItemController.prototype.getColumnCss = function (size) {
+                size = size || this.boards.length;
+                if (12 < size) {
+                    return 'col-md-1';
+                }
+                else {
+                    return 'col-md-' + Math.floor(12 / size);
+                }
+            };
+            SprintItemController.prototype.defineBoard = function (type, defaults) {
+                var _this = this;
+                var projKey = this.sprint ? this.sprint.ProjectKey : null;
+                var boards = this.scrumBoards.Boards.filterByProject(projKey, type);
+                if (!boards.length) {
+                    boards = defaults ? [defaults(type)] : [];
+                }
+                if (boards.length) {
+                    boards.forEach(function (item) {
+                        if (item)
+                            _this.boards.push(item);
+                    });
+                }
+            };
             return SprintItemController;
         })();
         controllers.SprintItemController = SprintItemController;
@@ -1366,7 +1597,7 @@ angular.module('myScrumBoard.controllers', [
     .controller('SprintController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.SprintController])
     .controller('SprintsActiveController', ['$rootScope', 'ScrumBoardService', app.controllers.SprintsActiveController])
     .controller('SprintListController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.SprintListController])
-    .controller('SprintItemController', ['ScrumBoardService', 'sprint', app.controllers.SprintItemController])
+    .controller('SprintItemController', ['$rootScope', 'ScrumBoardService', 'sprint', app.controllers.SprintItemController])
     .controller('SprintEditController', ['ScrumBoardService', 'sprint', app.controllers.SprintEditController])
     .controller('BacklogController', ['$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
     .controller('BacklogItemController', ['ScrumBoardService', 'board', app.controllers.BacklogItemController]);

@@ -15,6 +15,7 @@ module app.data.repositories {
         public create(board: models.IBoard, title: string, description?: string): models.ITask {
             var item: models.ITask = {
                 Key: Guid.New(),
+                TaskType: models.TaskType.Default,
                 Title: title,
                 Description: description,
                 BoardKey: board.Key,
@@ -44,7 +45,27 @@ module app.data.repositories {
             var list: models.ITask[] = [];
             this.memCache.forEach((item) => {
                 if (boardKey && boardKey != item.BoardKey) return;
-                if (groupKey && groupKey != item.BoardKey) return;
+                if (groupKey && groupKey != item.GroupKey) return;
+                list.push(item);
+            });
+            return list;
+        }
+
+        public filterByProject(projectKey: string, groupKey?: string): models.ITask[] {
+            var list: models.ITask[] = [];
+            this.memCache.forEach((item) => {
+                if (projectKey && projectKey != item.ProjectKey) return;
+                if (groupKey && groupKey != item.GroupKey) return;
+                list.push(item);
+            });
+            return list;
+        }
+
+        public filterBySprint(sprintKey: string, groupKey?: string): models.ITask[] {
+            var list: models.ITask[] = [];
+            this.memCache.forEach((item) => {
+                if (sprintKey && sprintKey != item.SprintKey) return;
+                if (groupKey && groupKey != item.GroupKey) return;
                 list.push(item);
             });
             return list;

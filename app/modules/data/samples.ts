@@ -166,6 +166,7 @@ module app.data {
             {
                 Key: Guid.New(),
                 Title: 'Reminder',
+                TaskType: models.TaskType.Completed,
                 Description: 'Create some more tasks and assign more work.',
                 BoardKey: SampleData.Boards[0].Key,
                 GroupKey: SampleData.Groups[0].Key,
@@ -173,6 +174,7 @@ module app.data {
             {
                 Key: Guid.New(),
                 Title: 'Creative Design',
+                TaskType: models.TaskType.Testing,
                 Description: 'Create a mockup of the UI and draw some layouts.',
                 BoardKey: SampleData.Boards[0].Key,
                 GroupKey: SampleData.Groups[0].Key,
@@ -180,6 +182,7 @@ module app.data {
             {
                 Key: Guid.New(),
                 Title: 'Scaffold web application',
+                TaskType: models.TaskType.InProgress,
                 Description: 'Create the HTML, CSS and javascript folder structures for the web app.',
                 BoardKey: SampleData.Boards[0].Key,
                 GroupKey: SampleData.Groups[0].Key,
@@ -187,6 +190,7 @@ module app.data {
             {
                 Key: Guid.New(),
                 Title: 'Add Grunt Build',
+                TaskType: models.TaskType.Default,
                 Description: 'Create a build folder and install and setup grunt for continous builds.',
                 BoardKey: SampleData.Boards[0].Key,
                 GroupKey: SampleData.Groups[0].Key,
@@ -194,20 +198,31 @@ module app.data {
             {
                 Key: Guid.New(),
                 Title: 'Create Git Repository',
+                TaskType: models.TaskType.Scheduled,
                 Description: 'Create a clean new repo to store the code.',
                 BoardKey: SampleData.Boards[0].Key,
                 GroupKey: SampleData.Groups[0].Key,
             },
             {
                 Key: Guid.New(),
+                TaskType: models.TaskType.Backlog,
                 Title: 'Commit Initial Release',
                 Description: 'Publish to the git repository.',
+                BoardKey: SampleData.Boards[0].Key,
+                GroupKey: SampleData.Groups[0].Key,
+            },
+            {
+                Key: Guid.New(),
+                TaskType: models.TaskType.Canceled,
+                Title: 'Canceled Task',
+                Description: 'This is a sample of a canceled task.',
                 BoardKey: SampleData.Boards[0].Key,
                 GroupKey: SampleData.Groups[0].Key,
             },
             // --------------------------------------------------------------
             {
                 Key: Guid.New(),
+                TaskType: models.TaskType.Default,
                 Title: 'Do some task for me',
                 Description: 'This is an example taskthat is just that: an example.',
                 BoardKey: SampleData.Boards[1].Key,
@@ -215,6 +230,7 @@ module app.data {
             },
             {
                 Key: Guid.New(),
+                TaskType: models.TaskType.Default,
                 Title: 'Do some task for me',
                 Description: 'This is an example taskthat is just that: an example.',
                 BoardKey: SampleData.Boards[6].Key,
@@ -222,6 +238,7 @@ module app.data {
             },
             {
                 Key: Guid.New(),
+                TaskType: models.TaskType.Default,
                 Title: 'Do some task for me',
                 Description: 'This is an example taskthat is just that: an example.',
                 BoardKey: SampleData.Boards[6].Key,
@@ -229,6 +246,7 @@ module app.data {
             },
             {
                 Key: Guid.New(),
+                TaskType: models.TaskType.Default,
                 Title: 'Do some task for me',
                 Description: 'This is an example taskthat is just that: an example.',
                 BoardKey: SampleData.Boards[6].Key,
@@ -236,6 +254,7 @@ module app.data {
             },
             {
                 Key: Guid.New(),
+                TaskType: models.TaskType.Default,
                 Title: 'Do some task for me',
                 Description: 'This is an example taskthat is just that: an example.',
                 BoardKey: SampleData.Boards[7].Key,
@@ -243,6 +262,7 @@ module app.data {
             },
             {
                 Key: Guid.New(),
+                TaskType: models.TaskType.Default,
                 Title: 'Do some task for me',
                 Description: 'This is an example taskthat is just that: an example.',
                 BoardKey: SampleData.Boards[7].Key,
