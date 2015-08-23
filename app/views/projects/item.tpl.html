@@ -1,25 +1,54 @@
 ﻿<div>
     <span class="pull-right">
-        <a class="btn btn-default" href="" ng-click="state.pilot=2">Edit</a>
-        <a class="btn btn-primary" href="" ng-click="state.pilot=0">Done</a>
+        <a class="btn btn-xs btn-default" href="" ng-click="viewCtrl.cancel()">Cancel</a>
+        <a class="btn btn-xs btn-primary" href="" ng-click="viewCtrl.update(childCtrl.project)">Update</a>
     </span>
-    <br />
     <h3>
-        Large Scale Project
-        <small>6 User(s), 12 Stories, 91 points</small>
+        Current Projects
+        <small>2 Items, 1 Active Sprint(s)</small>
     </h3>
     <div class="row contained">
-        <div class="col-md-2"><div class="board">Sprint 1</div></div>
-        <div class="col-md-2"><div class="board">Sprint 2</div></div>
-        <div class="col-md-2"><div class="board">Sprint 3</div></div>
-        <div class="col-md-2"><div class="board">Sprint 4</div></div>
-        <div class="col-md-2"><div class="board">Sprint 5</div></div>
-        <div class="col-md-2"><div class="board">Sprint 6</div></div>
-        <div class="col-md-2"><div class="board">Sprint 7</div></div>
-        <div class="col-md-2"><div class="board">Sprint 8</div></div>
-        <div class="col-md-2"><div class="board">Sprint 9</div></div>
-        <div class="col-md-2"><div class="board">Sprint 10</div></div>
-        <div class="col-md-2"><div class="board">Testing</div></div>
-        <div class="col-md-2"><div class="board">Backlog</div></div>
+        <div class="col-md-12" ng-if="childCtrl.project">
+            <div class="project">
+                <a class="pull-right ctrl"><i class="fa fa-trash"></i></a>
+                <h4>
+                    <a xui-sref="projects.item({ projectKey: childCtrl.project..Key })">
+                        <i class="fa fa-tags"></i> {{ childCtrl.project.Title || 'Project Overview' }}
+                    </a>
+                    <small>1 Active, 2 Scheduled, 0 Commpleted, 1 Backlog(s)</small>
+                </h4>
+                <div class="proj-body">
+                    <div class="proj-logo">
+                        No Logo
+                    </div>
+                    <div class="proj-info">
+                        <h5>
+                            <i class="fa fa-tag"></i> Sprint #1
+                            <small>4 / 12 Points</small>
+                        </h5>
+                        <a href="" ui-sref="sprints.list({ projectKey: childCtrl.project.Key })" class="tile add">
+                            <i class="fa fa-plus"></i> Add Sprint
+                        </a>
+                    </div>
+                    <div class="proj-history">
+                        <h5>
+                            Project History
+                            <small>1 January 2012 to 30 August 2015 (12 Sprints)</small>
+                        </h5>
+                        <div class="tile empty">
+                            <i class="fa fa-info-circle"></i> No Data Avalaible
+                        </div>
+                    </div>
+                </div>
+                <div class="proj-details">
+                    ...
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <a href="" class="project add">
+                <i class="fa fa-plus"></i> Create Project
+            </a>
+        </div>
     </div>
 </div>

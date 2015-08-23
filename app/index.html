@@ -1,7 +1,8 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script type="text/javascript">
+    <script id="setBaseTag" type="text/javascript">
+        // Force relative dir to this folder
         var url = document.location.href;
         var pos = url.lastIndexOf('/');
         if (pos > 0) {
@@ -42,7 +43,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.13/angular-ui-router.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.12.0/ui-bootstrap-tpls.min.js"></script>
     <script src="assets/lib/app.js"></script>
+    <!--
     <script src="assets/lib/app.tpl.js"></script>
+    -->
+    <script html-compile="false">
+        // Mock the template caches (clears pre-loaded templates and load rather from source)
+        angular.module('myScrumBoard.templates', []).run(['$templateCache', function ($templateCache) { }]);
+    </script>
     <!--<![endif]-->
 </body>
 </html>

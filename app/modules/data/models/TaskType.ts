@@ -4,12 +4,11 @@ module app.data.models {
 
     export enum TaskType {
         Default = 0,
-        Scheduled = 1,
-        InProgress = 2,
-        Testing = 3,
-        Completed = 4,
-        Canceled = 5,
-        Backlog = 6,
+        InProgress = 1,
+        Testing = 2,
+        Completed = 3,
+        Canceled = 4,
+        Backlog = 5,
     }
 
 }   

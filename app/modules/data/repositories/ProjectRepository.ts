@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../common/utils/Guid.ts" />
-/// <reference path="../models/Project.ts" />
 /// <reference path="AbstractRepository.ts" />
+/// <reference path="../models/IProject.ts" />
 /// <reference path="../samples.ts" />
 
 module app.data.repositories {
@@ -9,8 +9,8 @@ module app.data.repositories {
 
     export class ProjectRepository extends AbstractRepository<IProject> implements IRepository<IProject> {
 
-        constructor(private $q: ng.IQService) {
-            super();
+        constructor($q: ng.IQService) {
+            super($q);
             this.load()
                 .then((list) => {
                     this.memCache = list;
@@ -44,6 +44,28 @@ module app.data.repositories {
             return deferred.promise;
         }
 
+        public findByKey(key: string): ng.IPromise<IProject> {
+            var found = false;
+            var deferred = this.$q.defer<IProject>();
+            this.load()
+                .then((items) => {
+                if (items) {
+                    items.forEach((item) => {
+                        if (found) return;
+                        if (item.Key == key) {
+                            deferred.resolve(item);
+                            found = true;
+                        }
+                    });
+                }
+                if (!found) {
+                    deferred.resolve(null);
+                }
+            }).catch((error) => {
+                deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof this));
+            });
+            return deferred.promise;
+        }
     }
 
 }  

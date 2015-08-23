@@ -8,7 +8,19 @@ angular.module('myScrumBoard.controllers', [
     'myScrumBoard.common',
 ])
 
-    .controller('BacklogController', ['ScrumBoardService', app.controllers.BacklogController])
     .controller('DashboardController', ['ScrumBoardService', app.controllers.DashboardController])
-    .controller('ProjectsController', ['ScrumBoardService', app.controllers.ProjectsController])
-    .controller('SprintController', ['ScrumBoardService', app.controllers.SprintController])
+
+    .controller('ProjectsController', ['$state', '$modal', 'ScrumBoardService', app.controllers.ProjectsController])
+    .controller('ProjectListController', ['$rootScope', 'ScrumBoardService', app.controllers.ProjectListController])
+    .controller('ProjectItemController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.ProjectItemController])
+
+    .controller('SprintController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.SprintController])
+    .controller('SprintsActiveController', ['$rootScope', 'ScrumBoardService', app.controllers.SprintsActiveController])
+    .controller('SprintListController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.SprintListController])
+    .controller('SprintItemController', ['$rootScope', 'ScrumBoardService', 'sprint', app.controllers.SprintItemController])
+    .controller('SprintEditController', ['ScrumBoardService', 'sprint', app.controllers.SprintEditController])
+
+    .controller('BacklogController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
+    .controller('BacklogListController', ['ScrumBoardService', app.controllers.BacklogListController])
+    .controller('BacklogItemController', ['ScrumBoardService', 'board', app.controllers.BacklogItemController])
+

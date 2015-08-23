@@ -1,0 +1,47 @@
+﻿<div>
+    <h3>
+        Active Sprints
+        <small>5 Pending Tasks, 2 In Progress, 2 Completed</small>
+    </h3>
+    <div class="row">
+        <div class="col-md-3" ng-repeat="item in childCtrl.sprints">
+            <div class="row contained">
+                <div class="container-title">
+                    <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>
+                    {{ viewCtrl.getProjectLabel(item.ProjectKey) || 'Loading...' }}
+                </div>
+                <div class="col-md-12">
+                    <span class="pull-right">
+                        <span class="label label-success">Active</span>
+                    </span>
+                    <div class="board">
+                        <h4>
+                            <a ui-sref="sprints.item({ key: item.Key })">
+                                <i class="fa fa-tag"></i>
+                                <b>Sprint #{{ (item.Number || '1') }}</b>
+                            </a>
+                        </h4>
+                        <div class="tile" ng-repeat="boards in viewCtrl.getBoards(item.Key)">
+                            <div class="board-group">
+                                {{ boards.Title }}
+                            </div>
+                        </div>
+                        <div>
+                            <a href="" ng-click="viewCtrl.addBacklogs(item)" class="tile aside">
+                                <i class="fa fa-share"></i> From Backlog
+                            </a>
+                            <a href="" ng-click="viewCtrl.addTaskToSprint(item)" class="tile aside">
+                                <i class="fa fa-plus"></i> Add Task
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <a href="" ng-click="viewCtrl.addSprint()" class="board add">
+                <i class="fa fa-plus"></i> Add Sprint
+            </a>
+        </div>
+    </div>
+</div>

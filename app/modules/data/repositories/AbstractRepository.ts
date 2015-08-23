@@ -13,7 +13,7 @@ module app.data.repositories {
 
         memCache: TModel[] = [];
 
-        constructor() {}
+        constructor(public $q: ng.IQService) { }
 
         public list(): TModel[] {
             return this.memCache;
@@ -33,6 +33,7 @@ module app.data.repositories {
                 this.memCache.splice(index, 1);
             }
         }
+
     }
 
 }   

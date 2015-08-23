@@ -1,29 +1,51 @@
 ﻿<div>
-    <p>
-        <h3>Simple Project Name <small>1 User(s), 3 Stories, 12 points</small></h3>
-        <div class="row contained">
-            <div class="col-md-3 btn btn-default">Previous (2 sprints)</div>
-            <div class="col-md-3 btn btn-default">Current (4 of 12 points)</div>
-            <div class="col-md-3 btn btn-default">Upcomming (2 sprints)</div>
-            <div class="col-md-3 btn btn-default">Backlog (4 items)</div>
+    <span class="pull-right">
+    </span>
+    <h3>
+        Current Projects
+        <small>2 Items, 1 Active Sprint(s)</small>
+    </h3>
+    <div class="row contained">
+        <div class="col-md-12" ng-repeat="item in childCtrl.projects">
+            <div class="project">
+                <a class="pull-right ctrl"><i class="fa fa-trash"></i></a>
+                <a ui-sref="projects.item({ projectKey: item.Key })" class="pull-right ctrl"><i class="fa fa-edit"></i></a>
+                <h4>
+                    <a ui-sref="projects.item({ projectKey: item.Key })">
+                        <i class="fa fa-tags"></i> {{ item.Title || 'Project Overview' }}
+                    </a>
+                    <small>1 Active, 2 Scheduled, 0 Commpleted, 1 Backlog(s)</small>
+                </h4>
+                <div class="proj-body">
+                    <div class="proj-logo">
+                        No Logo
+                    </div>
+                    <div class="proj-info">
+                        <h5>
+                            <i class="fa fa-tag"></i> Sprint #1
+                            <small>4 / 12 Points</small>
+                        </h5>
+                        <a href="" ui-sref="sprints.list({ projectKey: item.Key })" class="tile add">
+                            <i class="fa fa-plus"></i> Add Sprint
+                        </a>
+                    </div>
+                    <div class="proj-history">
+                        <h5>
+                            Project History
+                            <small>1 January 2012 to 30 August 2015 (12 Sprints)</small>
+                        </h5>
+                        <div class="tile empty">
+                            <i class="fa fa-info-circle"></i> No Data Avalaible
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </p>
-    <p>
-        <h3>Large Scale Project <small>1 User(s), 3 Stories, 12 points</small></h3>
-        <div class="row contained">
-            <div class="col-md-3 btn btn-default">Previous (2 sprints)</div>
-            <div class="col-md-3 btn btn-default">Current (4 of 12 points)</div>
-            <div class="col-md-3 btn btn-default">Upcomming (2 sprints)</div>
-            <div class="col-md-3 btn btn-default">Backlog (4 items)</div>
+        <div class="col-md-12">
+            <a href="" class="project add"
+               ng-click="viewCtrl.newProject()">
+                <i class="fa fa-plus"></i> Create Project
+            </a>
         </div>
-    </p>
-    <p>
-        <h3>Future Dated Project <small>1 User(s), 3 Stories, 12 points</small></h3>
-        <div class="row contained">
-            <div class="col-md-3 btn btn-default">Previous (2 sprints)</div>
-            <div class="col-md-3 btn btn-default">Current (4 of 12 points)</div>
-            <div class="col-md-3 btn btn-default">Upcomming (2 sprints)</div>
-            <div class="col-md-3 btn btn-default">Backlog (4 items)</div>
-        </div>
-    </p>
+    </div>
 </div>
