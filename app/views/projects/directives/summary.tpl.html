@@ -27,7 +27,7 @@
     </a>
     <div class="board-summary" ng-if="summryCtrl.current">
         <a class="tile"
-           ui-sref="sprints.list({ projectKey: project.Key })"
+           ui-sref="sprints.item({ key: item.SprintKey })"
            ng-repeat="item in summryCtrl.getTaskSummary(summryCtrl.current)">
             {{ item.Title }}
         </a>
