@@ -14,7 +14,6 @@ module app.controllers {
                 case models.TaskType.Canceled: return 'Canceled';
                 case models.TaskType.Completed: return 'Completed';
                 case models.TaskType.InProgress: return 'In Progress';
-                case models.TaskType.Scheduled: return 'Scheduled';
                 case models.TaskType.Testing: return 'Testing';
                 default: return '';
             }
@@ -45,7 +44,6 @@ module app.controllers {
         }
 
         public index() {
-            this.$state.go('sprints');
         }
 
         public openBoard(sprint: models.ISprint) {
@@ -128,7 +126,7 @@ module app.controllers {
             this.addTask(task);
         }
 
-        public addSprint(project?: models.IProject, state?: models.SprintState, callback?: (sprint: models.ISprint) => void) {
+        public addSprint(project?: models.IProject, state?: models.SprintState) {
             var sprint: models.ISprint = {
                 Number: 0,
                 Key: Guid.Empty,
@@ -153,8 +151,55 @@ module app.controllers {
                 // On Commit
                 (modalContext) => {
                     console.info(' - Modal closed. Updating sprint.', modalContext);
-                    if (callback) callback(modalContext.sprint);
                     this.updateSprint(modalContext.sprint);
+                },
+                // Dismissed
+                () => {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    this.cancel();
+                });
+        }
+
+        public addBacklogs(sprint: models.ISprint, board?: models.IBoard) {
+            // Open the modal dialog
+            var dialog = this.$modal.open({
+                size: 'md',
+                animation: true,
+                templateUrl: 'views/common/modal/addBacklogs.tpl.html',
+                controller: 'AddBacklogsController',
+                controllerAs: 'modalCtrl',
+                resolve: {
+                    modalContext: () => {
+                        return {
+                            data: [],
+                            sprint: sprint,
+                            projectKey: sprint.ProjectKey,
+                        };
+                    },
+                }
+            }).result.then(
+                // On Commit
+                (modalContext) => {
+                    var result = modalContext.data;
+                    console.info(' - Modal closed. Updating sprint.', result);
+                    if (result && result.length) {
+                        result.forEach((item: models.ITask) => {
+                            item.TaskType = models.TaskType.Default;
+                            item.SprintKey = sprint.Key;
+                            item.ProjectKey = sprint.ProjectKey;
+                            item.BoardKey = board ? board.Key : this.firstOrDefaultBoard(sprint.Key, models.TaskType.Default,(type) => <models.IBoard>{
+                                Key: Guid.Empty,
+                                TaskType: type,
+                                SprintKey: sprint.Key,
+                                ProjectKey: sprint.ProjectKey,                                
+                                Title: ControllerUtils.TaskDescription(type),
+                            }).Key;
+                        });
+
+                        this.scrumBoards.Boards.save().then(() => {
+                            this.scrumBoards.Tasks.save();
+                        });
+                    }
                 },
                 // Dismissed
                 () => {
@@ -256,7 +301,6 @@ module app.controllers {
 
             if (!target) {
                 boards = defaults ? [defaults(type)] : [];
-                console.log('Defaults:', boards);
                 boards.forEach((item) => {
                     if (item.Key == Guid.Empty) {
                         item.Key = Guid.New();
@@ -354,44 +398,44 @@ module app.controllers {
         public init() {
             this.scrumBoards.Boards.load().then((items) => {
                 // Define the boards
-                this.boards = [];
+                this.boards = [
 
-                // Scheduled Tasks
-                this.firstOrDefaultBoard(models.TaskType.Scheduled,(type) => <models.IBoard>{
-                    Key: Guid.Empty,
-                    TaskType: type,
-                    Title: ControllerUtils.TaskDescription(type),
-                    ProjectKey: this.sprint ? this.sprint.ProjectKey : null,
-                    SprintKey: this.sprint ? this.sprint.Key : null,
-                });
+                    // Scheduled Tasks
+                    this.firstOrDefaultBoard(models.TaskType.Default,(type) => <models.IBoard>{
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        Title: ControllerUtils.TaskDescription(type),
+                        ProjectKey: this.sprint ? this.sprint.ProjectKey : null,
+                        SprintKey: this.sprint ? this.sprint.Key : null,
+                    }),
 
-                // In Progress Tasks
-                this.firstOrDefaultBoard(models.TaskType.InProgress,(type) => <models.IBoard>{
-                    Key: Guid.Empty,
-                    TaskType: type,
-                    Title: ControllerUtils.TaskDescription(type),
-                    ProjectKey: this.sprint ? this.sprint.ProjectKey : null,
-                    SprintKey: this.sprint ? this.sprint.Key : null,
-                });
+                    // In Progress Tasks
+                    this.firstOrDefaultBoard(models.TaskType.InProgress,(type) => <models.IBoard>{
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        Title: ControllerUtils.TaskDescription(type),
+                        ProjectKey: this.sprint ? this.sprint.ProjectKey : null,
+                        SprintKey: this.sprint ? this.sprint.Key : null,
+                    }),
 
-                // Testing (if required)
-                this.firstOrDefaultBoard(models.TaskType.Testing,(type) => !this.requiresTesting ? null : < models.IBoard > {
-                    Key: Guid.Empty,
-                    TaskType: type,
-                    Title: ControllerUtils.TaskDescription(type),
-                    ProjectKey: this.sprint ? this.sprint.ProjectKey : null,
-                    SprintKey: this.sprint ? this.sprint.Key : null,
-                });
+                    // Testing (if required)
+                    this.firstOrDefaultBoard(models.TaskType.Testing,(type) => !this.requiresTesting ? null : < models.IBoard > {
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        Title: ControllerUtils.TaskDescription(type),
+                        ProjectKey: this.sprint ? this.sprint.ProjectKey : null,
+                        SprintKey: this.sprint ? this.sprint.Key : null,
+                    }),
 
-                // Completed Tasks
-                this.firstOrDefaultBoard(models.TaskType.Completed,(type) => <models.IBoard>{
-                    Key: Guid.Empty,
-                    TaskType: type,
-                    Title: ControllerUtils.TaskDescription(type),
-                    ProjectKey: this.sprint ? this.sprint.ProjectKey : null,
-                    SprintKey: this.sprint ? this.sprint.Key : null,
-                });
-
+                    // Completed Tasks
+                    this.firstOrDefaultBoard(models.TaskType.Completed,(type) => <models.IBoard>{
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        Title: ControllerUtils.TaskDescription(type),
+                        ProjectKey: this.sprint ? this.sprint.ProjectKey : null,
+                        SprintKey: this.sprint ? this.sprint.Key : null,
+                    }),
+                ];
             }).finally(() => {
                 this.$rootScope.$applyAsync();
             })
@@ -407,16 +451,31 @@ module app.controllers {
         }
 
         public firstOrDefaultBoard(type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard) {
-            var projKey = this.sprint ? this.sprint.ProjectKey : null;
-            var boards = this.scrumBoards.Boards.filterByProject(projKey, type);
-            if (!boards.length) {
-                boards = defaults ? [defaults(type)] : [];
-            }
+            var target = null;
+            var sprintKey = this.sprint ? this.sprint.Key : null;
+            var boards = this.scrumBoards.Boards.filterBySprint(sprintKey, type);
             if (boards.length) {
                 boards.forEach((item) => {
-                    if (item) this.boards.push(item);
+                    if (target) return;
+                    if (item.TaskType == type) {
+                        target = item;
+                    }
                 });
             }
+
+            if (!target) {
+                boards = defaults ? [defaults(type)] : [];
+                boards.forEach((item) => {
+                    if (item.Key == Guid.Empty) {
+                        item.Key = Guid.New();
+                        this.scrumBoards.Boards.insert(item);
+                    }
+                    if (item.TaskType == type) {
+                        target = item;
+                    }
+                });
+            }
+            return target;
         }
     }
 

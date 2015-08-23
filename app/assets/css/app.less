@@ -25,6 +25,56 @@
         .modal {
             background-color: rgba(255, 255, 255, 0.75) !important;
         }
+
+        .inactive-fill {
+            color: silver;
+            border: dashed 1px #e2e2e2;
+            line-height: 128px;
+            font-size: x-large;
+            text-align: center;
+        }
+
+        .backlog-group {
+            margin: 0;
+            padding: 0;
+
+            .group-title {
+                margin: 0;
+                padding: 3px;
+                display: block;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                border: solid 1px rgba(68, 68, 68, 0.36);
+                background-color: #e2e2e2;
+            }
+
+            .group-body {
+                margin: 0;
+                padding: 3px;
+                border: solid 1px rgba(68, 68, 68, 0.36);
+                background-color: rgba(255, 255, 255, 0.75);
+
+                .task {
+                    margin: 2px;
+                    padding: 3px;
+                    color: silver;
+                    display: block;
+                    cursor: pointer;
+                    border: dotted 1px #e2e2e2;
+                    background-color: none;
+                    border-radius: 2px;
+                }
+
+                .task.selected {
+                    color: #0094ff;
+                    border: solid 1px #0094ff;
+                    background-color: rgba(255, 255, 255, 0.95);
+                    box-shadow: 0 0 3px 0 #0094ff;
+                    border-radius: 0;
+                }
+            }
+        }
     }
 
     .app-container {
@@ -111,12 +161,12 @@
                     border-bottom: solid 1px silver;
                 }
 
-                .container-title{
+                .container-title {
                     margin: 0;
                     padding: 0 3px;
                     color: #444;
                     font-size: 14px;
-                    font-weight: bold;                    
+                    font-weight: bold;
                 }
             }
 
@@ -178,7 +228,7 @@
                     }
                 }
 
-                .board-group{
+                .board-group {
                     margin: 0;
                     padding: 0;
                     font-size: 11px;

@@ -1,0 +1,67 @@
+﻿<div class="app-modal-body">
+    <div class="modal-header">
+        <h3 class="modal-title">
+            <i class="fa fa-tag"></i> Add From Backlog
+        </h3>
+    </div>
+    <div class="modal-body" ng-init="modalCtrl.toggle = {};">
+        <div class="inactive-fill"
+             ng-if="!modalCtrl.boards.length && !modalCtrl.other.length">
+            <em>No Backlogs Available....</em>
+        </div>
+        <div class="backlog-group"
+             ng-if="modalCtrl.boards.length"
+             ng-init="modalCtrl.toggle[board.Key] = true"
+             ng-repeat="board in modalCtrl.boards">
+            <h3 class="group-title" ng-click="modalCtrl.toggle[board.Key] = !modalCtrl.toggle[board.Key]">
+                <i class="fa fa-sticky-note"></i>
+                {{ board.Title || 'Backloags' }}
+            </h3>
+            <div class="group-body" ng-if="modalCtrl.toggle[board.Key]">
+                <a class="task"
+                   ng-repeat="task in modalCtrl.getBoardTasks(board)"
+                   ng-click="modalCtrl.selected[task.Key] = !modalCtrl.selected[task.Key]"
+                   ng-class="{ 'selected': modalCtrl.selected[task.Key] }">
+                    <i class="fa"
+                       ng-class="{ 'fa-check-square-o': modalCtrl.selected[task.Key], 'fa-square-o':!modalCtrl.selected[task.Key] }"></i>
+                    <strong>
+                        {{ task.Title }}
+                    </strong>
+                </a>
+            </div>
+        </div>
+        <div class="backlog-group"
+             ng-if="modalCtrl.other.length">
+            <h3 class="group-title" ng-click="modalCtrl.otherHidden = !modalCtrl.otherHidden">
+                <i class="fa fa-sticky-note"></i>
+                Other Backlog Tasks
+            </h3>
+            <div class="group-body"
+                 ng-if="!modalCtrl.otherHidden">
+                <a class="task"
+                   ng-repeat="task in modalCtrl.other"
+                   ng-click="modalCtrl.selected[task.Key] = !modalCtrl.selected[task.Key]"
+                   ng-class="{ 'selected': modalCtrl.selected[task.Key] }">
+                    <i class="fa"
+                       ng-class="{ 'fa-check-square-o': modalCtrl.selected[task.Key], 'fa-square-o':!modalCtrl.selected[task.Key] }"></i>
+                    <strong>
+                        {{ task.Title }}
+                    </strong>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" tabindex="4"
+                class="btn btn-default"
+                ng-click="cancel()">
+            Cancel
+        </button>
+        <button type="button" tabindex="3"
+                class="btn btn-primary"
+                ng-click="submit()"
+                ng-disabled="!modalCtrl.getSelected().length">
+            Import
+        </button>
+    </div>
+</div>

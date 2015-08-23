@@ -15,20 +15,20 @@
         </h3>
         <div class="row contained" ng-if="childCtrl.boards.length">
             <div ng-class="childCtrl.getColumnCss(childCtrl.boards.length)"
-                 ng-repeat="board in childCtrl.boards">
+                 ng-repeat="board in childCtrl.boards track by board.Key">
                 <div class="board">
                     <div>
                         <h4>
                             <i class="fa fa-tag"></i> {{ board.Title || 'Board' }}
                         </h4>
-                        <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(board.Key)">
+                        <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(board.Key) track by task.Key">
                             <h5>{{ task.Title }}</h5>
                             <p>
                                 {{ task.Description }}
                             </p>
                         </div>
                         <div ng-if="board.TaskType <= 2">
-                            <a href="" ng-click="" class="tile aside">
+                            <a href="" ng-click="viewCtrl.addBacklogs(childCtrl.sprint, board)" class="tile aside">
                                 <i class="fa fa-share"></i> From Backlog
                             </a>
                             <a href="" ng-click="viewCtrl.addTaskToBoard(board)" class="tile aside">

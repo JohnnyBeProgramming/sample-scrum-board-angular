@@ -57,12 +57,11 @@ declare module app.data.models {
 declare module app.data.models {
     enum TaskType {
         Default = 0,
-        Scheduled = 1,
-        InProgress = 2,
-        Testing = 3,
-        Completed = 4,
-        Canceled = 5,
-        Backlog = 6,
+        InProgress = 1,
+        Testing = 2,
+        Completed = 3,
+        Canceled = 4,
+        Backlog = 5,
     }
 }
 declare module app.data.models {
@@ -207,13 +206,24 @@ declare module app.common.modal {
         init(): void;
     }
 }
+declare module app.common.modal {
+    import models = app.data.models;
+    class AddBacklogsController {
+        private $scope;
+        private $modalInstance;
+        private modalContext;
+        scrumBoardService: app.common.services.ScrumBoardService;
+        selected: any;
+        boards: models.IBoard[];
+        other: models.ITask[];
+        constructor($scope: any, $modalInstance: any, modalContext: any, scrumBoardService: app.common.services.ScrumBoardService);
+        init(): void;
+        getSelected(): string[];
+        getBoardTasks(board: models.IBoard): models.ITask[];
+    }
+}
 declare module app.controllers {
     import models = app.data.models;
-    class BacklogItemController {
-        private scrumBoards;
-        board: models.IBoard;
-        constructor(scrumBoards: app.common.services.ScrumBoardService, board?: models.IBoard);
-    }
     class BacklogController {
         private $state;
         private $modal;
@@ -229,9 +239,14 @@ declare module app.controllers {
         update(board: models.IBoard): void;
         insert(board: models.IBoard): void;
         cancel(): void;
-        addTask(board?: models.IBoard): void;
+        addTaskToBoard(board?: models.IBoard): void;
         updateTask(task: models.ITask): void;
         cancelTask(): void;
+    }
+    class BacklogItemController {
+        private scrumBoards;
+        board: models.IBoard;
+        constructor(scrumBoards: app.common.services.ScrumBoardService, board?: models.IBoard);
     }
 }
 declare module app.controllers {
@@ -288,7 +303,8 @@ declare module app.controllers {
         addTask(task?: models.ITask): void;
         addTaskToBoard(board?: models.IBoard, callback?: (task: models.ITask) => void): void;
         addTaskToSprint(sprint: models.ISprint): void;
-        addSprint(project?: models.IProject, state?: models.SprintState, callback?: (sprint: models.ISprint) => void): void;
+        addSprint(project?: models.IProject, state?: models.SprintState): void;
+        addBacklogs(sprint: models.ISprint, board?: models.IBoard): void;
         updateTask(task: models.ITask): void;
         updateSprint(sprint: models.ISprint): void;
         refreshData(ctx: any): void;
@@ -329,7 +345,7 @@ declare module app.controllers {
         constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
         init(): void;
         getColumnCss(size: number): string;
-        firstOrDefaultBoard(type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): void;
+        firstOrDefaultBoard(type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): any;
     }
     class SprintEditController {
         private scrumBoards;

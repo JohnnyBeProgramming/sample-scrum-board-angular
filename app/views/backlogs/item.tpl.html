@@ -17,7 +17,7 @@
                     <div class="row">
                         <div class="col-md-8">
                             <div>
-                                <a href="" ng-click="viewCtrl.addTask()" ng-if="!viewCtrl.newTask" class="pull-right ctrl"><i class="fa fa-plus"></i></a>
+                                <a href="" ng-click="viewCtrl.addTaskToBoard(childCtrl.board)" ng-if="!viewCtrl.newTask" class="pull-right ctrl"><i class="fa fa-plus"></i></a>
                                 <h4>
                                     <i class="fa fa-tags"></i> Unassigned Tasks
                                 </h4>
@@ -29,7 +29,7 @@
                                         {{ task.Description }}
                                     </p>
                                 </div>
-                                <a href="" ng-click="viewCtrl.addTask()" class="tile add">
+                                <a href="" ng-click="viewCtrl.addTaskToBoard(childCtrl.board)" class="tile add">
                                     <i class="fa fa-plus"></i> Add Task
                                 </a>
                             </div>
@@ -42,7 +42,7 @@
                                 </h4>
                                 <div class="thumbnail pad-aside">
                                     <div class="btn-group-vertical horz-fill" role="group" aria-label="...">
-                                        <a ng-click="viewCtrl.addTask()" ng-disabled="viewCtrl.newTask" class="btn btn-primary horz-fill">Add New Task</a>
+                                        <a ng-click="viewCtrl.addTaskToBoard(childCtrl.board)" ng-disabled="viewCtrl.newTask" class="btn btn-primary horz-fill">Add New Task</a>
                                         <a ng-click="viewCtrl.addGroup()" class="btn btn-info horz-fill disabled">Create Group</a>
                                         <a ng-click="viewCtrl.inviteUser()" class="btn btn-default horz-fill disabled">Invite User</a>
                                     </div>

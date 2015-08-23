@@ -2,12 +2,6 @@
 
     import models = app.data.models;
 
-    export class BacklogItemController {
-
-        constructor(private scrumBoards: app.common.services.ScrumBoardService, public board?: models.IBoard) { }
-
-    }
-
     export class BacklogController {
         public newTask: models.ITask;
         public current: models.IBoard;
@@ -87,15 +81,15 @@
                 } else {
                     // Not saved....
                 }
-            });
-            this.openBoard(board);
+                });
+            this.index();
         }
 
         public cancel() {
             this.index();
         }
 
-        public addTask(board?: models.IBoard) {
+        public addTaskToBoard(board?: models.IBoard) {
             if (!board) board = this.current;
             if (!board) return;
 
@@ -147,6 +141,12 @@
         public cancelTask() {
             this.newTask = null;
         }
+    }
+
+    export class BacklogItemController {
+
+        constructor(private scrumBoards: app.common.services.ScrumBoardService, public board?: models.IBoard) { }
+
     }
 
 }

@@ -4,8 +4,8 @@
             <i class="fa fa-tag"></i> Sprints
             <small>&raquo; <a href="" ng-click="">Show All Projects</a></small>
         </h2>
-        <a class="btn btn-primary" ng-click="">Add Sprint</a>
-        <a class="btn btn-success" ng-click="">Complete Current</a>
+        <a class="btn btn-success disabled" ng-click="">Complete Current</a>
+        <a class="btn btn-primary" ng-click="viewCtrl.addSprint()">Add New Sprint</a>
     </div>
     <div class="app-panel">
         <ui-view name="contents">

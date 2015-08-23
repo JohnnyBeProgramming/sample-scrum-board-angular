@@ -1,7 +1,4 @@
 ﻿<div>
-    <span class="pull-right">
-        Status: <span class="label label-success">Active</span>
-    </span>
     <h3>
         Active Sprints
         <small>5 Pending Tasks, 2 In Progress, 2 Completed</small>
@@ -14,6 +11,9 @@
                     {{ viewCtrl.getProjectLabel(item.ProjectKey) || 'Loading...' }}
                 </div>
                 <div class="col-md-12">
+                    <span class="pull-right">
+                        <span class="label label-success">Active</span>
+                    </span>
                     <div class="board">
                         <h4>
                             <a ui-sref="sprints.item({ key: item.Key })">
@@ -27,7 +27,7 @@
                             </div>
                         </div>
                         <div>
-                            <a href="" ng-click="" class="tile aside">
+                            <a href="" ng-click="viewCtrl.addBacklogs(item)" class="tile aside">
                                 <i class="fa fa-share"></i> From Backlog
                             </a>
                             <a href="" ng-click="viewCtrl.addTaskToSprint(item)" class="tile aside">

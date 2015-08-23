@@ -4,6 +4,7 @@
 /// <reference path="modal/AddBoardController.ts" />
 /// <reference path="modal/AddTaskController.ts" />
 /// <reference path="modal/AddSprintController.ts" />
+/// <reference path="modal/AddBacklogsController.ts" />
 
 angular.module('myScrumBoard.common', [
     'myScrumBoard.directives',
@@ -15,3 +16,4 @@ angular.module('myScrumBoard.common', [
     .controller('AddBoardController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddBoardController])
     .controller('AddSprintController', ['$scope', '$modalInstance', 'modalContext', 'ScrumBoardService', app.common.modal.AddSprintController])
     .controller('AddTaskController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddTaskController])
+    .controller('AddBacklogsController', ['$scope', '$modalInstance', 'modalContext', 'ScrumBoardService',  app.common.modal.AddBacklogsController])
