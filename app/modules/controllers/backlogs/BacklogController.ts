@@ -8,7 +8,7 @@
 
         public get boards(): models.IBoard[] { return this.getBoards(); }
 
-        constructor(private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) {}
+        constructor(private $rootScope: any, private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) { }
 
         public getBoards(): models.IBoard[] {
             return this.scrumBoards
@@ -81,7 +81,7 @@
                 } else {
                     // Not saved....
                 }
-                });
+            });
             this.index();
         }
 
@@ -128,6 +128,16 @@
                 });
         }
 
+        public moveTask(boardKey: string, task: models.ITask) {
+            console.log(' - Move Task:', boardKey, task.Key);
+            if (task && boardKey) {
+                task.BoardKey = boardKey;
+            }
+            this.scrumBoards.Tasks.save().finally(() => {
+                this.$rootScope.$applyAsync();
+            });
+        }
+
         public updateTask(task: models.ITask) {
             if (task.Key == Guid.Empty) {
                 task.Key = Guid.New();
@@ -141,6 +151,18 @@
         public cancelTask() {
             this.newTask = null;
         }
+    }
+
+    export class BacklogListController {
+
+        constructor(private scrumBoards: app.common.services.ScrumBoardService) {
+            this.init();
+        }
+
+        public init() {
+        }
+
+
     }
 
     export class BacklogItemController {

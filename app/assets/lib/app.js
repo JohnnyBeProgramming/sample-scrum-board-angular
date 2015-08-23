@@ -826,37 +826,205 @@ var app;
         })(services = common.services || (common.services = {}));
     })(common = app.common || (app.common = {}));
 })(app || (app = {}));
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var directives;
+        (function (directives) {
+            function AppToolbar() {
+                return {
+                    replace: true,
+                    restrict: 'AEM',
+                    templateUrl: 'views/common/toolbar.tpl.html'
+                };
+            }
+            directives.AppToolbar = AppToolbar;
+        })(directives = common.directives || (common.directives = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var directives;
+        (function (directives) {
+            function AppHeading() {
+                return {
+                    replace: true,
+                    restrict: 'AEM',
+                    templateUrl: 'views/common/heading.tpl.html'
+                };
+            }
+            directives.AppHeading = AppHeading;
+        })(directives = common.directives || (common.directives = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var directives;
+        (function (directives) {
+            function AppBody() {
+                return {
+                    replace: true,
+                    restrict: 'AEM',
+                    templateUrl: 'views/common/body.tpl.html'
+                };
+            }
+            directives.AppBody = AppBody;
+        })(directives = common.directives || (common.directives = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var directives;
+        (function (directives) {
+            function AppFooter() {
+                return {
+                    replace: true,
+                    restrict: 'AEM',
+                    templateUrl: 'views/common/footer.tpl.html'
+                };
+            }
+            directives.AppFooter = AppFooter;
+        })(directives = common.directives || (common.directives = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var directives;
+        (function (directives) {
+            function DropTarget() {
+                function addEvent(to, type, fn) {
+                    if ('addEventListener' in document) {
+                        to.addEventListener(type, fn, false);
+                    }
+                    else if ('attachEvent' in document) {
+                        to.attachEvent('on' + type, fn);
+                    }
+                    else {
+                        to['on' + type] = fn;
+                    }
+                }
+                ;
+                return {
+                    replace: true,
+                    restrict: 'AEMC',
+                    scope: {
+                        action: '&dropAction',
+                    },
+                    controller: ['$scope', function ($scope) {
+                            $scope.over = function () { };
+                            $scope.enter = function () { };
+                            $scope.leave = function () { };
+                            $scope.drop = function (data) {
+                                console.warn(' - Drop', data.Key, $scope.action);
+                                if ($scope.action) {
+                                    $scope.action({
+                                        data: data,
+                                    });
+                                }
+                            };
+                        }],
+                    link: function ($scope, element) {
+                        addEvent(element[0], 'dragover', function (e) {
+                            if (e.preventDefault)
+                                e.preventDefault(); // allows us to drop
+                            e.dataTransfer.dropEffect = 'copy';
+                            element.toggleClass('over', true);
+                            $scope.over();
+                            return false;
+                        });
+                        addEvent(element[0], 'dragenter', function (e) {
+                            element.toggleClass('over', true); // to get IE to work
+                            $scope.enter();
+                            return false;
+                        });
+                        addEvent(element[0], 'dragleave', function () {
+                            element.toggleClass('over', false);
+                            $scope.leave();
+                        });
+                        addEvent(element[0], 'drop', function (e) {
+                            if (e.stopPropagation)
+                                e.stopPropagation(); // stops the browser from redirecting...why???
+                            element.toggleClass('over', false);
+                            var data = e.dataTransfer.getData('Text');
+                            $scope.drop(JSON.parse(data));
+                            return false;
+                        });
+                    },
+                };
+            }
+            directives.DropTarget = DropTarget;
+        })(directives = common.directives || (common.directives = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var common;
+    (function (common) {
+        var directives;
+        (function (directives) {
+            function DragItem() {
+                function addEvent(to, type, fn) {
+                    if ('addEventListener' in document) {
+                        to.addEventListener(type, fn, false);
+                    }
+                    else if ('attachEvent' in document) {
+                        to.attachEvent('on' + type, fn);
+                    }
+                    else {
+                        to['on' + type] = fn;
+                    }
+                }
+                ;
+                return {
+                    replace: true,
+                    restrict: 'AEMC',
+                    scope: {
+                        data: '=dragData',
+                    },
+                    controller: ['$scope', function ($scope) {
+                            $scope.drag = function (data) {
+                                console.log(' - Drag:', data.Key);
+                            };
+                        }],
+                    link: function ($scope, element) {
+                        element.attr('draggable', 'true');
+                        addEvent(element[0], 'dragstart', function (e) {
+                            var data = $scope.data;
+                            e.dataTransfer.effectAllowed = 'copy'; // only dropEffect='copy' will be dropable
+                            e.dataTransfer.setData('Text', JSON.stringify(data)); // required otherwise doesn't work
+                            $scope.drag(data);
+                        });
+                    },
+                };
+            }
+            directives.DragItem = DragItem;
+        })(directives = common.directives || (common.directives = {}));
+    })(common = app.common || (app.common = {}));
+})(app || (app = {}));
+/// <reference path="AppToolbar.ts" />
+/// <reference path="AppHeading.ts" />
+/// <reference path="AppBody.ts" />
+/// <reference path="AppFooter.ts" />
+/// <reference path="DropTarget.ts" />
+/// <reference path="DragItem.ts" />
 angular.module('myScrumBoard.directives', [
     'ui.bootstrap',
 ])
-    .directive('appToolbar', function () {
-    return {
-        replace: true,
-        restrict: 'AEM',
-        templateUrl: 'views/common/toolbar.tpl.html'
-    };
-})
-    .directive('appHeading', function () {
-    return {
-        replace: true,
-        restrict: 'AEM',
-        templateUrl: 'views/common/heading.tpl.html'
-    };
-})
-    .directive('appBody', function () {
-    return {
-        replace: true,
-        restrict: 'AEM',
-        templateUrl: 'views/common/body.tpl.html'
-    };
-})
-    .directive('appFooter', function () {
-    return {
-        replace: true,
-        restrict: 'AEM',
-        templateUrl: 'views/common/footer.tpl.html'
-    };
-});
+    .directive('appToolbar', app.common.directives.AppToolbar)
+    .directive('appHeading', app.common.directives.AppHeading)
+    .directive('appBody', app.common.directives.AppBody)
+    .directive('appFooter', app.common.directives.AppFooter)
+    .directive('dropTarget', app.common.directives.DropTarget)
+    .directive('dragItem', app.common.directives.DragItem);
 var app;
 (function (app) {
     var common;
@@ -1110,7 +1278,8 @@ var app;
     (function (controllers) {
         var models = app.data.models;
         var BacklogController = (function () {
-            function BacklogController($state, $modal, scrumBoards) {
+            function BacklogController($rootScope, $state, $modal, scrumBoards) {
+                this.$rootScope = $rootScope;
                 this.$state = $state;
                 this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
@@ -1234,6 +1403,16 @@ var app;
                     _this.cancelTask();
                 });
             };
+            BacklogController.prototype.moveTask = function (boardKey, task) {
+                var _this = this;
+                console.log(' - Move Task:', boardKey, task.Key);
+                if (task && boardKey) {
+                    task.BoardKey = boardKey;
+                }
+                this.scrumBoards.Tasks.save().finally(function () {
+                    _this.$rootScope.$applyAsync();
+                });
+            };
             BacklogController.prototype.updateTask = function (task) {
                 if (task.Key == Guid.Empty) {
                     task.Key = Guid.New();
@@ -1249,6 +1428,16 @@ var app;
             return BacklogController;
         })();
         controllers.BacklogController = BacklogController;
+        var BacklogListController = (function () {
+            function BacklogListController(scrumBoards) {
+                this.scrumBoards = scrumBoards;
+                this.init();
+            }
+            BacklogListController.prototype.init = function () {
+            };
+            return BacklogListController;
+        })();
+        controllers.BacklogListController = BacklogListController;
         var BacklogItemController = (function () {
             function BacklogItemController(scrumBoards, board) {
                 this.scrumBoards = scrumBoards;
@@ -1886,7 +2075,8 @@ angular.module('myScrumBoard.controllers', [
     .controller('SprintListController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.SprintListController])
     .controller('SprintItemController', ['$rootScope', 'ScrumBoardService', 'sprint', app.controllers.SprintItemController])
     .controller('SprintEditController', ['ScrumBoardService', 'sprint', app.controllers.SprintEditController])
-    .controller('BacklogController', ['$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
+    .controller('BacklogController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
+    .controller('BacklogListController', ['ScrumBoardService', app.controllers.BacklogListController])
     .controller('BacklogItemController', ['ScrumBoardService', 'board', app.controllers.BacklogItemController]);
 angular.module('myScrumBoard.routes', [
     'ui.router',
@@ -2038,6 +2228,8 @@ angular.module('myScrumBoard.routes', [
             views: {
                 'contents': {
                     templateUrl: 'views/backlogs/list.tpl.html',
+                    controller: 'BacklogListController',
+                    controllerAs: 'childCtrl',
                 },
             },
         })

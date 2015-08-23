@@ -169,6 +169,56 @@ declare module app.common.services {
         constructor($q: any);
     }
 }
+declare module app.common.directives {
+    function AppToolbar(): {
+        replace: boolean;
+        restrict: string;
+        templateUrl: string;
+    };
+}
+declare module app.common.directives {
+    function AppHeading(): {
+        replace: boolean;
+        restrict: string;
+        templateUrl: string;
+    };
+}
+declare module app.common.directives {
+    function AppBody(): {
+        replace: boolean;
+        restrict: string;
+        templateUrl: string;
+    };
+}
+declare module app.common.directives {
+    function AppFooter(): {
+        replace: boolean;
+        restrict: string;
+        templateUrl: string;
+    };
+}
+declare module app.common.directives {
+    function DropTarget(): {
+        replace: boolean;
+        restrict: string;
+        scope: {
+            action: string;
+        };
+        controller: (string | (($scope: any) => void))[];
+        link: ($scope: any, element: JQuery) => void;
+    };
+}
+declare module app.common.directives {
+    function DragItem(): {
+        replace: boolean;
+        restrict: string;
+        scope: {
+            data: string;
+        };
+        controller: (string | (($scope: any) => void))[];
+        link: ($scope: any, element: any) => void;
+    };
+}
 declare module app.common.modal {
     class AddProjectController {
         private $scope;
@@ -225,13 +275,14 @@ declare module app.common.modal {
 declare module app.controllers {
     import models = app.data.models;
     class BacklogController {
+        private $rootScope;
         private $state;
         private $modal;
         private scrumBoards;
         newTask: models.ITask;
         current: models.IBoard;
         boards: models.IBoard[];
-        constructor($state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
+        constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         getBoards(): models.IBoard[];
         index(): void;
         openBoard(board: models.IBoard): void;
@@ -240,8 +291,14 @@ declare module app.controllers {
         insert(board: models.IBoard): void;
         cancel(): void;
         addTaskToBoard(board?: models.IBoard): void;
+        moveTask(boardKey: string, task: models.ITask): void;
         updateTask(task: models.ITask): void;
         cancelTask(): void;
+    }
+    class BacklogListController {
+        private scrumBoards;
+        constructor(scrumBoards: app.common.services.ScrumBoardService);
+        init(): void;
     }
     class BacklogItemController {
         private scrumBoards;

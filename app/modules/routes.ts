@@ -165,6 +165,8 @@
             views: {
                 'contents': {
                     templateUrl: 'views/backlogs/list.tpl.html',
+                    controller: 'BacklogListController',
+                    controllerAs: 'childCtrl',
                 },
             },
         })

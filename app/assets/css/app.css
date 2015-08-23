@@ -1,6 +1,11 @@
 body {
   height: 100%;
 }
+body *[draggable=true] {
+  -moz-user-select: none;
+  -khtml-user-drag: element;
+  cursor: move;
+}
 body .horz-fill {
   width: 100%;
   display: inline-block;
@@ -16,6 +21,22 @@ body .pad-aside {
 }
 body .modal {
   background-color: rgba(255, 255, 255, 0.75) !important;
+}
+body .drop-list {
+  margin: 0;
+  padding: 0;
+}
+body .drop-list li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+body .drop-target.over {
+  border: solid 1px #0094ff !important;
+  box-shadow: 0 0 3px 0 #0094ff;
+}
+body .drag-item {
+  cursor: move;
 }
 body .inactive-fill {
   color: silver;

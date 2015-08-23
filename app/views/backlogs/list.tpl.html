@@ -6,19 +6,25 @@
     </h3>
     <div class="row contained">
         <div class="col-md-3" ng-repeat="item in viewCtrl.boards">
-            <div class="board">
+            <div class="board drop-target"
+                 drop-action="viewCtrl.moveTask(item.Key, data)">
                 <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>
                 <h4>
                     <a ui-sref="backlogs.item({ key: item.Key })">
                         <i class="fa fa-sticky-note-o"></i> {{ item.Title || 'Project Backlog' }}
                     </a>
                 </h4>
-                <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(item.Key)">
-                    <h5>{{ task.Title }}</h5>
-                    <p>
-                        {{ task.Description }}
-                    </p>
-                </div>
+                <ul class="drop-list">
+                    <li class="drag-item" drag-data="task"
+                        ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(item.Key)">
+                        <div class="tile">
+                            <h5>{{ task.Title }}</h5>
+                            <p>
+                                {{ task.Description }}
+                            </p>
+                        </div>
+                    </li>
+                </ul>                
                 <a href="" ng-click="viewCtrl.addTaskToBoard(item)" class="tile add">
                     <i class="fa fa-plus"></i> Add Task
                 </a>

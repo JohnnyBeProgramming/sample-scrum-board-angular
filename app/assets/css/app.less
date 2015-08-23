@@ -1,6 +1,12 @@
 ﻿body {
     height: 100%;
 
+    *[draggable=true] {
+        -moz-user-select: none;
+        -khtml-user-drag: element;
+        cursor: move;
+    }
+
     & {
 
         .horz-fill {
@@ -24,6 +30,29 @@
 
         .modal {
             background-color: rgba(255, 255, 255, 0.75) !important;
+        }
+
+        .drop-list {
+            margin: 0;
+            padding: 0;
+
+            li {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+        }
+
+        .drop-target {
+
+            &.over {
+                border: solid 1px #0094ff !important;
+                box-shadow: 0 0 3px 0 #0094ff;
+            }
+        }
+
+        .drag-item {
+            cursor: move;
         }
 
         .inactive-fill {
