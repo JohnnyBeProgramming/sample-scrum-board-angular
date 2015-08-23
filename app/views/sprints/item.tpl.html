@@ -4,7 +4,7 @@
     </div>
     <span class="pull-right" ng-if="childCtrl.sprint">
         <a class="btn btn-xs btn-default" href="" ng-click="viewCtrl.cancel()">Cancel</a>
-        <a class="btn btn-xs btn-primary" href="" ng-click="viewCtrl.update(childCtrl.sprint)">Update</a>
+        <a class="btn btn-xs btn-primary" href="" ng-click="viewCtrl.updateSprint(childCtrl.sprint)">Update</a>
     </span>
     <div ng-if="childCtrl.sprint">
         <h3>
@@ -16,17 +16,24 @@
         <div class="row contained" ng-if="childCtrl.boards.length">
             <div ng-class="childCtrl.getColumnCss(childCtrl.boards.length)"
                  ng-repeat="board in childCtrl.boards track by board.Key">
-                <div class="board">
+                <div class="board drop-target"
+                     drop-action="viewCtrl.moveTask(item.Key, data)">
                     <div>
                         <h4>
                             <i class="fa fa-tag"></i> {{ board.Title || 'Board' }}
                         </h4>
-                        <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(board.Key) track by task.Key">
-                            <h5>{{ task.Title }}</h5>
-                            <p>
-                                {{ task.Description }}
-                            </p>
-                        </div>
+                        <ul class="drop-list">
+                            <li class="drag-item" drag-data="task"
+                                ng-dblclick="viewCtrl.editTask(task)"
+                                ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(board.Key) track by task.Key">
+                                <div class="tile">
+                                    <h5>{{ task.Title }}</h5>
+                                    <p>
+                                        {{ task.Description }}
+                                    </p>
+                                </div>
+                            </li>
+                        </ul>     
                         <div ng-if="board.TaskType <= 2">
                             <a href="" ng-click="viewCtrl.addBacklogs(childCtrl.sprint, board)" class="tile aside">
                                 <i class="fa fa-share"></i> From Backlog

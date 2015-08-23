@@ -13,7 +13,7 @@
         </h3>
         <div class="row contained">
             <div class="col-md-12">
-                <div class="board">
+                <div class="board drop-target" drop-action="viewCtrl.moveTask(item.Key, data)">
                     <div class="row">
                         <div class="col-md-8">
                             <div>
@@ -21,14 +21,18 @@
                                 <h4>
                                     <i class="fa fa-tags"></i> Unassigned Tasks
                                 </h4>
-                                <div class="tile" ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(childCtrl.board.Key)">
-                                    <a href="" ng-click="viewCtrl.cancelTask()" class="pull-right ctrl"><i class="fa fa-times"></i></a>
-                                    <a href="" ng-click="viewCtrl.updateTask(viewCtrl.newTask)" class="pull-right ctrl"><i class="fa fa-save"></i></a>
-                                    <h5>{{ task.Title }}</h5>
-                                    <p>
-                                        {{ task.Description }}
-                                    </p>
-                                </div>
+                                <ul class="drop-list">
+                                    <li class="drag-item" drag-data="task"
+                                        ng-dblclick="viewCtrl.editTask(task)"
+                                        ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(childCtrl.board.Key)">
+                                        <div class="tile">
+                                            <h5>{{ task.Title }}</h5>
+                                            <p>
+                                                {{ task.Description }}
+                                            </p>
+                                        </div>
+                                    </li>
+                                </ul>       
                                 <a href="" ng-click="viewCtrl.addTaskToBoard(childCtrl.board)" class="tile add">
                                     <i class="fa fa-plus"></i> Add Task
                                 </a>

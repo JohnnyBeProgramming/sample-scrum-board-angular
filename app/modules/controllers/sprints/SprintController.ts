@@ -44,14 +44,15 @@ module app.controllers {
         }
 
         public index() {
-        }
-
-        public openBoard(sprint: models.ISprint) {
-            this.$state.go('sprints.item', { key: sprint.Key });
+            this.$state.go('sprints.active');
         }
 
         public cancel() {
             this.index();
+        }
+
+        public openBoard(sprint: models.ISprint) {
+            this.$state.go('sprints.item', { key: sprint.Key });
         }
 
         public addTask(task?: models.ITask) {
@@ -191,7 +192,7 @@ module app.controllers {
                                 Key: Guid.Empty,
                                 TaskType: type,
                                 SprintKey: sprint.Key,
-                                ProjectKey: sprint.ProjectKey,                                
+                                ProjectKey: sprint.ProjectKey,
                                 Title: ControllerUtils.TaskDescription(type),
                             }).Key;
                         });
@@ -314,6 +315,15 @@ module app.controllers {
             return target;
         }
 
+        public moveTask(boardKey: string, task: models.ITask) {
+            if (task && !!boardKey) {
+                this.$rootScope.$applyAsync(() => {
+                    console.log(' - Move:', task.Key, boardKey);
+                    task.BoardKey = boardKey;
+                    this.updateTask(task);
+                });
+            }
+        }
     }
 
     export class SprintListController {
@@ -477,6 +487,7 @@ module app.controllers {
             }
             return target;
         }
+
     }
 
     export class SprintEditController {

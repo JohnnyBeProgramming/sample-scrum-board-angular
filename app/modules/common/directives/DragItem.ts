@@ -18,7 +18,7 @@
             },
             controller: ['$scope', ($scope) => {
                 $scope.drag = (data) => {
-                    console.log(' - Drag:', data.Key);
+                    //console.debug(' - Drag:', data);
                 }
             }],
             link: ($scope: any, element) => {

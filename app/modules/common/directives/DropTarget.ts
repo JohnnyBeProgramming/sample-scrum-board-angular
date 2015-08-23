@@ -21,7 +21,8 @@
                 $scope.enter = () => { }
                 $scope.leave = () => { }
                 $scope.drop = (data) => {
-                    console.warn(' - Drop', data.Key, $scope.action);
+                    //console.debug(' - Drop', data);
+
                     if ($scope.action) {
                         $scope.action({
                             data: data,

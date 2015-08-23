@@ -238,12 +238,25 @@ declare module app.common.modal {
     }
 }
 declare module app.common.modal {
+    import models = app.data.models;
     class AddTaskController {
+        private $rootScope;
         private $scope;
         private $modalInstance;
         private modalContext;
-        constructor($scope: any, $modalInstance: any, modalContext: any);
+        scrumBoardService: app.common.services.ScrumBoardService;
+        map: any;
+        projects: models.IProject[];
+        sprints: models.ISprint[];
+        boards: models.IBoard[];
+        constructor($rootScope: any, $scope: any, $modalInstance: any, modalContext: any, scrumBoardService: app.common.services.ScrumBoardService);
         init(): void;
+        getProjectLabel(projectKey: string): string;
+        getSprintLabel(sprintKey: string): string;
+        getBoardLabel(boardKey: string): string;
+        setProjectKey(task: models.ITask, key: string): void;
+        setSprintKey(task: models.ITask, key: string): void;
+        setBoardKey(task: models.ITask, key: string): void;
     }
 }
 declare module app.common.modal {
@@ -284,6 +297,7 @@ declare module app.controllers {
         boards: models.IBoard[];
         constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         getBoards(): models.IBoard[];
+        getTasks(board: models.IBoard): models.ITask[];
         index(): void;
         openBoard(board: models.IBoard): void;
         createNew(boardId?: string): void;
@@ -292,6 +306,7 @@ declare module app.controllers {
         cancel(): void;
         addTaskToBoard(board?: models.IBoard): void;
         moveTask(boardKey: string, task: models.ITask): void;
+        editTask(task: models.ITask): void;
         updateTask(task: models.ITask): void;
         cancelTask(): void;
     }
@@ -355,8 +370,8 @@ declare module app.controllers {
         constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         getSprints(): ng.IPromise<models.ISprint[]>;
         index(): void;
-        openBoard(sprint: models.ISprint): void;
         cancel(): void;
+        openBoard(sprint: models.ISprint): void;
         addTask(task?: models.ITask): void;
         addTaskToBoard(board?: models.IBoard, callback?: (task: models.ITask) => void): void;
         addTaskToSprint(sprint: models.ISprint): void;
@@ -370,6 +385,7 @@ declare module app.controllers {
         getBoardByType(sprint: models.ISprint, type?: models.TaskType): models.IBoard;
         getBoards(sprintKey: string): models.IBoard[];
         firstOrDefaultBoard(sprintKey: string, type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): models.IBoard;
+        moveTask(boardKey: string, task: models.ITask): void;
     }
     class SprintListController {
         private $rootScope;

@@ -16,7 +16,8 @@
                 </h4>
                 <ul class="drop-list">
                     <li class="drag-item" drag-data="task"
-                        ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(item.Key)">
+                        ng-dblclick="viewCtrl.editTask(task)"
+                        ng-repeat="task in viewCtrl.getTasks(item)">
                         <div class="tile">
                             <h5>{{ task.Title }}</h5>
                             <p>

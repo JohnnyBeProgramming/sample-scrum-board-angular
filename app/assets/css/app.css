@@ -6,6 +6,9 @@ body *[draggable=true] {
   -khtml-user-drag: element;
   cursor: move;
 }
+body .navbar {
+  margin-bottom: 0;
+}
 body .horz-fill {
   width: 100%;
   display: inline-block;
@@ -21,6 +24,15 @@ body .pad-aside {
 }
 body .modal {
   background-color: rgba(255, 255, 255, 0.75) !important;
+}
+body .modal .modal-header {
+  padding: 6px 16px;
+  color: #FFF;
+  background-color: #303c4b;
+}
+body .padd-title {
+  margin: 0;
+  padding: 6px;
 }
 body .drop-list {
   margin: 0;

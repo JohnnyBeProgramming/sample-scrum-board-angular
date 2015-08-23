@@ -7,6 +7,7 @@
     // Configure defaults
     $urlRouterProvider
         .when('', '/')
+        .when('/', '/projects')
         .when('index.html', '/')
 
     // Configure client-side routing
@@ -14,6 +15,7 @@
         .state('default',
         {
             url: '/',
+            /*
             views: {
                 'main@': {
                     templateUrl: 'views/dashboard/main.tpl.html',
@@ -21,6 +23,15 @@
                     controllerAs: 'viewCtrl',
                 },
             }
+            */
+            parent: 'projects',
+            views: {
+                'contents': {
+                    templateUrl: 'views/projects/list.tpl.html',
+                    controller: 'ProjectListController',
+                    controllerAs: 'childCtrl',
+                },
+            },
         })
 
         .state('projects',

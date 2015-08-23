@@ -16,6 +16,12 @@
                 .filterByType(app.data.models.TaskType.Backlog);
         }
 
+        public getTasks(board: models.IBoard): models.ITask[] {
+            var tasks = this.scrumBoards.Tasks.filter(board.Key);
+            //console.log(' - Tasks: ', board.Key, tasks);
+            return tasks;
+        }
+
         public index() {
             this.$state.go('backlogs.list');
         }
@@ -129,13 +135,42 @@
         }
 
         public moveTask(boardKey: string, task: models.ITask) {
-            console.log(' - Move Task:', boardKey, task.Key);
-            if (task && boardKey) {
-                task.BoardKey = boardKey;
+            if (task && !!boardKey) {
+                this.$rootScope.$applyAsync(() => {
+                    console.log(' - Move:', task.Key, boardKey);
+                    task.BoardKey = boardKey;
+                    this.updateTask(task);
+                });
             }
-            this.scrumBoards.Tasks.save().finally(() => {
-                this.$rootScope.$applyAsync();
-            });
+        }
+
+        public editTask(task: models.ITask) {
+
+            // Open the modal dialog
+            var dialog = this.$modal.open({
+                size: 'md',
+                animation: true,
+                templateUrl: 'views/common/modal/addTask.tpl.html',
+                controller: 'AddTaskController',
+                controllerAs: 'modalCtrl',
+                resolve: {
+                    modalContext: () => {
+                        return {
+                            task: task,
+                        };
+                    },
+                }
+            }).result.then(
+                // On Commit
+                (modalContext) => {
+                    console.info(' - Modal closed. Updating task.', modalContext);
+                    this.updateTask(modalContext.task);
+                },
+                // Dismissed
+                () => {
+                    console.info(' - Modal dismissed at: ' + new Date());
+                    this.cancelTask();
+                });
         }
 
         public updateTask(task: models.ITask) {
@@ -143,7 +178,6 @@
                 task.Key = Guid.New();
                 this.scrumBoards.Tasks.insert(task);
             }
-            console.log(task);
             this.scrumBoards.Tasks.save();
             this.newTask = null;
         }
