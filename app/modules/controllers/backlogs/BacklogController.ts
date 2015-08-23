@@ -54,12 +54,10 @@
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     this.insert(modalContext.board);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.index();
                 });
 
@@ -124,12 +122,10 @@
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     this.updateTask(modalContext.task);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.cancelTask();
                 });
         }
@@ -163,12 +159,10 @@
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     this.updateTask(modalContext.task);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.cancelTask();
                 });
         }

@@ -3,10 +3,10 @@
     </span>
     <h3>
         Current Projects
-        <small>2 Items, 1 Active Sprint(s)</small>
+        <small>{{ viewCtrl.projects.length }} Items<span ng-if="viewCtrl.countSprintsOfType(app.data.models.TaskType.InProgress)">, {{ viewCtrl.countSprintsOfType(app.data.models.TaskType.InProgress) }} Active Sprint(s)</span></small>
     </h3>
     <div class="row contained">
-        <div class="col-md-12" ng-repeat="item in childCtrl.projects">
+        <div class="col-md-12" ng-repeat="item in viewCtrl.projects">
             <div class="project">
                 <a class="pull-right ctrl"><i class="fa fa-trash"></i></a>
                 <a ui-sref="projects.item({ projectKey: item.Key })" class="pull-right ctrl"><i class="fa fa-edit"></i></a>
@@ -14,25 +14,24 @@
                     <a ui-sref="projects.item({ projectKey: item.Key })">
                         <i class="fa fa-tags"></i> {{ item.Title || 'Project Overview' }}
                     </a>
-                    <small>1 Active, 2 Scheduled, 0 Commpleted, 1 Backlog(s)</small>
+                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Started, item.Key) || 0 }} In Progress,</small>
+                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Default, item.Key) || 0 }} Scheduled,</small>
+                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Completed, item.Key) || 0 }} Commpleted,</small>
+                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.OnHold, item.Key) || 0 }} On Hold</small>
                 </h4>
                 <div class="proj-body">
                     <div class="proj-logo">
                         No Logo
                     </div>
-                    <div class="proj-info">
-                        <h5>
-                            <i class="fa fa-tag"></i> Sprint #1
-                            <small>4 / 12 Points</small>
-                        </h5>
-                        <a href="" ui-sref="sprints.list({ projectKey: item.Key })" class="tile add">
-                            <i class="fa fa-plus"></i> Add Sprint
-                        </a>
+                    <div class="proj-info" project-summary="item">
+                        <em>Loading Summary...</em>
                     </div>
                     <div class="proj-history">
                         <h5>
                             Project History
-                            <small>1 January 2012 to 30 August 2015 (12 Sprints)</small>
+                            <small ng-if="item.StartedAt">starting <b>{{ item.StartedAt | date:'longDate' }}</b></small>
+                            <small ng-if="item.ClosedAt"> up until <b>{{ item.ClosedAt | date:'longDate' }}</b></small>
+                            <small>(12 Sprints)</small>
                         </h5>
                         <div class="tile empty">
                             <i class="fa fa-info-circle"></i> No Data Avalaible

@@ -14,11 +14,14 @@ module app.data {
                 Key: Guid.New(),
                 Title: 'Simple Project',
                 Description: 'This is a basic project example.',
+                StartedAt: new Date('2015-01-01'),
+                ClosedAt: new Date('2015-11-01'),
             },
             {
                 Key: Guid.New(),
                 Title: 'Large Scale Project',
                 Description: 'This is a larger project with many groups, users and sprints.',
+                StartedAt: new Date('2015-03-11'),
             },
         ];
 

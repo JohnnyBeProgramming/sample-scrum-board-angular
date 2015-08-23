@@ -38,6 +38,8 @@ declare module app.data.models {
         Key: string;
         Title: string;
         Description?: string;
+        StartedAt?: Date;
+        ClosedAt?: Date;
     }
 }
 declare module app.data.models {
@@ -331,21 +333,27 @@ declare module app.controllers {
 declare module app.controllers {
     import models = app.data.models;
     class ProjectsController {
-        private $state;
-        private $modal;
-        private scrumBoards;
-        constructor($state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
+        $rootScope: any;
+        $state: any;
+        $modal: any;
+        scrumBoards: app.common.services.ScrumBoardService;
+        cache: any;
+        projects: models.IProject[];
+        constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
+        init(): void;
         index(): void;
         openProject(project: models.IProject): void;
         newProject(): void;
         update(project: models.IProject): void;
         cancel(): void;
+        countSprintsOfType(state: models.SprintState, projectKey?: string): number;
     }
     class ProjectListController {
-        private $rootScope;
-        private scrumBoards;
-        projects: models.IProject[];
-        constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService);
+        $rootScope: any;
+        $state: any;
+        $modal: any;
+        scrumBoards: app.common.services.ScrumBoardService;
+        constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         init(): void;
     }
     class ProjectItemController {
@@ -424,5 +432,38 @@ declare module app.controllers {
         private scrumBoards;
         sprint: models.ISprint;
         constructor(scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
+    }
+}
+declare module app.controllers.projects.directives {
+    import models = app.data.models;
+    function ProjectSummary(): {
+        replace: boolean;
+        restrict: string;
+        scope: {
+            project: string;
+        };
+        templateUrl: string;
+        controller: string;
+        controllerAs: string;
+    };
+    class ProjectSummaryController {
+        private $rootScope;
+        private $scope;
+        private $modal;
+        scrumboardService: app.common.services.ScrumBoardService;
+        project: models.IProject;
+        current: models.ISprint;
+        sprints: models.ISprint[];
+        constructor($rootScope: any, $scope: any, $modal: any, scrumboardService: app.common.services.ScrumBoardService);
+        init(): void;
+        refresh(): void;
+        cancel(): void;
+        prevSprint(): void;
+        nextSprint(): void;
+        addSprint(project?: models.IProject, state?: models.SprintState): void;
+        updateSprint(sprint: models.ISprint): void;
+        getTaskSummary(sprint: models.ISprint): models.IBoard[];
+        newBoard(sprint: models.ISprint, taskType: models.TaskType): models.IBoard;
+        firstOrDefaultBoard(sprintKey: string, type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): models.IBoard;
     }
 }

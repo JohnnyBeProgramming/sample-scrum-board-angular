@@ -82,12 +82,10 @@ module app.controllers {
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     this.updateTask(modalContext.task);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.cancel();
                 });
         }
@@ -151,12 +149,10 @@ module app.controllers {
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating sprint.', modalContext);
                     this.updateSprint(modalContext.sprint);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.cancel();
                 });
         }
@@ -182,7 +178,6 @@ module app.controllers {
                 // On Commit
                 (modalContext) => {
                     var result = modalContext.data;
-                    console.info(' - Modal closed. Updating sprint.', result);
                     if (result && result.length) {
                         result.forEach((item: models.ITask) => {
                             item.TaskType = models.TaskType.Default;
@@ -204,7 +199,6 @@ module app.controllers {
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.cancel();
                 });
         }

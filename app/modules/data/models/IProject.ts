@@ -6,6 +6,8 @@ module app.data.models {
         Key: string;
         Title: string;
         Description?: string;
+        StartedAt?: Date;
+        ClosedAt?: Date;
     }
 
 }  

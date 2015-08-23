@@ -3,6 +3,7 @@
 /// <reference path="dashboard/DashboardController.ts" />
 /// <reference path="projects/ProjectsController.ts" />
 /// <reference path="sprints/SprintController.ts" />
+/// <reference path="projects/directives/ProjectSummary.ts" />
 
 angular.module('myScrumBoard.controllers', [
     'myScrumBoard.common',
@@ -10,9 +11,11 @@ angular.module('myScrumBoard.controllers', [
 
     .controller('DashboardController', ['ScrumBoardService', app.controllers.DashboardController])
 
-    .controller('ProjectsController', ['$state', '$modal', 'ScrumBoardService', app.controllers.ProjectsController])
-    .controller('ProjectListController', ['$rootScope', 'ScrumBoardService', app.controllers.ProjectListController])
+    .controller('ProjectsController', ['$rootScope','$state', '$modal', 'ScrumBoardService', app.controllers.ProjectsController])
+    .controller('ProjectListController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.ProjectListController])
     .controller('ProjectItemController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.ProjectItemController])
+    .controller('ProjectSummaryController', ['$rootScope', '$scope', '$modal', 'ScrumBoardService', app.controllers.projects.directives.ProjectSummaryController])
+    .directive('projectSummary', [app.controllers.projects.directives.ProjectSummary])
 
     .controller('SprintController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.SprintController])
     .controller('SprintsActiveController', ['$rootScope', 'ScrumBoardService', app.controllers.SprintsActiveController])

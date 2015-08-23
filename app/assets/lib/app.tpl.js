@@ -606,7 +606,7 @@ angular.module('views/projects/list.tpl.html', []).run(['$templateCache', functi
     '    </span>\n' +
     '    <h3>\n' +
     '        Current Projects\n' +
-    '        <small>2 Items, 1 Active Sprint(s)</small>\n' +
+    '        <small>{{ childCtrl.projects.length }} Items<span ng-if="viewCtrl.countSprintsOfType(app.data.models.TaskType.InProgress)">, {{ viewCtrl.countSprintsOfType(app.data.models.TaskType.InProgress) }} Active Sprint(s)</span></small>\n' +
     '    </h3>\n' +
     '    <div class="row contained">\n' +
     '        <div class="col-md-12" ng-repeat="item in childCtrl.projects">\n' +
@@ -617,7 +617,10 @@ angular.module('views/projects/list.tpl.html', []).run(['$templateCache', functi
     '                    <a ui-sref="projects.item({ projectKey: item.Key })">\n' +
     '                        <i class="fa fa-tags"></i> {{ item.Title || \'Project Overview\' }}\n' +
     '                    </a>\n' +
-    '                    <small>1 Active, 2 Scheduled, 0 Commpleted, 1 Backlog(s)</small>\n' +
+    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Started) || 0 }} In Progress,</small>\n' +
+    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Default) || 0 }} Scheduled,</small>\n' +
+    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Completed) || 0 }} Commpleted,</small>\n' +
+    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.OnHold) || 0 }} On Hold</small>\n' +
     '                </h4>\n' +
     '                <div class="proj-body">\n' +
     '                    <div class="proj-logo">\n' +
@@ -635,7 +638,9 @@ angular.module('views/projects/list.tpl.html', []).run(['$templateCache', functi
     '                    <div class="proj-history">\n' +
     '                        <h5>\n' +
     '                            Project History\n' +
-    '                            <small>1 January 2012 to 30 August 2015 (12 Sprints)</small>\n' +
+    '                            <small ng-if="item.StartedAt">{{ item.StartedAt | date:\'fullDate\' }}</small>\n' +
+    '                            <small ng-if="item.ClosedAt"> up to {{ item.ClosedAt | date:\'fullDate\' }}</small>\n' +
+    '                            <small>(12 Sprints)</small>\n' +
     '                        </h5>\n' +
     '                        <div class="tile empty">\n' +
     '                            <i class="fa fa-info-circle"></i> No Data Avalaible\n' +

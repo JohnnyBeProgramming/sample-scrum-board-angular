@@ -4,7 +4,20 @@
 
     export class ProjectsController {
 
-        constructor(private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) {}
+        public cache: any = {};
+        public projects: models.IProject[] = [];
+
+        constructor(public $rootScope: any, public $state: any, public $modal: any, public scrumBoards: app.common.services.ScrumBoardService) {
+            this.init();
+        }
+
+        public init() {
+            this.scrumBoards.Projects.load().then((items) => {
+                this.projects = items;
+            }).finally(() => {
+                this.$rootScope.$applyAsync();
+            });
+        }
 
         public index() {
             this.$state.go('projects.list');
@@ -37,12 +50,10 @@
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     this.update(modalContext.project);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.cancel();
                 });
         }
@@ -52,39 +63,46 @@
                 project.Key = Guid.New(),
                 this.scrumBoards.Projects.insert(project);
             } else {
-            this.scrumBoards.Projects.save().then(() => {
-                this.index();
-            });
+                this.scrumBoards.Projects.save().then(() => {
+                    this.index();
+                });
             }
         }
 
         public cancel() {
             this.index();
         }
+
+        public countSprintsOfType(state: models.SprintState, projectKey?: string): number {
+            var count = 0;
+            var sprints = this.scrumBoards.Sprints.list();
+            if (sprints) {
+                sprints.forEach((item) => {
+                    if (projectKey && (projectKey != item.ProjectKey)) return;
+                    if (item.State == state) {
+                        count++;
+                    }
+                });
+            }
+            return count;
+        }
+
     }
 
     export class ProjectListController {
 
-        public projects: models.IProject[] = [];
-
-        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService) {
+        constructor(public $rootScope: any, public $state: any, public $modal: any, public scrumBoards: app.common.services.ScrumBoardService) {
             this.init();
         }
 
         public init() {
-            this.scrumBoards.Projects.load().then((items) => {
-                this.projects = items;
-            }).finally(() => {
-                this.$rootScope.$applyAsync();
-            });
-
         }
     }
 
     export class ProjectItemController {
 
-        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) {}
+        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) { }
 
     }
-
+    
 }
