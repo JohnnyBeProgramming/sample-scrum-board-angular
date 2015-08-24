@@ -2,13 +2,10 @@
 
     import IBoard = app.data.models.IBoard;
 
-    export class BoardRepository extends AbstractRepository<IBoard> implements IRepository<IBoard> {
+    export class BoardRepository extends AbstractRepository<IBoard> {
 
-        constructor($q: ng.IQService) {
-            super($q);
-            this.load().then((list) => {
-                this.memCache = list;
-            });
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService) {
+            super('boards', $rootScope, $q,() => SampleData.Boards);
         }
 
         public create(type: app.data.models.TaskType, title?: string): IBoard {
@@ -21,26 +18,9 @@
             return item;
         }
 
-        public load(): ng.IPromise<IBoard[]> {
-            var deferred = this.$q.defer<IBoard[]>();
-            {
-                deferred.resolve(SampleData.Boards);
-            }
-            return deferred.promise;
-        }
-
-        public save(): ng.IPromise<boolean> {
-            var deferred = this.$q.defer<boolean>();
-            {
-                console.log(' - ToDo: Implement Save: ', this.memCache);
-                deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-            }
-            return deferred.promise;
-        }
-
         public filterByProject(projectKey: string, type?: app.data.models.TaskType): IBoard[] {
             var list = [];
-            this.memCache.forEach((item) => {
+            this.list().forEach((item) => {
                 if (item.ProjectKey != projectKey) return;
                 if (!type) {
                     list.push(item);
@@ -53,7 +33,7 @@
 
         public filterBySprint(sprintKey: string, type?: app.data.models.TaskType): IBoard[] {
             var list = [];
-            this.memCache.forEach((item) => {
+            this.list().forEach((item) => {
                 if (item.SprintKey != sprintKey) return;
                 if (!type) {
                     list.push(item);
@@ -66,7 +46,7 @@
 
         public filterByType(type: app.data.models.TaskType): IBoard[] {
             var list = [];
-            this.memCache.forEach((item) => {
+            this.list().forEach((item) => {
                 if (item.TaskType == type) {
                     list.push(item);
                 }
@@ -74,28 +54,6 @@
             return list;
         }
 
-        public findByKey(key: string): ng.IPromise<IBoard> {
-            var found = false;
-            var deferred = this.$q.defer<IBoard>();
-            this.load()
-                .then((items) => {
-                if (items) {
-                    items.forEach((item) => {
-                        if (found) return;
-                        if (item.Key == key) {
-                            deferred.resolve(item);
-                            found = true;
-                        }
-                    });
-                }
-                if (!found) {
-                    deferred.resolve(null);
-                }
-            }).catch((error) => {
-                deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof this));
-            });
-            return deferred.promise;
-        }
     }
 
 }  

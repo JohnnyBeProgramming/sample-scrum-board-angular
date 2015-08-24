@@ -17,13 +17,13 @@ module app.common.services {
         public Tasks: app.data.repositories.TaskRepository;
         public Users: app.data.repositories.UserRepository;
 
-        constructor(private $q: any) {
-            this.Projects = new app.data.repositories.ProjectRepository($q);
-            this.Sprints = new app.data.repositories.SprintRepository($q);
-            this.Boards = new app.data.repositories.BoardRepository($q);
-            this.Groups = new app.data.repositories.GroupRepository($q);
-            this.Tasks = new app.data.repositories.TaskRepository($q);
-            this.Users = new app.data.repositories.UserRepository($q);
+        constructor(private $rootScope: ng.IRootScopeService, private $q: any) {
+            this.Projects = new app.data.repositories.ProjectRepository($rootScope, $q);
+            this.Sprints = new app.data.repositories.SprintRepository($rootScope, $q);
+            this.Boards = new app.data.repositories.BoardRepository($rootScope, $q);
+            this.Groups = new app.data.repositories.GroupRepository($rootScope, $q);
+            this.Tasks = new app.data.repositories.TaskRepository($rootScope, $q);
+            this.Users = new app.data.repositories.UserRepository($rootScope, $q);
         }
 
     }

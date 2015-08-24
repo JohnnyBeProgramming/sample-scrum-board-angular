@@ -294,6 +294,6 @@ module app.data {
 
         ];
 
-
+        public static Users: models.IUser[] = [];
     }
 } 

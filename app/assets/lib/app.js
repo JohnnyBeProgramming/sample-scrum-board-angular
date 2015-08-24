@@ -41,20 +41,158 @@ var Guid = (function () {
 var app;
 (function (app) {
     var data;
-    (function (data) {
+    (function (data_1) {
         var repositories;
         (function (repositories) {
             var AbstractRepository = (function () {
-                function AbstractRepository($q) {
+                function AbstractRepository(ident, $rootScope, $q, defaults) {
+                    this.ident = ident;
+                    this.$rootScope = $rootScope;
                     this.$q = $q;
+                    this.defaults = defaults;
+                    this.hasLocal = false;
+                    this.isOnline = false;
+                    this.keys = [];
                     this.memCache = [];
+                    this.init();
                 }
+                AbstractRepository.prototype.init = function () {
+                    var _this = this;
+                    this.hasLocal = typeof (Storage) !== "undefined";
+                    this.load().then(function (list) {
+                        console.debug(' - Store [ ' + _this.ident + ' ] Loaded.', _this.keys.length);
+                    });
+                };
+                AbstractRepository.prototype.load = function () {
+                    var _this = this;
+                    var deferred = this.$q.defer();
+                    try {
+                        if (this.memCache.length) {
+                            deferred.resolve(this.memCache);
+                        }
+                        else if (this.isOnline) {
+                            deferred.reject(new Error('Online Storage has not been implemented.'));
+                        }
+                        if (this.hasLocal) {
+                            var found = true;
+                            var local = localStorage.getItem(this.ident);
+                            if (local) {
+                                var cache = [];
+                                console.debug(' - Store [ ' + this.ident + ' ] Restoring...');
+                                this.keys = JSON.parse(local);
+                                this.keys.forEach(function (key) {
+                                    var storeKey = _this.ident + '[' + key + ']';
+                                    var storeItem = localStorage.getItem(storeKey);
+                                    if (storeItem) {
+                                        cache.push(JSON.parse(storeItem));
+                                    }
+                                });
+                                this.memCache = cache;
+                                deferred.resolve(cache);
+                            }
+                            else {
+                                found = false;
+                            }
+                        }
+                        if (!found) {
+                            var data = this.defaults ? this.defaults() : [];
+                            this.memCache = data;
+                            this.save().then(function () {
+                                deferred.resolve(data);
+                            });
+                        }
+                    }
+                    catch (ex) {
+                        deferred.reject(ex);
+                    }
+                    return deferred.promise;
+                };
+                AbstractRepository.prototype.reset = function () {
+                    var deferred = this.$q.defer();
+                    try {
+                        if (this.isOnline) {
+                            deferred.reject(new Error('Online Storage has not been implemented.'));
+                        }
+                        else {
+                            var data = this.defaults ? this.defaults() : [];
+                            console.debug(' - Store [ ' + this.ident + ' ] Reset.', data);
+                            this.memCache = data;
+                            this.save().then(function (item) {
+                                deferred.resolve(data);
+                            }).catch(function (err) {
+                                deferred.reject(err);
+                            });
+                        }
+                    }
+                    catch (ex) {
+                        deferred.reject(ex);
+                    }
+                    return deferred.promise;
+                };
+                AbstractRepository.prototype.save = function (item) {
+                    var _this = this;
+                    var deferred = this.$q.defer();
+                    try {
+                        if (this.hasLocal) {
+                            // Save keys
+                            var keys = [];
+                            this.list().forEach(function (item) { return keys.push(item.Key); });
+                            localStorage.setItem(this.ident, JSON.stringify(this.keys));
+                            this.keys = keys;
+                        }
+                        if (!item) {
+                            // Save all
+                            var list = [];
+                            this.list().forEach(function (model) { return list.push(_this.save(model)); });
+                            this.$q.all(list).then(function () {
+                                deferred.resolve(null);
+                            });
+                        }
+                        else {
+                            // Save item
+                            var storeKey = this.ident + '[' + item.Key + ']';
+                            localStorage.setItem(storeKey, JSON.stringify(item));
+                            console.debug(' - Store [ ' + this.ident + ' ] Saved:', storeKey);
+                            deferred.resolve(item);
+                        }
+                    }
+                    catch (ex) {
+                        deferred.reject(ex);
+                    }
+                    return deferred.promise;
+                };
+                AbstractRepository.prototype.findByKey = function (key) {
+                    var _this = this;
+                    var found = false;
+                    var deferred = this.$q.defer();
+                    this.load().then(function (items) {
+                        if (items) {
+                            items.forEach(function (item) {
+                                if (found)
+                                    return;
+                                if (item.Key == key) {
+                                    deferred.resolve(item);
+                                    found = true;
+                                }
+                            });
+                        }
+                        if (!found) {
+                            deferred.resolve(null);
+                        }
+                    }).catch(function (error) {
+                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
+                    });
+                    return deferred.promise;
+                };
                 AbstractRepository.prototype.list = function () {
                     return this.memCache;
                 };
                 AbstractRepository.prototype.insert = function (item) {
-                    if (!item.Key) {
+                    if (!item.Key || Guid.Empty) {
                         item.Key = Guid.New();
+                    }
+                    if (!this.keys.indexOf(item.Key)) {
+                        this.keys.push(item.Key);
                     }
                     this.memCache.push(item);
                     return item;
@@ -62,13 +200,17 @@ var app;
                 AbstractRepository.prototype.remove = function (item) {
                     var index = this.memCache.indexOf(item);
                     if (index) {
+                        var key = this.keys.indexOf(item.Key);
+                        if (key >= 0) {
+                            this.keys.splice(key, 1);
+                        }
                         this.memCache.splice(index, 1);
                     }
                 };
                 return AbstractRepository;
             })();
             repositories.AbstractRepository = AbstractRepository;
-        })(repositories = data.repositories || (data.repositories = {}));
+        })(repositories = data_1.repositories || (data_1.repositories = {}));
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
 /// <reference path="IDataModel.ts" />
@@ -398,6 +540,7 @@ var app;
                     GroupKey: null,
                 },
             ];
+            SampleData.Users = [];
             return SampleData;
         })();
         data.SampleData = SampleData;
@@ -421,13 +564,8 @@ var app;
         (function (repositories) {
             var ProjectRepository = (function (_super) {
                 __extends(ProjectRepository, _super);
-                function ProjectRepository($q) {
-                    var _this = this;
-                    _super.call(this, $q);
-                    this.load()
-                        .then(function (list) {
-                        _this.memCache = list;
-                    });
+                function ProjectRepository($rootScope, $q) {
+                    _super.call(this, 'projects', $rootScope, $q, function () { return data.SampleData.Projects; });
                 }
                 ProjectRepository.prototype.create = function (title, description) {
                     var item = {
@@ -437,45 +575,6 @@ var app;
                     };
                     this.insert(item);
                     return item;
-                };
-                ProjectRepository.prototype.load = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        deferred.resolve(data.SampleData.Projects);
-                    }
-                    return deferred.promise;
-                };
-                ProjectRepository.prototype.save = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        console.log(' - ToDo: Implement Save: ', this.memCache);
-                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-                    }
-                    return deferred.promise;
-                };
-                ProjectRepository.prototype.findByKey = function (key) {
-                    var _this = this;
-                    var found = false;
-                    var deferred = this.$q.defer();
-                    this.load()
-                        .then(function (items) {
-                        if (items) {
-                            items.forEach(function (item) {
-                                if (found)
-                                    return;
-                                if (item.Key == key) {
-                                    deferred.resolve(item);
-                                    found = true;
-                                }
-                            });
-                        }
-                        if (!found) {
-                            deferred.resolve(null);
-                        }
-                    }).catch(function (error) {
-                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
-                    });
-                    return deferred.promise;
                 };
                 return ProjectRepository;
             })(repositories.AbstractRepository);
@@ -491,12 +590,8 @@ var app;
         (function (repositories) {
             var SprintRepository = (function (_super) {
                 __extends(SprintRepository, _super);
-                function SprintRepository($q) {
-                    var _this = this;
-                    _super.call(this, $q);
-                    this.load().then(function (list) {
-                        _this.memCache = list;
-                    });
+                function SprintRepository($rootScope, $q) {
+                    _super.call(this, 'sprints', $rootScope, $q, function () { return data.SampleData.Sprints; });
                 }
                 SprintRepository.prototype.create = function (projectKey, number) {
                     var item = {
@@ -507,44 +602,6 @@ var app;
                     };
                     this.insert(item);
                     return item;
-                };
-                SprintRepository.prototype.load = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        deferred.resolve(data.SampleData.Sprints);
-                    }
-                    return deferred.promise;
-                };
-                SprintRepository.prototype.save = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        console.log(' - ToDo: Implement Save: ', this.memCache);
-                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-                    }
-                    return deferred.promise;
-                };
-                SprintRepository.prototype.findByKey = function (key) {
-                    var _this = this;
-                    var found = false;
-                    var deferred = this.$q.defer();
-                    this.load().then(function (items) {
-                        if (items) {
-                            items.forEach(function (item) {
-                                if (found)
-                                    return;
-                                if (item.Key == key) {
-                                    deferred.resolve(item);
-                                    found = true;
-                                }
-                            });
-                        }
-                        if (!found) {
-                            deferred.resolve(null);
-                        }
-                    }).catch(function (error) {
-                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
-                    });
-                    return deferred.promise;
                 };
                 SprintRepository.prototype.filterByProject = function (key) {
                     var _this = this;
@@ -566,13 +623,11 @@ var app;
                 };
                 SprintRepository.prototype.getNextSprintNumber = function (projectKey) {
                     var sprintMax = 0;
-                    if (this.memCache) {
-                        this.memCache.forEach(function (item) {
-                            if (item.ProjectKey == projectKey && item.Number > sprintMax) {
-                                sprintMax = item.Number;
-                            }
-                        });
-                    }
+                    this.list().forEach(function (item) {
+                        if (item.ProjectKey == projectKey && item.Number > sprintMax) {
+                            sprintMax = item.Number;
+                        }
+                    });
                     return sprintMax + 1;
                 };
                 return SprintRepository;
@@ -589,12 +644,8 @@ var app;
         (function (repositories) {
             var BoardRepository = (function (_super) {
                 __extends(BoardRepository, _super);
-                function BoardRepository($q) {
-                    var _this = this;
-                    _super.call(this, $q);
-                    this.load().then(function (list) {
-                        _this.memCache = list;
-                    });
+                function BoardRepository($rootScope, $q) {
+                    _super.call(this, 'boards', $rootScope, $q, function () { return data.SampleData.Boards; });
                 }
                 BoardRepository.prototype.create = function (type, title) {
                     var item = {
@@ -605,24 +656,9 @@ var app;
                     this.insert(item);
                     return item;
                 };
-                BoardRepository.prototype.load = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        deferred.resolve(data.SampleData.Boards);
-                    }
-                    return deferred.promise;
-                };
-                BoardRepository.prototype.save = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        console.log(' - ToDo: Implement Save: ', this.memCache);
-                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-                    }
-                    return deferred.promise;
-                };
                 BoardRepository.prototype.filterByProject = function (projectKey, type) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (item.ProjectKey != projectKey)
                             return;
                         if (!type) {
@@ -636,7 +672,7 @@ var app;
                 };
                 BoardRepository.prototype.filterBySprint = function (sprintKey, type) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (item.SprintKey != sprintKey)
                             return;
                         if (!type) {
@@ -650,36 +686,12 @@ var app;
                 };
                 BoardRepository.prototype.filterByType = function (type) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (item.TaskType == type) {
                             list.push(item);
                         }
                     });
                     return list;
-                };
-                BoardRepository.prototype.findByKey = function (key) {
-                    var _this = this;
-                    var found = false;
-                    var deferred = this.$q.defer();
-                    this.load()
-                        .then(function (items) {
-                        if (items) {
-                            items.forEach(function (item) {
-                                if (found)
-                                    return;
-                                if (item.Key == key) {
-                                    deferred.resolve(item);
-                                    found = true;
-                                }
-                            });
-                        }
-                        if (!found) {
-                            deferred.resolve(null);
-                        }
-                    }).catch(function (error) {
-                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
-                    });
-                    return deferred.promise;
                 };
                 return BoardRepository;
             })(repositories.AbstractRepository);
@@ -687,18 +699,23 @@ var app;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
+/// <reference path="../../common/utils/Guid.ts" />
+/// <reference path="AbstractRepository.ts" />
+/// <reference path="../models/IGroup.ts" />
+/// <reference path="../samples.ts" />
 var app;
 (function (app) {
     var data;
     (function (data) {
         var repositories;
         (function (repositories) {
-            var GroupRepository = (function () {
-                function GroupRepository($q) {
-                    this.$q = $q;
+            var GroupRepository = (function (_super) {
+                __extends(GroupRepository, _super);
+                function GroupRepository($rootScope, $q) {
+                    _super.call(this, 'groups', $rootScope, $q, function () { return data.SampleData.Groups; });
                 }
                 return GroupRepository;
-            })();
+            })(repositories.AbstractRepository);
             repositories.GroupRepository = GroupRepository;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
@@ -712,12 +729,8 @@ var app;
             var models = app.data.models;
             var TaskRepository = (function (_super) {
                 __extends(TaskRepository, _super);
-                function TaskRepository($q) {
-                    var _this = this;
-                    _super.call(this, $q);
-                    this.load().then(function (list) {
-                        _this.memCache = list;
-                    });
+                function TaskRepository($rootScope, $q) {
+                    _super.call(this, 'tasks', $rootScope, $q, function () { return data.SampleData.Tasks; });
                 }
                 TaskRepository.prototype.create = function (board, title, description) {
                     var item = {
@@ -730,24 +743,9 @@ var app;
                     this.insert(item);
                     return item;
                 };
-                TaskRepository.prototype.load = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        deferred.resolve(data.SampleData.Tasks);
-                    }
-                    return deferred.promise;
-                };
-                TaskRepository.prototype.save = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        console.log(' - ToDo: Implement Save: ', this.memCache);
-                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-                    }
-                    return deferred.promise;
-                };
                 TaskRepository.prototype.filter = function (boardKey, groupKey) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (boardKey && boardKey != item.BoardKey)
                             return;
                         if (groupKey && groupKey != item.GroupKey)
@@ -758,7 +756,7 @@ var app;
                 };
                 TaskRepository.prototype.filterByProject = function (projectKey, groupKey) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (projectKey && projectKey != item.ProjectKey)
                             return;
                         if (groupKey && groupKey != item.GroupKey)
@@ -769,7 +767,7 @@ var app;
                 };
                 TaskRepository.prototype.filterBySprint = function (sprintKey, groupKey) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (sprintKey && sprintKey != item.SprintKey)
                             return;
                         if (groupKey && groupKey != item.GroupKey)
@@ -784,18 +782,24 @@ var app;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
+/// <reference path="IDataModel.ts" />
+/// <reference path="../../common/utils/Guid.ts" />
+/// <reference path="AbstractRepository.ts" />
+/// <reference path="../models/IUser.ts" />
+/// <reference path="../samples.ts" />
 var app;
 (function (app) {
     var data;
     (function (data) {
         var repositories;
         (function (repositories) {
-            var UserRepository = (function () {
-                function UserRepository($q) {
-                    this.$q = $q;
+            var UserRepository = (function (_super) {
+                __extends(UserRepository, _super);
+                function UserRepository($rootScope, $q) {
+                    _super.call(this, 'users', $rootScope, $q, function () { return data.SampleData.Users; });
                 }
                 return UserRepository;
-            })();
+            })(repositories.AbstractRepository);
             repositories.UserRepository = UserRepository;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
@@ -814,14 +818,15 @@ var app;
         var services;
         (function (services) {
             var ScrumBoardService = (function () {
-                function ScrumBoardService($q) {
+                function ScrumBoardService($rootScope, $q) {
+                    this.$rootScope = $rootScope;
                     this.$q = $q;
-                    this.Projects = new app.data.repositories.ProjectRepository($q);
-                    this.Sprints = new app.data.repositories.SprintRepository($q);
-                    this.Boards = new app.data.repositories.BoardRepository($q);
-                    this.Groups = new app.data.repositories.GroupRepository($q);
-                    this.Tasks = new app.data.repositories.TaskRepository($q);
-                    this.Users = new app.data.repositories.UserRepository($q);
+                    this.Projects = new app.data.repositories.ProjectRepository($rootScope, $q);
+                    this.Sprints = new app.data.repositories.SprintRepository($rootScope, $q);
+                    this.Boards = new app.data.repositories.BoardRepository($rootScope, $q);
+                    this.Groups = new app.data.repositories.GroupRepository($rootScope, $q);
+                    this.Tasks = new app.data.repositories.TaskRepository($rootScope, $q);
+                    this.Users = new app.data.repositories.UserRepository($rootScope, $q);
                 }
                 return ScrumBoardService;
             })();
@@ -1356,7 +1361,7 @@ var app;
 angular.module('myScrumBoard.common', [
     'myScrumBoard.directives',
 ])
-    .service('ScrumBoardService', ['$q', app.common.services.ScrumBoardService])
+    .service('ScrumBoardService', ['$rootScope', '$q', app.common.services.ScrumBoardService])
     .controller('AddProjectController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddProjectController])
     .controller('AddBoardController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddBoardController])
     .controller('AddSprintController', ['$scope', '$modalInstance', 'modalContext', 'ScrumBoardService', app.common.modal.AddSprintController])
@@ -1918,9 +1923,10 @@ var app;
                                 ProjectKey: sprint.ProjectKey,
                                 Title: ControllerUtils.TaskDescription(type),
                             }; }).Key;
+                            _this.scrumBoards.Tasks.save(item);
                         });
-                        _this.scrumBoards.Boards.save().then(function () {
-                            _this.scrumBoards.Tasks.save();
+                        _this.scrumBoards.Boards.save(board).then(function () {
+                            _this.$rootScope.$applyAsync();
                         });
                     }
                 }, 
@@ -1947,7 +1953,7 @@ var app;
                     sprint.Key = Guid.New();
                     this.scrumBoards.Sprints.insert(sprint);
                 }
-                this.scrumBoards.Sprints.save().finally(function () {
+                this.scrumBoards.Sprints.save(sprint).finally(function () {
                     _this.refreshData({ sprint: sprint });
                     _this.$rootScope.$applyAsync();
                 });
@@ -2812,6 +2818,27 @@ angular.module('myScrumBoard.routes', [
                 board: ['$stateParams', 'ScrumBoardService', function ($stateParams, svc) {
                         return $stateParams.key ? svc.Boards.findByKey($stateParams.key) : null;
                     }]
+            },
+        })
+            .state('reset', {
+            url: '/reset',
+            views: {
+                'main@': {
+                    controller: ['$state', '$q', 'ScrumBoardService', function ($state, $q, svc) {
+                            console.debug(' - Resetting all...');
+                            $q.all([
+                                svc.Projects.reset(),
+                                svc.Sprints.reset(),
+                                svc.Boards.reset(),
+                                svc.Groups.reset(),
+                                svc.Tasks.reset(),
+                                svc.Users.reset(),
+                            ]).then(function () {
+                                console.debug(' - Storage reset.');
+                                $state.go('default', {}, { reset: true });
+                            });
+                        }],
+                },
             },
         });
     }]);

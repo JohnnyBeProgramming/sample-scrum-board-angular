@@ -190,10 +190,10 @@ module app.controllers {
                                 ProjectKey: sprint.ProjectKey,
                                 Title: ControllerUtils.TaskDescription(type),
                             }).Key;
+                            this.scrumBoards.Tasks.save(item);
                         });
-
-                        this.scrumBoards.Boards.save().then(() => {
-                            this.scrumBoards.Tasks.save();
+                        this.scrumBoards.Boards.save(board).then(() => {
+                            this.$rootScope.$applyAsync();
                         });
                     }
                 },
@@ -219,7 +219,7 @@ module app.controllers {
                 sprint.Key = Guid.New();
                 this.scrumBoards.Sprints.insert(sprint);
             }
-            this.scrumBoards.Sprints.save().finally(() => {
+            this.scrumBoards.Sprints.save(sprint).finally(() => {
                 this.refreshData({ sprint: sprint });
                 this.$rootScope.$applyAsync();
             });

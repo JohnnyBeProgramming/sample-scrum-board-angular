@@ -17,12 +17,23 @@ declare module app.data.repositories {
     import IDataModel = app.data.models.IDataModel;
     interface IRepository<TModel> {
         load(): ng.IPromise<TModel[]>;
-        save(): ng.IPromise<boolean>;
+        save(): ng.IPromise<TModel>;
     }
-    class AbstractRepository<TModel extends IDataModel> {
+    class AbstractRepository<TModel extends IDataModel> implements IRepository<TModel> {
+        ident: string;
+        private $rootScope;
         $q: ng.IQService;
-        memCache: TModel[];
-        constructor($q: ng.IQService);
+        private defaults;
+        hasLocal: boolean;
+        isOnline: boolean;
+        private keys;
+        private memCache;
+        constructor(ident: string, $rootScope: ng.IRootScopeService, $q: ng.IQService, defaults?: () => TModel[]);
+        init(): void;
+        load(): ng.IPromise<TModel[]>;
+        reset(): ng.IPromise<TModel[]>;
+        save(item?: TModel): ng.IPromise<TModel>;
+        findByKey(key: string): ng.IPromise<TModel>;
         list(): TModel[];
         insert(item: TModel): TModel;
         remove(item: TModel): void;
@@ -98,69 +109,68 @@ declare module app.data {
         static Groups: models.IGroup[];
         static Boards: models.IBoard[];
         static Tasks: models.ITask[];
+        static Users: models.IUser[];
     }
 }
 declare module app.data.repositories {
     import IProject = app.data.models.IProject;
-    class ProjectRepository extends AbstractRepository<IProject> implements IRepository<IProject> {
-        constructor($q: ng.IQService);
+    class ProjectRepository extends AbstractRepository<IProject> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
         create(title: string, description?: string): IProject;
-        load(): ng.IPromise<IProject[]>;
-        save(): ng.IPromise<boolean>;
-        findByKey(key: string): ng.IPromise<IProject>;
     }
 }
 declare module app.data.repositories {
     import ISprint = app.data.models.ISprint;
-    class SprintRepository extends AbstractRepository<ISprint> implements IRepository<ISprint> {
-        constructor($q: ng.IQService);
+    class SprintRepository extends AbstractRepository<ISprint> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
         create(projectKey: string, number?: number): ISprint;
-        load(): ng.IPromise<ISprint[]>;
-        save(): ng.IPromise<boolean>;
-        findByKey(key: string): ng.IPromise<ISprint>;
         filterByProject(key: string): ng.IPromise<models.ISprint[]>;
         getNextSprintNumber(projectKey: string): number;
     }
 }
 declare module app.data.repositories {
     import IBoard = app.data.models.IBoard;
-    class BoardRepository extends AbstractRepository<IBoard> implements IRepository<IBoard> {
-        constructor($q: ng.IQService);
+    class BoardRepository extends AbstractRepository<IBoard> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
         create(type: app.data.models.TaskType, title?: string): IBoard;
-        load(): ng.IPromise<IBoard[]>;
-        save(): ng.IPromise<boolean>;
         filterByProject(projectKey: string, type?: app.data.models.TaskType): IBoard[];
         filterBySprint(sprintKey: string, type?: app.data.models.TaskType): IBoard[];
         filterByType(type: app.data.models.TaskType): IBoard[];
-        findByKey(key: string): ng.IPromise<IBoard>;
     }
 }
 declare module app.data.repositories {
-    class GroupRepository {
-        private $q;
-        constructor($q: any);
+    import IGroup = app.data.models.IGroup;
+    class GroupRepository extends AbstractRepository<IGroup> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
     }
 }
 declare module app.data.repositories {
     import models = app.data.models;
-    class TaskRepository extends AbstractRepository<models.ITask> implements IRepository<models.ITask> {
-        constructor($q: ng.IQService);
+    class TaskRepository extends AbstractRepository<models.ITask> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
         create(board: models.IBoard, title: string, description?: string): models.ITask;
-        load(): ng.IPromise<models.ITask[]>;
-        save(): ng.IPromise<boolean>;
         filter(boardKey: string, groupKey?: string): models.ITask[];
         filterByProject(projectKey: string, groupKey?: string): models.ITask[];
         filterBySprint(sprintKey: string, groupKey?: string): models.ITask[];
     }
 }
+declare module app.data.models {
+    interface IUser extends IDataModel {
+        DisplayName: string;
+        ProjectKeys: string[];
+        SprintKeys: string[];
+        BoardKeys: string[];
+        GroupKeys: string[];
+    }
+}
 declare module app.data.repositories {
-    class UserRepository {
-        private $q;
-        constructor($q: any);
+    class UserRepository extends AbstractRepository<models.IUser> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
     }
 }
 declare module app.common.services {
     class ScrumBoardService {
+        private $rootScope;
         private $q;
         Projects: app.data.repositories.ProjectRepository;
         Sprints: app.data.repositories.SprintRepository;
@@ -168,7 +178,7 @@ declare module app.common.services {
         Groups: app.data.repositories.GroupRepository;
         Tasks: app.data.repositories.TaskRepository;
         Users: app.data.repositories.UserRepository;
-        constructor($q: any);
+        constructor($rootScope: ng.IRootScopeService, $q: any);
     }
 }
 declare module app.common.directives {

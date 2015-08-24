@@ -87,7 +87,7 @@
                     controllerAs: 'viewCtrl',
                 },
             }
-        })        
+        })
         .state('sprints.active',
         {
             url: '',
@@ -196,6 +196,29 @@
                 board: ['$stateParams', 'ScrumBoardService', ($stateParams, svc: app.common.services.ScrumBoardService) => {
                     return $stateParams.key ? svc.Boards.findByKey($stateParams.key) : null;
                 }]
+            },
+        })
+
+        .state('reset',
+        {
+            url: '/reset',
+            views: {
+                'main@': {
+                    controller: ['$state', '$q', 'ScrumBoardService', ($state, $q: ng.IQService, svc: app.common.services.ScrumBoardService) => {
+                        console.debug(' - Resetting all...');
+                        $q.all([
+                            svc.Projects.reset(),
+                            svc.Sprints.reset(),
+                            svc.Boards.reset(),
+                            svc.Groups.reset(),
+                            svc.Tasks.reset(),
+                            svc.Users.reset(),
+                        ]).then(() => {
+                            console.debug(' - Storage reset.');
+                            $state.go('default', {}, { reset: true });
+                        });
+                    }],
+                },
             },
         })
 
