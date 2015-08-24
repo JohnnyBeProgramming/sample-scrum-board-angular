@@ -1,0 +1,36 @@
+﻿<div class="proj-info">
+    <a ng-if="summryCtrl.current" href=""
+       ng-click="summryCtrl.nextSprint();"
+       class="pull-right ctrl">
+        <i class="fa fa-chevron-right"></i>
+    </a>
+    <a ng-if="summryCtrl.current" class="pull-right ctrl" ui-sref="sprints.list({ projectKey: project.Key })">
+        <i class="fa fa-list-ul"></i>
+    </a>
+    <a ng-if="summryCtrl.current" href=""
+       ng-click="summryCtrl.prevSprint();"
+       class="pull-right ctrl">
+        <i class="fa fa-chevron-left"></i>
+    </a>
+
+    <h5>
+        <i class="fa fa-tag"></i>
+        <em ng-if="!summryCtrl.current">No Sprints Available</em>
+        <span ng-if="summryCtrl.current">
+            Sprint #{{ summryCtrl.current.Number }}
+        </span>
+        <small ng-if="summryCtrl.current">{{ summaryCtrl.countPoints(app.data.models.TaskType.Completed) }} / {{ summaryCtrl.countPoints(app.data.models.TaskType.Testing) }} / {{ summaryCtrl.countPoints() }} Points</small>
+    </h5>
+    <a ng-if="!summryCtrl.current" href="" class="tile add"
+       ng-click="summryCtrl.addSprint(project)">
+        <i class="fa fa-plus"></i> Add Sprint
+    </a>
+    <div class="board-summary" ng-if="summryCtrl.current">
+        <a class="tile"
+           ui-sref="sprints.item({ key: item.SprintKey })"
+           ng-class="summryCtrl.getTaskCss(item.TaskType)"
+           ng-repeat="item in summryCtrl.getTaskSummary(summryCtrl.current)">
+            <b>{{ summryCtrl.countTasks(item.TaskType) }}</b> {{ item.Title }}
+        </a>
+    </div>
+</div>

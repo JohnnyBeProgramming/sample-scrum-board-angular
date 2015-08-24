@@ -1,4 +1,4 @@
-angular.module('myScrumBoard.templates', ['views/backlogs/item.tpl.html', 'views/backlogs/list.tpl.html', 'views/backlogs/main.tpl.html', 'views/common/body.tpl.html', 'views/common/footer.tpl.html', 'views/common/heading.tpl.html', 'views/common/modal/addBacklogs.tpl.html', 'views/common/modal/addBoard.tpl.html', 'views/common/modal/addProject.tpl.html', 'views/common/modal/addSprint.tpl.html', 'views/common/modal/addTask.tpl.html', 'views/common/toolbar.tpl.html', 'views/dashboard/main.tpl.html', 'views/projects/edit.tpl.html', 'views/projects/item.tpl.html', 'views/projects/list.tpl.html', 'views/projects/main.tpl.html', 'views/sprints/active.tpl.html', 'views/sprints/edit.tpl.html', 'views/sprints/item.tpl.html', 'views/sprints/list.tpl.html', 'views/sprints/main.tpl.html']);
+angular.module('myScrumBoard.templates', ['views/backlogs/item.tpl.html', 'views/backlogs/list.tpl.html', 'views/backlogs/main.tpl.html', 'views/common/body.tpl.html', 'views/common/footer.tpl.html', 'views/common/heading.tpl.html', 'views/common/modal/addBacklogs.tpl.html', 'views/common/modal/addBoard.tpl.html', 'views/common/modal/addProject.tpl.html', 'views/common/modal/addSprint.tpl.html', 'views/common/modal/addTask.tpl.html', 'views/common/toolbar.tpl.html', 'views/dashboard/main.tpl.html', 'views/projects/edit.tpl.html', 'views/projects/item.tpl.html', 'views/projects/list.tpl.html', 'views/projects/main.tpl.html', 'views/sprints/active.tpl.html', 'views/sprints/directives/backlogs.tpl.html', 'views/sprints/directives/summary.tpl.html', 'views/sprints/edit.tpl.html', 'views/sprints/item.tpl.html', 'views/sprints/list.tpl.html', 'views/sprints/main.tpl.html']);
 
 angular.module('views/backlogs/item.tpl.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('views/backlogs/item.tpl.html',
@@ -452,57 +452,64 @@ angular.module('views/common/modal/addTask.tpl.html', []).run(['$templateCache',
 
 angular.module('views/common/toolbar.tpl.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('views/common/toolbar.tpl.html',
-    '<nav class="navbar navbar-default">\n' +
-    '    <div class="container-fluid">\n' +
-    '        <!-- Brand and toggle get grouped for better mobile display -->\n' +
-    '        <div class="navbar-header">\n' +
-    '            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-toolbar-menu" aria-expanded="false">\n' +
-    '                <span class="sr-only">Toggle navigation</span>\n' +
-    '                <span class="icon-bar"></span>\n' +
-    '                <span class="icon-bar"></span>\n' +
-    '                <span class="icon-bar"></span>\n' +
-    '            </button>\n' +
-    '            <a class="navbar-brand" href="" ui-sref="default">\n' +
-    '                <i class="fa fa-home"></i> Scrum Boards\n' +
-    '            </a>\n' +
-    '        </div>\n' +
+    '<div class="container">\n' +
+    '    <nav class="navbar navbar-default">\n' +
+    '        <div class="container-fluid">\n' +
+    '            <!-- Brand and toggle get grouped for better mobile display -->\n' +
+    '            <div class="navbar-header">\n' +
+    '                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#app-toolbar-menu" aria-expanded="false">\n' +
+    '                    <span class="sr-only">Toggle navigation</span>\n' +
+    '                    <span class="icon-bar"></span>\n' +
+    '                    <span class="icon-bar"></span>\n' +
+    '                    <span class="icon-bar"></span>\n' +
+    '                </button>\n' +
+    '                <a class="navbar-brand" href="" ui-sref="default">\n' +
+    '                    <i class="fa fa-home"></i> Scrum Boards\n' +
+    '                </a>\n' +
+    '            </div>\n' +
     '\n' +
-    '        <!-- Collect the nav links, forms, and other content for toggling -->\n' +
-    '        <div class="collapse navbar-collapse" id="app-toolbar-menu">\n' +
-    '            <ul class="nav navbar-nav">\n' +
-    '                <li ui-sref-active="active">\n' +
-    '                    <a href="" ui-sref="projects.list">Projects</a>\n' +
-    '                </li>\n' +
-    '                <li ui-sref-active="active">\n' +
-    '                    <a href="" ui-sref="sprints.active">Sprints</a>\n' +
-    '                </li>\n' +
-    '                <li ui-sref-active="active">\n' +
-    '                    <a href="" ui-sref="backlogs.list">Backlogs</a>\n' +
-    '                </li>\n' +
-    '            </ul>\n' +
-    '            <form class="navbar-form navbar-right hidden" role="search">\n' +
-    '                <div class="form-group">\n' +
-    '                    <input type="text" class="form-control" placeholder="Search">\n' +
-    '                </div>\n' +
-    '                <button type="submit" class="btn btn-default">Submit</button>\n' +
-    '            </form>\n' +
-    '            <ul class="nav navbar-nav navbar-right">\n' +
-    '                <li class="dropdown disabled">\n' +
-    '                    <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">\n' +
-    '                        <i class="fa fa-user"></i> Username <span class="caret"></span>\n' +
-    '                    </a>\n' +
-    '                    <ul class="dropdown-menu">\n' +
-    '                        <li><a href="">Profile</a></li>\n' +
-    '                        <li><a href="">Accounts</a></li>\n' +
-    '                        <li><a href="" class="disabled">Administration</a></li>\n' +
-    '                        <li role="separator" class="divider"></li>\n' +
-    '                        <li><a href="">Sign Out</a></li>\n' +
-    '                    </ul>\n' +
-    '                </li>\n' +
-    '            </ul>\n' +
-    '        </div><!-- /.navbar-collapse -->\n' +
-    '    </div><!-- /.container-fluid -->\n' +
-    '</nav>');
+    '            <!-- Collect the nav links, forms, and other content for toggling -->\n' +
+    '            <div class="collapse navbar-collapse" id="app-toolbar-menu">\n' +
+    '                <ul class="nav navbar-nav">\n' +
+    '                    <li ui-sref-active="active">\n' +
+    '                        <a href="" ui-sref="projects.list">Projects</a>\n' +
+    '                    </li>\n' +
+    '                    <li ui-sref-active="active">\n' +
+    '                        <a href="" ui-sref="sprints.active">Sprints</a>\n' +
+    '                    </li>\n' +
+    '                    <li ui-sref-active="active">\n' +
+    '                        <a href="" ui-sref="backlogs.list">Backlogs</a>\n' +
+    '                    </li>\n' +
+    '                </ul>\n' +
+    '                <form class="navbar-form navbar-right hidden" role="search">\n' +
+    '                    <div class="form-group">\n' +
+    '                        <input type="text" class="form-control" placeholder="Search">\n' +
+    '                    </div>\n' +
+    '                    <button type="submit" class="btn btn-default">Submit</button>\n' +
+    '                </form>\n' +
+    '                <ul class="nav navbar-nav navbar-right">\n' +
+    '                    <li class="dropdown disabled">\n' +
+    '                        <a href="" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">\n' +
+    '                            <i class="fa fa-user"></i> Username <span class="caret"></span>\n' +
+    '                        </a>\n' +
+    '                        <ul class="dropdown-menu">\n' +
+    '                            <li><a href="">Profile</a></li>\n' +
+    '                            <li><a href="">Accounts</a></li>\n' +
+    '                            <li><a href="" class="disabled">Administration</a></li>\n' +
+    '                            <li role="separator" class="divider"></li>\n' +
+    '                            <li><a href="">Sign Out</a></li>\n' +
+    '                        </ul>\n' +
+    '                    </li>\n' +
+    '                    <li ui-sref-active="active">\n' +
+    '                        <a href="" class="reset" ui-sref="reset" title="Reset Sample Data">\n' +
+    '                            <i class="fa fa-certificate"></i>\n' +
+    '                        </a>\n' +
+    '                    </li>\n' +
+    '                </ul>\n' +
+    '            </div><!-- /.navbar-collapse -->\n' +
+    '        </div><!-- /.container-fluid -->\n' +
+    '    </nav>\n' +
+    '</div>');
 }]);
 
 angular.module('views/dashboard/main.tpl.html', []).run(['$templateCache', function($templateCache) {
@@ -544,15 +551,20 @@ angular.module('views/projects/edit.tpl.html', []).run(['$templateCache', functi
 angular.module('views/projects/item.tpl.html', []).run(['$templateCache', function($templateCache) {
   $templateCache.put('views/projects/item.tpl.html',
     '<div>\n' +
-    '    <span class="pull-right">\n' +
+    '    <span ng-if="childCtrl.project" class="pull-right">\n' +
     '        <a class="btn btn-xs btn-default" href="" ng-click="viewCtrl.cancel()">Cancel</a>\n' +
     '        <a class="btn btn-xs btn-primary" href="" ng-click="viewCtrl.update(childCtrl.project)">Update</a>\n' +
     '    </span>\n' +
-    '    <h3>\n' +
-    '        Current Projects\n' +
-    '        <small>2 Items, 1 Active Sprint(s)</small>\n' +
+    '    <div ng-if="!childCtrl.project" class="inactive-fill">\n' +
+    '        <em>Project Not Found</em>\n' +
+    '    </div>\n' +
+    '    <h3 ng-if="childCtrl.project">\n' +
+    '        Project Details\n' +
+    '        <small ng-if="childCtrl.project">\n' +
+    '            {{ childCtrl.project.Description }}\n' +
+    '        </small>\n' +
     '    </h3>\n' +
-    '    <div class="row contained">\n' +
+    '    <div class="row contained tight" ng-if="childCtrl.project">\n' +
     '        <div class="col-md-12" ng-if="childCtrl.project">\n' +
     '            <div class="project">\n' +
     '                <a class="pull-right ctrl"><i class="fa fa-trash"></i></a>\n' +
@@ -566,14 +578,10 @@ angular.module('views/projects/item.tpl.html', []).run(['$templateCache', functi
     '                    <div class="proj-logo">\n' +
     '                        No Logo\n' +
     '                    </div>\n' +
-    '                    <div class="proj-info">\n' +
-    '                        <h5>\n' +
-    '                            <i class="fa fa-tag"></i> Sprint #1\n' +
-    '                            <small>4 / 12 Points</small>\n' +
-    '                        </h5>\n' +
-    '                        <a href="" ui-sref="sprints.list({ projectKey: childCtrl.project.Key })" class="tile add">\n' +
-    '                            <i class="fa fa-plus"></i> Add Sprint\n' +
-    '                        </a>\n' +
+    '                    <div class="proj-info" \n' +
+    '                         sprint-summary\n' +
+    '                         sprint-summary-project="childCtrl.project">\n' +
+    '                        <em>Loading Summary...</em>\n' +
     '                    </div>\n' +
     '                    <div class="proj-history">\n' +
     '                        <h5>\n' +
@@ -585,16 +593,11 @@ angular.module('views/projects/item.tpl.html', []).run(['$templateCache', functi
     '                        </div>\n' +
     '                    </div>\n' +
     '                </div>\n' +
-    '                <div class="proj-details">\n' +
-    '                    ...\n' +
-    '                </div>\n' +
     '            </div>\n' +
     '        </div>\n' +
-    '        <div class="col-md-12">\n' +
-    '            <a href="" class="project add">\n' +
-    '                <i class="fa fa-plus"></i> Create Project\n' +
-    '            </a>\n' +
-    '        </div>\n' +
+    '    </div>\n' +
+    '    <div ng-if="childCtrl.project"\n' +
+    '         sprint-backlog-view="childCtrl.project">\n' +
     '    </div>\n' +
     '</div>');
 }]);
@@ -606,10 +609,10 @@ angular.module('views/projects/list.tpl.html', []).run(['$templateCache', functi
     '    </span>\n' +
     '    <h3>\n' +
     '        Current Projects\n' +
-    '        <small>{{ childCtrl.projects.length }} Items<span ng-if="viewCtrl.countSprintsOfType(app.data.models.TaskType.InProgress)">, {{ viewCtrl.countSprintsOfType(app.data.models.TaskType.InProgress) }} Active Sprint(s)</span></small>\n' +
+    '        <small>{{ viewCtrl.projects.length }} Items<span ng-if="viewCtrl.countSprintsOfType(app.data.models.TaskType.InProgress)">, {{ viewCtrl.countSprintsOfType(app.data.models.TaskType.InProgress) }} Active Sprint(s)</span></small>\n' +
     '    </h3>\n' +
     '    <div class="row contained">\n' +
-    '        <div class="col-md-12" ng-repeat="item in childCtrl.projects">\n' +
+    '        <div class="col-md-12" ng-repeat="item in viewCtrl.projects">\n' +
     '            <div class="project">\n' +
     '                <a class="pull-right ctrl"><i class="fa fa-trash"></i></a>\n' +
     '                <a ui-sref="projects.item({ projectKey: item.Key })" class="pull-right ctrl"><i class="fa fa-edit"></i></a>\n' +
@@ -617,29 +620,25 @@ angular.module('views/projects/list.tpl.html', []).run(['$templateCache', functi
     '                    <a ui-sref="projects.item({ projectKey: item.Key })">\n' +
     '                        <i class="fa fa-tags"></i> {{ item.Title || \'Project Overview\' }}\n' +
     '                    </a>\n' +
-    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Started) || 0 }} In Progress,</small>\n' +
-    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Default) || 0 }} Scheduled,</small>\n' +
-    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Completed) || 0 }} Commpleted,</small>\n' +
-    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.OnHold) || 0 }} On Hold</small>\n' +
+    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Started, item.Key) || 0 }} In Progress,</small>\n' +
+    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Default, item.Key) || 0 }} Scheduled,</small>\n' +
+    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.Completed, item.Key) || 0 }} Commpleted,</small>\n' +
+    '                    <small>{{ viewCtrl.countSprintsOfType(app.data.models.SprintState.OnHold, item.Key) || 0 }} On Hold</small>\n' +
     '                </h4>\n' +
     '                <div class="proj-body">\n' +
     '                    <div class="proj-logo">\n' +
     '                        No Logo\n' +
     '                    </div>\n' +
-    '                    <div class="proj-info">\n' +
-    '                        <h5>\n' +
-    '                            <i class="fa fa-tag"></i> Sprint #1\n' +
-    '                            <small>4 / 12 Points</small>\n' +
-    '                        </h5>\n' +
-    '                        <a href="" ui-sref="sprints.list({ projectKey: item.Key })" class="tile add">\n' +
-    '                            <i class="fa fa-plus"></i> Add Sprint\n' +
-    '                        </a>\n' +
+    '                    <div class="proj-info" \n' +
+    '                         sprint-summary\n' +
+    '                         sprint-summary-project="item">\n' +
+    '                        <em>Loading Summary...</em>\n' +
     '                    </div>\n' +
     '                    <div class="proj-history">\n' +
     '                        <h5>\n' +
     '                            Project History\n' +
-    '                            <small ng-if="item.StartedAt">{{ item.StartedAt | date:\'fullDate\' }}</small>\n' +
-    '                            <small ng-if="item.ClosedAt"> up to {{ item.ClosedAt | date:\'fullDate\' }}</small>\n' +
+    '                            <small ng-if="item.StartedAt">starting <b>{{ item.StartedAt | date:\'longDate\' }}</b></small>\n' +
+    '                            <small ng-if="item.ClosedAt"> up until <b>{{ item.ClosedAt | date:\'longDate\' }}</b></small>\n' +
     '                            <small>(12 Sprints)</small>\n' +
     '                        </h5>\n' +
     '                        <div class="tile empty">\n' +
@@ -687,7 +686,6 @@ angular.module('views/sprints/active.tpl.html', []).run(['$templateCache', funct
     '        <div class="col-md-3" ng-repeat="item in childCtrl.sprints">\n' +
     '            <div class="row contained">\n' +
     '                <div class="container-title">\n' +
-    '                    <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>\n' +
     '                    {{ viewCtrl.getProjectLabel(item.ProjectKey) || \'Loading...\' }}\n' +
     '                </div>\n' +
     '                <div class="col-md-12">\n' +
@@ -701,9 +699,11 @@ angular.module('views/sprints/active.tpl.html', []).run(['$templateCache', funct
     '                                <b>Sprint #{{ (item.Number || \'1\') }}</b>\n' +
     '                            </a>\n' +
     '                        </h4>\n' +
-    '                        <div class="tile" ng-repeat="boards in viewCtrl.getBoards(item.Key)">\n' +
+    '                        <div class="tile"\n' +
+    '                             ng-class="viewCtrl.getTaskCss(board.TaskType)"\n' +
+    '                             ng-repeat="board in viewCtrl.getBoards(item.Key)">\n' +
     '                            <div class="board-group">\n' +
-    '                                {{ boards.Title }}\n' +
+    '                                {{ board.Title }}\n' +
     '                            </div>\n' +
     '                        </div>\n' +
     '                        <div>\n' +
@@ -723,6 +723,117 @@ angular.module('views/sprints/active.tpl.html', []).run(['$templateCache', funct
     '                <i class="fa fa-plus"></i> Add Sprint\n' +
     '            </a>\n' +
     '        </div>\n' +
+    '    </div>\n' +
+    '</div>');
+}]);
+
+angular.module('views/sprints/directives/backlogs.tpl.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('views/sprints/directives/backlogs.tpl.html',
+    '<div class="row">\n' +
+    '    <div class="col-md-9">\n' +
+    '        <div class="row contained">\n' +
+    '            <div class="col-md-3" ng-repeat="item in backlogCtrl.sprints">\n' +
+    '                <div class="board drop-target"\n' +
+    '                     drop-action="backlogCtrl.moveTask(item.Key, data)">\n' +
+    '                    <h4>\n' +
+    '                        <a ui-sref="sprints.item({ key: item.Key })">\n' +
+    '                            <i class="fa fa-tag"></i>\n' +
+    '                            {{ backlogCtrl.getStateDesc(item.State) || \'Loading...\' }}\n' +
+    '                        </a>\n' +
+    '                        <small>\n' +
+    '                            Sprint #{{ (item.Number || \'1\') }}                            \n' +
+    '                        </small>\n' +
+    '                    </h4>\n' +
+    '                    <ul class="drop-list">\n' +
+    '                        <li class="drag-item" drag-data="task"\n' +
+    '                            ng-dblclick="backlogCtrl.editTask(task)"\n' +
+    '                            ng-repeat="task in backlogCtrl.getTasks(item)">\n' +
+    '                            <div class="tile">\n' +
+    '                                <h5>{{ task.Title }}</h5>\n' +
+    '                                <p>\n' +
+    '                                    {{ task.Description }}\n' +
+    '                                </p>\n' +
+    '                            </div>\n' +
+    '                        </li>\n' +
+    '                    </ul>\n' +
+    '                    <div ng-if="true">\n' +
+    '                        <a href="" ng-click="backlogCtrl.addTaskToBoard(item)" class="tile aside">\n' +
+    '                            <i class="fa fa-plus"></i> Add Task\n' +
+    '                        </a>\n' +
+    '                    </div>\n' +
+    '                </div>\n' +
+    '            </div>\n' +
+    '            <div class="col-md-3">\n' +
+    '                <a href="" ng-click="viewCtrl.addSprint(backlogCtrl.project)" class="board add">\n' +
+    '                    <i class="fa fa-plus"></i> New Sprint\n' +
+    '                </a>\n' +
+    '            </div>\n' +
+    '        </div>\n' +
+    '    </div>\n' +
+    '    <div class="col-md-3">\n' +
+    '        <div class="row contained">\n' +
+    '            <div class="col-md-12">\n' +
+    '                <div class="board">\n' +
+    '                    <h4>\n' +
+    '                        <a ui-sref="sprints.item({ key: item.Key })">\n' +
+    '                            <i class="fa fa-sticky-note-o"></i>\n' +
+    '                            Project Backlog\n' +
+    '                        </a>\n' +
+    '                    </h4>\n' +
+    '                    <div class="tile" ng-repeat="board in viewCtrl.getBoards(item.Key)">\n' +
+    '                        <h5>{{ board.Title }}</h5>\n' +
+    '                        <p>\n' +
+    '                            {{ board.Description }}\n' +
+    '                        </p>\n' +
+    '                    </div>\n' +
+    '                    <div ng-if="true">\n' +
+    '                        <a href="" ng-click="viewCtrl.addTaskToBoard(item)" class="tile aside">\n' +
+    '                            <i class="fa fa-plus"></i> Add Task\n' +
+    '                        </a>\n' +
+    '                    </div>\n' +
+    '                </div>\n' +
+    '            </div>\n' +
+    '        </div>\n' +
+    '    </div>\n' +
+    '</div>');
+}]);
+
+angular.module('views/sprints/directives/summary.tpl.html', []).run(['$templateCache', function($templateCache) {
+  $templateCache.put('views/sprints/directives/summary.tpl.html',
+    '<div class="proj-info">\n' +
+    '    <a ng-if="summryCtrl.current" href=""\n' +
+    '       ng-click="summryCtrl.nextSprint();"\n' +
+    '       class="pull-right ctrl">\n' +
+    '        <i class="fa fa-chevron-right"></i>\n' +
+    '    </a>\n' +
+    '    <a ng-if="summryCtrl.current" class="pull-right ctrl" ui-sref="sprints.list({ projectKey: project.Key })">\n' +
+    '        <i class="fa fa-list-ul"></i>\n' +
+    '    </a>\n' +
+    '    <a ng-if="summryCtrl.current" href=""\n' +
+    '       ng-click="summryCtrl.prevSprint();"\n' +
+    '       class="pull-right ctrl">\n' +
+    '        <i class="fa fa-chevron-left"></i>\n' +
+    '    </a>\n' +
+    '\n' +
+    '    <h5>\n' +
+    '        <i class="fa fa-tag"></i>\n' +
+    '        <em ng-if="!summryCtrl.current">No Sprints Available</em>\n' +
+    '        <span ng-if="summryCtrl.current">\n' +
+    '            Sprint #{{ summryCtrl.current.Number }}\n' +
+    '        </span>\n' +
+    '        <small ng-if="summryCtrl.current">{{ summaryCtrl.countPoints(app.data.models.TaskType.Completed) }} / {{ summaryCtrl.countPoints(app.data.models.TaskType.Testing) }} / {{ summaryCtrl.countPoints() }} Points</small>\n' +
+    '    </h5>\n' +
+    '    <a ng-if="!summryCtrl.current" href="" class="tile add"\n' +
+    '       ng-click="summryCtrl.addSprint(project)">\n' +
+    '        <i class="fa fa-plus"></i> Add Sprint\n' +
+    '    </a>\n' +
+    '    <div class="board-summary" ng-if="summryCtrl.current">\n' +
+    '        <a class="tile"\n' +
+    '           ui-sref="sprints.item({ key: item.SprintKey })"\n' +
+    '           ng-class="summryCtrl.getTaskCss(item.TaskType)"\n' +
+    '           ng-repeat="item in summryCtrl.getTaskSummary(summryCtrl.current)">\n' +
+    '            <b>{{ summryCtrl.countTasks(item.TaskType) }}</b> {{ item.Title }}\n' +
+    '        </a>\n' +
     '    </div>\n' +
     '</div>');
 }]);
@@ -835,7 +946,7 @@ angular.module('views/sprints/item.tpl.html', []).run(['$templateCache', functio
     '            <div ng-class="childCtrl.getColumnCss(childCtrl.boards.length)"\n' +
     '                 ng-repeat="board in childCtrl.boards track by board.Key">\n' +
     '                <div class="board drop-target"\n' +
-    '                     drop-action="viewCtrl.moveTask(item.Key, data)">\n' +
+    '                     drop-action="viewCtrl.moveTask(board.Key, data)">\n' +
     '                    <div>\n' +
     '                        <h4>\n' +
     '                            <i class="fa fa-tag"></i> {{ board.Title || \'Board\' }}\n' +
@@ -844,14 +955,14 @@ angular.module('views/sprints/item.tpl.html', []).run(['$templateCache', functio
     '                            <li class="drag-item" drag-data="task"\n' +
     '                                ng-dblclick="viewCtrl.editTask(task)"\n' +
     '                                ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(board.Key) track by task.Key">\n' +
-    '                                <div class="tile">\n' +
+    '                                <div class="tile" ng-class="viewCtrl.getTaskCss(task.TaskType)">\n' +
     '                                    <h5>{{ task.Title }}</h5>\n' +
     '                                    <p>\n' +
     '                                        {{ task.Description }}\n' +
     '                                    </p>\n' +
     '                                </div>\n' +
     '                            </li>\n' +
-    '                        </ul>     \n' +
+    '                        </ul>\n' +
     '                        <div ng-if="board.TaskType <= 2">\n' +
     '                            <a href="" ng-click="viewCtrl.addBacklogs(childCtrl.sprint, board)" class="tile aside">\n' +
     '                                <i class="fa fa-share"></i> From Backlog\n' +
@@ -859,6 +970,11 @@ angular.module('views/sprints/item.tpl.html', []).run(['$templateCache', functio
     '                            <a href="" ng-click="viewCtrl.addTaskToBoard(board)" class="tile aside">\n' +
     '                                <i class="fa fa-plus"></i> Add Task\n' +
     '                            </a>\n' +
+    '                        </div>\n' +
+    '                        <div ng-if="board.TaskType == 3">\n' +
+    '                            <div class="tile aside">\n' +
+    '                                <i class="fa fa-info-circle"></i> Drag here to complete\n' +
+    '                            </div>\n' +
     '                        </div>\n' +
     '                    </div>\n' +
     '                </div>\n' +
@@ -879,73 +995,7 @@ angular.module('views/sprints/list.tpl.html', []).run(['$templateCache', functio
     '        Project Sprints\n' +
     '        <small>5 Pending Tasks, 2 In Progress, 2 Completed</small>\n' +
     '    </h3>\n' +
-    '    <div class="row">\n' +
-    '        <div class="col-md-9">\n' +
-    '            <div class="row contained">\n' +
-    '                <div class="col-md-3" ng-repeat="item in childCtrl.sprints">\n' +
-    '                    <div class="board drop-target" \n' +
-    '                         drop-action="viewCtrl.moveTask(item.Key, data)"> \n' +
-    '                        <h4>\n' +
-    '                            <a ui-sref="sprints.item({ key: item.Key })">\n' +
-    '                                <i class="fa fa-tag"></i>\n' +
-    '                                Sprint #{{ (item.Number || \'1\') }}\n' +
-    '                            </a>\n' +
-    '                            <small>\n' +
-    '                                {{ viewCtrl.getStateDesc(item.State) || \'Loading...\' }}\n' +
-    '                            </small>\n' +
-    '                        </h4>\n' +
-    '                        <ul class="drop-list">\n' +
-    '                            <li class="drag-item" drag-data="task"\n' +
-    '                                ng-dblclick="viewCtrl.editTask(task)"\n' +
-    '                                ng-repeat="task in viewCtrl.getTasks(item)">\n' +
-    '                                <div class="tile">\n' +
-    '                                    <h5>{{ task.Title }}</h5>\n' +
-    '                                    <p>\n' +
-    '                                        {{ task.Description }}\n' +
-    '                                    </p>\n' +
-    '                                </div>\n' +
-    '                            </li>\n' +
-    '                        </ul>     \n' +
-    '                        <div ng-if="true">\n' +
-    '                            <a href="" ng-click="viewCtrl.addTaskToBoard(item)" class="tile aside">\n' +
-    '                                <i class="fa fa-plus"></i> Add Task\n' +
-    '                            </a>\n' +
-    '                        </div>\n' +
-    '                    </div>\n' +
-    '                </div>\n' +
-    '                <div class="col-md-3">\n' +
-    '                    <a href="" ng-click="viewCtrl.createNew()" class="board add">\n' +
-    '                        <i class="fa fa-plus"></i> New Sprint\n' +
-    '                    </a>\n' +
-    '                </div>\n' +
-    '            </div>\n' +
-    '        </div>\n' +
-    '        <div class="col-md-3">\n' +
-    '            <div class="row contained">\n' +
-    '                <div class="col-md-12">\n' +
-    '                    <div class="board">\n' +
-    '                        <h4>\n' +
-    '                            <a ui-sref="sprints.item({ key: item.Key })">\n' +
-    '                                <i class="fa fa-sticky-note-o"></i>\n' +
-    '                                Project Backlog\n' +
-    '                            </a>\n' +
-    '                        </h4>\n' +
-    '                        <div class="tile" ng-repeat="board in viewCtrl.getBoards(item.Key)">\n' +
-    '                            <h5>{{ board.Title }}</h5>\n' +
-    '                            <p>\n' +
-    '                                {{ board.Description }}\n' +
-    '                            </p>\n' +
-    '                        </div>\n' +
-    '                        <div ng-if="true">\n' +
-    '                            <a href="" ng-click="viewCtrl.addTaskToBoard(item)" class="tile aside">\n' +
-    '                                <i class="fa fa-plus"></i> Add Task\n' +
-    '                            </a>\n' +
-    '                        </div>\n' +
-    '                    </div>\n' +
-    '                </div>\n' +
-    '            </div>\n' +
-    '        </div>\n' +
-    '    </div>\n' +
+    '    <div sprint-backlog-view></div>    \n' +
     '</div>\n' +
     '');
 }]);
