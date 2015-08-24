@@ -1,28 +1,30 @@
-﻿module app.controllers.projects.directives {
+﻿module app.controllers.sprints.directives {
 
     import models = app.data.models;
 
-    export function ProjectSummary() {
+    export function SprintSummaryDirective() {
         return {
             replace: true,
             restrict: 'AEMC',
             scope: {
-                project: '=projectSummary',
+                project: '=sprintSummaryProject',
+                sprint: '=sprintSummaryActive',
             },
-            templateUrl: 'views/projects/directives/summary.tpl.html',
-            controller: 'ProjectSummaryController',
+            templateUrl: 'views/sprints/directives/summary.tpl.html',
+            controller: 'SprintSummaryController',
             controllerAs: 'summryCtrl',
         };
     }
 
 
-    export class ProjectSummaryController {
+    export class SprintSummaryController {
 
         public project: models.IProject;
         public current: models.ISprint;
         public sprints: models.ISprint[] = [];
 
         constructor(private $rootScope: any, private $scope: any, private $modal: any, public scrumboardService: app.common.services.ScrumBoardService) {
+            this.current = $scope.sprint;
             this.project = $scope.project;
             this.init();
         }
@@ -40,6 +42,7 @@
                         if (!this.project) return;
                         if (this.project.Key == item.ProjectKey) {
                             sprints.push(item);
+                            if (this.current) return;
                             if (max && (max.State == models.SprintState.Started)) return;
                             if (!max || (max.Number < item.Number)) {
                                 if (max && (item.State == models.SprintState.Discarded)) return;

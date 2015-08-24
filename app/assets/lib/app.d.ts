@@ -360,7 +360,10 @@ declare module app.controllers {
         private $rootScope;
         private scrumBoards;
         project: models.IProject;
+        current: models.ISprint;
+        sprints: models.ISprint[];
         constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService, project?: models.IProject);
+        init(): void;
     }
 }
 declare module app.controllers {
@@ -434,19 +437,58 @@ declare module app.controllers {
         constructor(scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
     }
 }
-declare module app.controllers.projects.directives {
+declare module app.controllers.sprints.directives {
     import models = app.data.models;
-    function ProjectSummary(): {
+    function SprintBacklogDirective(): {
         replace: boolean;
         restrict: string;
         scope: {
             project: string;
+            sprint: string;
         };
         templateUrl: string;
         controller: string;
         controllerAs: string;
     };
-    class ProjectSummaryController {
+    class SprintBacklogController {
+        private $rootScope;
+        private $scope;
+        private $modal;
+        scrumboardService: app.common.services.ScrumBoardService;
+        showAll: boolean;
+        cached: models.ISprint[];
+        current: models.ISprint;
+        project: models.IProject;
+        sprints: models.ISprint[];
+        constructor($rootScope: any, $scope: any, $modal: any, scrumboardService: app.common.services.ScrumBoardService);
+        init(): void;
+        refresh(): void;
+        getBoards(sprint: models.ISprint): any[];
+        isVisible(board: models.IBoard): boolean;
+        cancel(): void;
+        addTaskToBoard(board?: models.IBoard): void;
+        getStateDesc(state: models.SprintState): string;
+        moveTask(boardKey: string, task: models.ITask): void;
+        updateTask(task: models.ITask): void;
+        refreshData(ctx: any): void;
+        getTasks(board: models.IBoard): models.ITask[];
+        editTask(task: models.ITask): void;
+    }
+}
+declare module app.controllers.sprints.directives {
+    import models = app.data.models;
+    function SprintSummaryDirective(): {
+        replace: boolean;
+        restrict: string;
+        scope: {
+            project: string;
+            sprint: string;
+        };
+        templateUrl: string;
+        controller: string;
+        controllerAs: string;
+    };
+    class SprintSummaryController {
         private $rootScope;
         private $scope;
         private $modal;

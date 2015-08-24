@@ -62,11 +62,10 @@
             if (project.Key == Guid.Empty) {
                 project.Key = Guid.New(),
                 this.scrumBoards.Projects.insert(project);
-            } else {
-                this.scrumBoards.Projects.save().then(() => {
-                    this.index();
-                });
             }
+            this.scrumBoards.Projects.save().finally(() => {
+                this.$state.go('projects.item', { projectKey: project.Key });
+            });
         }
 
         public cancel() {
@@ -101,8 +100,38 @@
 
     export class ProjectItemController {
 
-        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) { }
+        public current: models.ISprint;
+        public sprints: models.ISprint[];
+
+        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) {
+            this.init();
+        }
+
+        public init() {
+            this.scrumBoards.Sprints.load().then((items) => {
+                var max: models.ISprint;
+                var sprints = [];
+                if (items) {
+                    items.forEach((item) => {
+                        if (!this.project) return;
+                        if (this.project.Key == item.ProjectKey) {
+                            sprints.push(item);
+                            if (max && (max.State == models.SprintState.Started)) return;
+                            if (!max || (max.Number < item.Number)) {
+                                if (max && (item.State == models.SprintState.Discarded)) return;
+                                if (max && (item.State == models.SprintState.Completed)) return;
+                                max = item;
+                            }
+                        }
+                    });
+                }
+                this.sprints = sprints;
+                this.current = max;
+            }).finally(() => {
+                this.$rootScope.$applyAsync();
+            });
+        }
 
     }
-    
+
 }

@@ -7,7 +7,6 @@
         <div class="col-md-3" ng-repeat="item in childCtrl.sprints">
             <div class="row contained">
                 <div class="container-title">
-                    <a href="" class="pull-right"><i class="fa fa-arrows"></i></a>
                     {{ viewCtrl.getProjectLabel(item.ProjectKey) || 'Loading...' }}
                 </div>
                 <div class="col-md-12">

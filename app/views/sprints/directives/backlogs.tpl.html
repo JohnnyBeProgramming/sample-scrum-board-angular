@@ -1,0 +1,67 @@
+﻿<div class="row">
+    <div class="col-md-9">
+        <div class="row contained">
+            <div class="col-md-3" ng-repeat="item in backlogCtrl.sprints">
+                <div class="board drop-target"
+                     drop-action="backlogCtrl.moveTask(item.Key, data)">
+                    <h4>
+                        <a ui-sref="sprints.item({ key: item.Key })">
+                            <i class="fa fa-tag"></i>
+                            {{ backlogCtrl.getStateDesc(item.State) || 'Loading...' }}
+                        </a>
+                        <small>
+                            Sprint #{{ (item.Number || '1') }}                            
+                        </small>
+                    </h4>
+                    <ul class="drop-list">
+                        <li class="drag-item" drag-data="task"
+                            ng-dblclick="backlogCtrl.editTask(task)"
+                            ng-repeat="task in backlogCtrl.getTasks(item)">
+                            <div class="tile">
+                                <h5>{{ task.Title }}</h5>
+                                <p>
+                                    {{ task.Description }}
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                    <div ng-if="true">
+                        <a href="" ng-click="backlogCtrl.addTaskToBoard(item)" class="tile aside">
+                            <i class="fa fa-plus"></i> Add Task
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <a href="" ng-click="viewCtrl.createNew()" class="board add">
+                    <i class="fa fa-plus"></i> New Sprint
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="row contained">
+            <div class="col-md-12">
+                <div class="board">
+                    <h4>
+                        <a ui-sref="sprints.item({ key: item.Key })">
+                            <i class="fa fa-sticky-note-o"></i>
+                            Project Backlog
+                        </a>
+                    </h4>
+                    <div class="tile" ng-repeat="board in viewCtrl.getBoards(item.Key)">
+                        <h5>{{ board.Title }}</h5>
+                        <p>
+                            {{ board.Description }}
+                        </p>
+                    </div>
+                    <div ng-if="true">
+                        <a href="" ng-click="viewCtrl.addTaskToBoard(item)" class="tile aside">
+                            <i class="fa fa-plus"></i> Add Task
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

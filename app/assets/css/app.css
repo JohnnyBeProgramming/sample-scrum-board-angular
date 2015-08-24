@@ -171,6 +171,9 @@ body .app-container .app-panel .contained h6 {
   margin-bottom: 3px;
   border-bottom: solid 1px silver;
 }
+body .app-container .app-panel .contained.tight {
+  min-height: initial;
+}
 body .app-container .app-panel .contained .container-title {
   margin: 0;
   padding: 0 3px;
@@ -239,7 +242,7 @@ body .app-container .app-panel .board-summary {
 body .app-container .app-panel .board-summary .tile {
   display: block;
   margin: 1px 0 !important;
-  padding-left: 8px!important;
+  padding-left: 8px !important;
 }
 body .app-container .app-panel .project {
   padding: 6px;
