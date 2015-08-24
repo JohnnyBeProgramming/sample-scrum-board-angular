@@ -45,8 +45,8 @@ body .drop-list li {
   list-style: none;
 }
 body .drop-target.over {
-  border: solid 1px #0094ff !important;
-  box-shadow: 0 0 3px 0 #0094ff;
+  border: solid 1px #303c4b !important;
+  box-shadow: 0 0 6px 0 #303c4b;
 }
 body .drag-item {
   cursor: move;
