@@ -128,12 +128,47 @@
             }
         }
         
+        public addSprint(project?: models.IProject, state?: models.SprintState) {
+            var sprint: models.ISprint = {
+                Number: 0,
+                Key: Guid.Empty,
+                State: state ? state : models.SprintState.Started,
+                ProjectKey: project != null ? project.Key : null,
+            };
+
+            // Open the modal dialog
+            var dialog = this.$modal.open({
+                size: 'md',
+                animation: true,
+                templateUrl: 'views/common/modal/addSprint.tpl.html',
+                controller: 'AddSprintController',
+                resolve: {
+                    modalContext: () => {
+                        return {
+                            sprint: sprint,
+                        };
+                    },
+                }
+            }).result.then(
+                // On Commit
+                (modalContext) => {
+                        this.scrumboardService.Sprints.save(modalContext.sprint).then(() => {
+                            this.$rootScope.$applyAsync();
+                        });
+                },
+                // Dismissed
+                () => {
+                    this.cancel();
+                });
+        }
+
+
         public updateTask(task: models.ITask) {
             if (task.Key == Guid.Empty) {
                 task.Key = Guid.New();
                 this.scrumboardService.Tasks.insert(task);
             }
-            this.scrumboardService.Tasks.save().finally(() => {
+            this.scrumboardService.Tasks.save(task).finally(() => {
                 this.refreshData({ task: task });
                 this.$rootScope.$applyAsync();
             });

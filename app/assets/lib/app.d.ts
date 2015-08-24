@@ -32,7 +32,7 @@ declare module app.data.repositories {
         init(): void;
         load(): ng.IPromise<TModel[]>;
         reset(): ng.IPromise<TModel[]>;
-        save(item?: TModel): ng.IPromise<TModel>;
+        save(item?: TModel, updateModel?: boolean): ng.IPromise<TModel>;
         findByKey(key: string): ng.IPromise<TModel>;
         list(): TModel[];
         insert(item: TModel): TModel;
@@ -384,11 +384,12 @@ declare module app.controllers {
     }
     class SprintController {
         private $rootScope;
+        private $q;
         private $state;
         private $modal;
         private scrumBoards;
         projectCache: any;
-        constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
+        constructor($rootScope: any, $q: ng.IQService, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         getSprints(): ng.IPromise<models.ISprint[]>;
         index(): void;
         cancel(): void;
@@ -399,6 +400,7 @@ declare module app.controllers {
         addSprint(project?: models.IProject, state?: models.SprintState): void;
         addBacklogs(sprint: models.ISprint, board?: models.IBoard): void;
         updateTask(task: models.ITask): void;
+        getTaskCss(type: models.TaskType): string;
         updateSprint(sprint: models.ISprint): void;
         refreshData(ctx: any): void;
         getProjectLabel(projectKey: string): string;
@@ -479,6 +481,7 @@ declare module app.controllers.sprints.directives {
         addTaskToBoard(board?: models.IBoard): void;
         getStateDesc(state: models.SprintState): string;
         moveTask(boardKey: string, task: models.ITask): void;
+        addSprint(project?: models.IProject, state?: models.SprintState): void;
         updateTask(task: models.ITask): void;
         refreshData(ctx: any): void;
         getTasks(board: models.IBoard): models.ITask[];
@@ -509,6 +512,8 @@ declare module app.controllers.sprints.directives {
         constructor($rootScope: any, $scope: any, $modal: any, scrumboardService: app.common.services.ScrumBoardService);
         init(): void;
         refresh(): void;
+        countTasks(taskType: models.TaskType): number;
+        getTaskCss(type: models.TaskType): string;
         cancel(): void;
         prevSprint(): void;
         nextSprint(): void;

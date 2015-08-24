@@ -129,8 +129,9 @@ var app;
                     }
                     return deferred.promise;
                 };
-                AbstractRepository.prototype.save = function (item) {
+                AbstractRepository.prototype.save = function (item, updateModel) {
                     var _this = this;
+                    if (updateModel === void 0) { updateModel = true; }
                     var deferred = this.$q.defer();
                     try {
                         if (this.hasLocal) {
@@ -143,7 +144,7 @@ var app;
                         if (!item) {
                             // Save all
                             var list = [];
-                            this.list().forEach(function (model) { return list.push(_this.save(model)); });
+                            this.list().forEach(function (model) { return list.push(_this.save(model, false)); });
                             this.$q.all(list).then(function () {
                                 deferred.resolve(null);
                             });
@@ -153,6 +154,17 @@ var app;
                             var storeKey = this.ident + '[' + item.Key + ']';
                             localStorage.setItem(storeKey, JSON.stringify(item));
                             console.debug(' - Store [ ' + this.ident + ' ] Saved:', storeKey);
+                            if (updateModel) {
+                                var found = false;
+                                this.list().forEach(function (node) {
+                                    if (found)
+                                        return;
+                                    if (node.Key == item.Key) {
+                                        angular.extend(node, item);
+                                        found = true;
+                                    }
+                                });
+                            }
                             deferred.resolve(item);
                         }
                     }
@@ -1500,13 +1512,11 @@ var app;
                 });
             };
             BacklogController.prototype.moveTask = function (boardKey, task) {
-                var _this = this;
                 if (task && !!boardKey) {
-                    this.$rootScope.$applyAsync(function () {
-                        console.log(' - Move:', task.Key, boardKey);
-                        task.BoardKey = boardKey;
-                        _this.updateTask(task);
-                    });
+                    console.log(' - Move:', task.Key, boardKey);
+                    task.BoardKey = boardKey;
+                    this.updateTask(task);
+                    this.$rootScope.$applyAsync(function () { });
                 }
             };
             BacklogController.prototype.editTask = function (task) {
@@ -1542,7 +1552,7 @@ var app;
                     task.Key = Guid.New();
                     this.scrumBoards.Tasks.insert(task);
                 }
-                this.scrumBoards.Tasks.save();
+                this.scrumBoards.Tasks.save(task);
                 this.newTask = null;
             };
             BacklogController.prototype.cancelTask = function () {
@@ -1765,8 +1775,9 @@ var app;
         })();
         controllers.ControllerUtils = ControllerUtils;
         var SprintController = (function () {
-            function SprintController($rootScope, $state, $modal, scrumBoards) {
+            function SprintController($rootScope, $q, $state, $modal, scrumBoards) {
                 this.$rootScope = $rootScope;
+                this.$q = $q;
                 this.$state = $state;
                 this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
@@ -1890,6 +1901,18 @@ var app;
             };
             SprintController.prototype.addBacklogs = function (sprint, board) {
                 var _this = this;
+                if (!board) {
+                    board = this.firstOrDefaultBoard(sprint.Key, models.TaskType.Default, function (type) { return {
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        SprintKey: sprint.Key,
+                        ProjectKey: sprint.ProjectKey,
+                        Title: ControllerUtils.TaskDescription(type),
+                    }; });
+                    this.scrumBoards.Boards.save(board).then(function () {
+                        _this.$rootScope.$applyAsync();
+                    });
+                }
                 // Open the modal dialog
                 var dialog = this.$modal.open({
                     size: 'md',
@@ -1910,25 +1933,20 @@ var app;
                 // On Commit
                 // On Commit
                 function (modalContext) {
+                    var list = [];
                     var result = modalContext.data;
                     if (result && result.length) {
                         result.forEach(function (item) {
-                            item.TaskType = models.TaskType.Default;
+                            item.TaskType = board ? board.TaskType : models.TaskType.Default;
                             item.SprintKey = sprint.Key;
                             item.ProjectKey = sprint.ProjectKey;
-                            item.BoardKey = board ? board.Key : _this.firstOrDefaultBoard(sprint.Key, models.TaskType.Default, function (type) { return {
-                                Key: Guid.Empty,
-                                TaskType: type,
-                                SprintKey: sprint.Key,
-                                ProjectKey: sprint.ProjectKey,
-                                Title: ControllerUtils.TaskDescription(type),
-                            }; }).Key;
-                            _this.scrumBoards.Tasks.save(item);
-                        });
-                        _this.scrumBoards.Boards.save(board).then(function () {
-                            _this.$rootScope.$applyAsync();
+                            item.BoardKey = board ? board.Key : null;
+                            list.push(_this.scrumBoards.Tasks.save(item));
                         });
                     }
+                    _this.$q.all(list).then(function () {
+                        _this.$rootScope.$applyAsync();
+                    });
                 }, 
                 // Dismissed
                 // Dismissed
@@ -1942,10 +1960,21 @@ var app;
                     task.Key = Guid.New();
                     this.scrumBoards.Tasks.insert(task);
                 }
-                this.scrumBoards.Tasks.save().finally(function () {
+                this.scrumBoards.Tasks.save(task).finally(function () {
                     _this.refreshData({ task: task });
                     _this.$rootScope.$applyAsync();
                 });
+            };
+            SprintController.prototype.getTaskCss = function (type) {
+                switch (type) {
+                    case models.TaskType.Default: return 'default';
+                    case models.TaskType.Backlog: return 'backlog';
+                    case models.TaskType.Canceled: return 'canceled';
+                    case models.TaskType.InProgress: return 'started';
+                    case models.TaskType.Testing: return 'testing';
+                    case models.TaskType.Completed: return 'completed';
+                }
+                return null;
             };
             SprintController.prototype.updateSprint = function (sprint) {
                 var _this = this;
@@ -2042,13 +2071,11 @@ var app;
                 return target;
             };
             SprintController.prototype.moveTask = function (boardKey, task) {
-                var _this = this;
                 if (task && !!boardKey) {
-                    this.$rootScope.$applyAsync(function () {
-                        console.log(' - Move:', task.Key, boardKey);
-                        task.BoardKey = boardKey;
-                        _this.updateTask(task);
-                    });
+                    console.log(' - Move:', task.Key, boardKey);
+                    task.BoardKey = boardKey;
+                    this.updateTask(task);
+                    this.$rootScope.$applyAsync(function () { });
                 }
             };
             return SprintController;
@@ -2368,13 +2395,48 @@ var app;
                             });
                         }
                     };
+                    SprintBacklogController.prototype.addSprint = function (project, state) {
+                        var _this = this;
+                        var sprint = {
+                            Number: 0,
+                            Key: Guid.Empty,
+                            State: state ? state : models.SprintState.Started,
+                            ProjectKey: project != null ? project.Key : null,
+                        };
+                        // Open the modal dialog
+                        var dialog = this.$modal.open({
+                            size: 'md',
+                            animation: true,
+                            templateUrl: 'views/common/modal/addSprint.tpl.html',
+                            controller: 'AddSprintController',
+                            resolve: {
+                                modalContext: function () {
+                                    return {
+                                        sprint: sprint,
+                                    };
+                                },
+                            }
+                        }).result.then(
+                        // On Commit
+                        // On Commit
+                        function (modalContext) {
+                            _this.scrumboardService.Sprints.save(modalContext.sprint).then(function () {
+                                _this.$rootScope.$applyAsync();
+                            });
+                        }, 
+                        // Dismissed
+                        // Dismissed
+                        function () {
+                            _this.cancel();
+                        });
+                    };
                     SprintBacklogController.prototype.updateTask = function (task) {
                         var _this = this;
                         if (task.Key == Guid.Empty) {
                             task.Key = Guid.New();
                             this.scrumboardService.Tasks.insert(task);
                         }
-                        this.scrumboardService.Tasks.save().finally(function () {
+                        this.scrumboardService.Tasks.save(task).finally(function () {
                             _this.refreshData({ task: task });
                             _this.$rootScope.$applyAsync();
                         });
@@ -2489,6 +2551,30 @@ var app;
                         }).finally(function () {
                             _this.$rootScope.$applyAsync();
                         });
+                    };
+                    SprintSummaryController.prototype.countTasks = function (taskType) {
+                        var _this = this;
+                        var count = 0;
+                        this.scrumboardService.Tasks.filterByProject(this.project.Key).forEach(function (itm) {
+                            if (!_this.project || _this.project.Key != itm.ProjectKey)
+                                return;
+                            if (!_this.current || _this.current.Key != itm.SprintKey)
+                                return;
+                            if (itm.TaskType == taskType)
+                                count++;
+                        });
+                        return count;
+                    };
+                    SprintSummaryController.prototype.getTaskCss = function (type) {
+                        switch (type) {
+                            case models.TaskType.Default: return 'default';
+                            case models.TaskType.Backlog: return 'backlog';
+                            case models.TaskType.Canceled: return 'canceled';
+                            case models.TaskType.InProgress: return 'started';
+                            case models.TaskType.Testing: return 'testing';
+                            case models.TaskType.Completed: return 'completed';
+                        }
+                        return null;
                     };
                     SprintSummaryController.prototype.cancel = function () {
                     };
@@ -2626,7 +2712,7 @@ angular.module('myScrumBoard.controllers', [
     .controller('ProjectsController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.ProjectsController])
     .controller('ProjectListController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.ProjectListController])
     .controller('ProjectItemController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.ProjectItemController])
-    .controller('SprintController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.SprintController])
+    .controller('SprintController', ['$rootScope', '$q', '$state', '$modal', 'ScrumBoardService', app.controllers.SprintController])
     .controller('SprintsActiveController', ['$rootScope', 'ScrumBoardService', app.controllers.SprintsActiveController])
     .controller('SprintListController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.SprintListController])
     .controller('SprintItemController', ['$rootScope', 'ScrumBoardService', 'sprint', app.controllers.SprintItemController])

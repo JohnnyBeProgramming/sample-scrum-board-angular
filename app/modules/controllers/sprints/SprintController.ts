@@ -35,7 +35,7 @@ module app.controllers {
     export class SprintController {
         public projectCache: any = {};
 
-        constructor(private $rootScope: any, private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) { }
+        constructor(private $rootScope: any, private $q: ng.IQService, private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) { }
 
         public getSprints(): ng.IPromise<models.ISprint[]> {
             return this.scrumBoards
@@ -158,6 +158,18 @@ module app.controllers {
         }
 
         public addBacklogs(sprint: models.ISprint, board?: models.IBoard) {
+            if (!board) {
+                board = this.firstOrDefaultBoard(sprint.Key, models.TaskType.Default,(type) => <models.IBoard>{
+                    Key: Guid.Empty,
+                    TaskType: type,
+                    SprintKey: sprint.Key,
+                    ProjectKey: sprint.ProjectKey,
+                    Title: ControllerUtils.TaskDescription(type),
+                });
+                this.scrumBoards.Boards.save(board).then(() => {
+                    this.$rootScope.$applyAsync();
+                });
+            }
             // Open the modal dialog
             var dialog = this.$modal.open({
                 size: 'md',
@@ -177,25 +189,20 @@ module app.controllers {
             }).result.then(
                 // On Commit
                 (modalContext) => {
+                    var list = [];
                     var result = modalContext.data;
                     if (result && result.length) {
                         result.forEach((item: models.ITask) => {
-                            item.TaskType = models.TaskType.Default;
+                            item.TaskType = board ? board.TaskType : models.TaskType.Default;
                             item.SprintKey = sprint.Key;
                             item.ProjectKey = sprint.ProjectKey;
-                            item.BoardKey = board ? board.Key : this.firstOrDefaultBoard(sprint.Key, models.TaskType.Default,(type) => <models.IBoard>{
-                                Key: Guid.Empty,
-                                TaskType: type,
-                                SprintKey: sprint.Key,
-                                ProjectKey: sprint.ProjectKey,
-                                Title: ControllerUtils.TaskDescription(type),
-                            }).Key;
-                            this.scrumBoards.Tasks.save(item);
-                        });
-                        this.scrumBoards.Boards.save(board).then(() => {
-                            this.$rootScope.$applyAsync();
+                            item.BoardKey = board ? board.Key : null;
+                            list.push(this.scrumBoards.Tasks.save(item));
                         });
                     }
+                    this.$q.all(list).then(() => {
+                        this.$rootScope.$applyAsync();
+                    });
                 },
                 // Dismissed
                 () => {
@@ -208,10 +215,22 @@ module app.controllers {
                 task.Key = Guid.New();
                 this.scrumBoards.Tasks.insert(task);
             }
-            this.scrumBoards.Tasks.save().finally(() => {
+            this.scrumBoards.Tasks.save(task).finally(() => {
                 this.refreshData({ task: task });
                 this.$rootScope.$applyAsync();
             });
+        }
+
+        public getTaskCss(type: models.TaskType): string {
+            switch (type) {
+                case models.TaskType.Default: return 'default';
+                case models.TaskType.Backlog: return 'backlog';
+                case models.TaskType.Canceled: return 'canceled';
+                case models.TaskType.InProgress: return 'started';
+                case models.TaskType.Testing: return 'testing';
+                case models.TaskType.Completed: return 'completed';
+            }
+            return null;
         }
 
         public updateSprint(sprint: models.ISprint) {
@@ -308,14 +327,13 @@ module app.controllers {
             }
             return target;
         }
-
+        
         public moveTask(boardKey: string, task: models.ITask) {
             if (task && !!boardKey) {
-                this.$rootScope.$applyAsync(() => {
-                    console.log(' - Move:', task.Key, boardKey);
-                    task.BoardKey = boardKey;
-                    this.updateTask(task);
-                });
+                console.log(' - Move:', task.Key, boardKey);
+                task.BoardKey = boardKey;
+                this.updateTask(task);
+                this.$rootScope.$applyAsync(() => { });
             }
         }
     }

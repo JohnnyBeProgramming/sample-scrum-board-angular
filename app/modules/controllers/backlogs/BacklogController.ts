@@ -132,11 +132,10 @@
 
         public moveTask(boardKey: string, task: models.ITask) {
             if (task && !!boardKey) {
-                this.$rootScope.$applyAsync(() => {
-                    console.log(' - Move:', task.Key, boardKey);
-                    task.BoardKey = boardKey;
-                    this.updateTask(task);
-                });
+                console.log(' - Move:', task.Key, boardKey);
+                task.BoardKey = boardKey;
+                this.updateTask(task);
+                this.$rootScope.$applyAsync(() => {});
             }
         }
 
@@ -172,7 +171,7 @@
                 task.Key = Guid.New();
                 this.scrumBoards.Tasks.insert(task);
             }
-            this.scrumBoards.Tasks.save();
+            this.scrumBoards.Tasks.save(task);
             this.newTask = null;
         }
 

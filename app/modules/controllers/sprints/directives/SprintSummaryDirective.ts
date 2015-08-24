@@ -59,6 +59,28 @@
             });
         }
 
+        public countTasks(taskType: models.TaskType): number {
+            var count = 0;
+            this.scrumboardService.Tasks.filterByProject(this.project.Key).forEach((itm) => {
+                if (!this.project || this.project.Key != itm.ProjectKey) return;
+                if (!this.current || this.current.Key != itm.SprintKey) return;
+                if (itm.TaskType == taskType) count++;
+            });
+            return count;
+        }
+
+        public getTaskCss(type: models.TaskType): string {
+            switch (type) {
+                case models.TaskType.Default: return 'default';
+                case models.TaskType.Backlog: return 'backlog';
+                case models.TaskType.Canceled: return 'canceled';
+                case models.TaskType.InProgress: return 'started';
+                case models.TaskType.Testing: return 'testing';
+                case models.TaskType.Completed: return 'completed';
+            }
+            return null;
+        }
+
         public cancel() {
 
         }

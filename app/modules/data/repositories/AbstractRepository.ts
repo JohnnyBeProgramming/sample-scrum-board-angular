@@ -91,7 +91,7 @@ module app.data.repositories {
             return deferred.promise;
         }
 
-        public save(item?: TModel): ng.IPromise<TModel> {
+        public save(item?: TModel, updateModel: boolean = true): ng.IPromise<TModel> {
             var deferred = this.$q.defer<TModel>();
             try {
                 if (this.hasLocal) {                    
@@ -104,7 +104,7 @@ module app.data.repositories {
                 if (!item) {
                     // Save all
                     var list = [];
-                    this.list().forEach((model) => list.push(this.save(model)));
+                    this.list().forEach((model) => list.push(this.save(model, false)));
                     this.$q.all(list).then(() => {
                         deferred.resolve(null);
                     });
@@ -113,6 +113,16 @@ module app.data.repositories {
                     var storeKey = this.ident + '[' + item.Key + ']';
                     localStorage.setItem(storeKey, JSON.stringify(item));
                     console.debug(' - Store [ ' + this.ident + ' ] Saved:', storeKey);
+                    if (updateModel) {
+                        var found = false;
+                        this.list().forEach((node) => {
+                            if (found) return;
+                            if (node.Key == item.Key) {
+                                angular.extend(node, item);
+                                found = true;
+                            }
+                        });
+                    }
                     deferred.resolve(item);
                 }
             } catch (ex) {

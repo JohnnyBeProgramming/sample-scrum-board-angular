@@ -20,9 +20,11 @@
                                 <b>Sprint #{{ (item.Number || '1') }}</b>
                             </a>
                         </h4>
-                        <div class="tile" ng-repeat="boards in viewCtrl.getBoards(item.Key)">
+                        <div class="tile"
+                             ng-class="viewCtrl.getTaskCss(board.TaskType)"
+                             ng-repeat="board in viewCtrl.getBoards(item.Key)">
                             <div class="board-group">
-                                {{ boards.Title }}
+                                {{ board.Title }}
                             </div>
                         </div>
                         <div>
