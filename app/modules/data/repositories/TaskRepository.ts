@@ -3,13 +3,10 @@ module app.data.repositories {
 
     import models = app.data.models;
 
-    export class TaskRepository extends AbstractRepository<models.ITask> implements IRepository<models.ITask> {
+    export class TaskRepository extends AbstractRepository<models.ITask> {
 
-        constructor($q: ng.IQService) {
-            super($q);
-            this.load().then((list) => {
-                this.memCache = list;
-            });
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService) {
+            super('tasks', $rootScope, $q,() => SampleData.Tasks);
         }
 
         public create(board: models.IBoard, title: string, description?: string): models.ITask {
@@ -24,26 +21,9 @@ module app.data.repositories {
             return item;
         }
 
-        public load(): ng.IPromise<models.ITask[]> {
-            var deferred = this.$q.defer<models.ITask[]>();
-            {
-                deferred.resolve(SampleData.Tasks);
-            }
-            return deferred.promise;
-        }
-
-        public save(): ng.IPromise<boolean> {
-            var deferred = this.$q.defer<boolean>();
-            {
-                console.log(' - ToDo: Implement Save: ', this.memCache);
-                deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-            }
-            return deferred.promise;
-        }
-
         public filter(boardKey: string, groupKey?: string): models.ITask[] {
             var list: models.ITask[] = [];
-            this.memCache.forEach((item) => {
+            this.list().forEach((item) => {
                 if (boardKey && boardKey != item.BoardKey) return;
                 if (groupKey && groupKey != item.GroupKey) return;
                 list.push(item);
@@ -53,7 +33,7 @@ module app.data.repositories {
 
         public filterByProject(projectKey: string, groupKey?: string): models.ITask[] {
             var list: models.ITask[] = [];
-            this.memCache.forEach((item) => {
+            this.list().forEach((item) => {
                 if (projectKey && projectKey != item.ProjectKey) return;
                 if (groupKey && groupKey != item.GroupKey) return;
                 list.push(item);
@@ -63,7 +43,7 @@ module app.data.repositories {
 
         public filterBySprint(sprintKey: string, groupKey?: string): models.ITask[] {
             var list: models.ITask[] = [];
-            this.memCache.forEach((item) => {
+            this.list().forEach((item) => {
                 if (sprintKey && sprintKey != item.SprintKey) return;
                 if (groupKey && groupKey != item.GroupKey) return;
                 list.push(item);

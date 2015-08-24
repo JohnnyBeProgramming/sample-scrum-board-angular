@@ -17,7 +17,7 @@
             <div ng-class="childCtrl.getColumnCss(childCtrl.boards.length)"
                  ng-repeat="board in childCtrl.boards track by board.Key">
                 <div class="board drop-target"
-                     drop-action="viewCtrl.moveTask(item.Key, data)">
+                     drop-action="viewCtrl.moveTask(board.Key, data)">
                     <div>
                         <h4>
                             <i class="fa fa-tag"></i> {{ board.Title || 'Board' }}
@@ -26,14 +26,14 @@
                             <li class="drag-item" drag-data="task"
                                 ng-dblclick="viewCtrl.editTask(task)"
                                 ng-repeat="task in viewCtrl.scrumBoards.Tasks.filter(board.Key) track by task.Key">
-                                <div class="tile">
+                                <div class="tile" ng-class="viewCtrl.getTaskCss(task.TaskType)">
                                     <h5>{{ task.Title }}</h5>
                                     <p>
                                         {{ task.Description }}
                                     </p>
                                 </div>
                             </li>
-                        </ul>     
+                        </ul>
                         <div ng-if="board.TaskType <= 2">
                             <a href="" ng-click="viewCtrl.addBacklogs(childCtrl.sprint, board)" class="tile aside">
                                 <i class="fa fa-share"></i> From Backlog
@@ -41,6 +41,11 @@
                             <a href="" ng-click="viewCtrl.addTaskToBoard(board)" class="tile aside">
                                 <i class="fa fa-plus"></i> Add Task
                             </a>
+                        </div>
+                        <div ng-if="board.TaskType == 3">
+                            <div class="tile aside">
+                                <i class="fa fa-info-circle"></i> Drag here to complete
+                            </div>
                         </div>
                     </div>
                 </div>

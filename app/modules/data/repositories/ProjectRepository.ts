@@ -7,16 +7,12 @@ module app.data.repositories {
 
     import IProject = app.data.models.IProject;
 
-    export class ProjectRepository extends AbstractRepository<IProject> implements IRepository<IProject> {
+    export class ProjectRepository extends AbstractRepository<IProject> {
 
-        constructor($q: ng.IQService) {
-            super($q);
-            this.load()
-                .then((list) => {
-                    this.memCache = list;
-                });
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService) {
+            super('projects', $rootScope, $q,() => SampleData.Projects);
         }
-
+       
         public create(title: string, description?: string): IProject {
             var item = {
                 Key: Guid.New(),
@@ -26,46 +22,7 @@ module app.data.repositories {
             this.insert(item);
             return item;
         }
-
-        public load(): ng.IPromise<IProject[]> {
-            var deferred = this.$q.defer<IProject[]>();
-            {
-                deferred.resolve(SampleData.Projects);
-            }
-            return deferred.promise;
-        }
-
-        public save(): ng.IPromise<boolean> {
-            var deferred = this.$q.defer<boolean>();
-            {
-                console.log(' - ToDo: Implement Save: ', this.memCache);
-                deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-            }
-            return deferred.promise;
-        }
-
-        public findByKey(key: string): ng.IPromise<IProject> {
-            var found = false;
-            var deferred = this.$q.defer<IProject>();
-            this.load()
-                .then((items) => {
-                if (items) {
-                    items.forEach((item) => {
-                        if (found) return;
-                        if (item.Key == key) {
-                            deferred.resolve(item);
-                            found = true;
-                        }
-                    });
-                }
-                if (!found) {
-                    deferred.resolve(null);
-                }
-            }).catch((error) => {
-                deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof this));
-            });
-            return deferred.promise;
-        }
+        
     }
 
 }  

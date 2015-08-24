@@ -4,7 +4,20 @@
 
     export class ProjectsController {
 
-        constructor(private $state: any, private $modal: any, private scrumBoards: app.common.services.ScrumBoardService) {}
+        public cache: any = {};
+        public projects: models.IProject[] = [];
+
+        constructor(public $rootScope: any, public $state: any, public $modal: any, public scrumBoards: app.common.services.ScrumBoardService) {
+            this.init();
+        }
+
+        public init() {
+            this.scrumBoards.Projects.load().then((items) => {
+                this.projects = items;
+            }).finally(() => {
+                this.$rootScope.$applyAsync();
+            });
+        }
 
         public index() {
             this.$state.go('projects.list');
@@ -37,12 +50,10 @@
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     this.update(modalContext.project);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.cancel();
                 });
         }
@@ -51,39 +62,75 @@
             if (project.Key == Guid.Empty) {
                 project.Key = Guid.New(),
                 this.scrumBoards.Projects.insert(project);
-            } else {
-            this.scrumBoards.Projects.save().then(() => {
-                this.index();
-            });
             }
+            this.scrumBoards.Projects.save().finally(() => {
+                this.$state.go('projects.item', { projectKey: project.Key });
+            });
         }
 
         public cancel() {
             this.index();
         }
+
+        public countSprintsOfType(state: models.SprintState, projectKey?: string): number {
+            var count = 0;
+            var sprints = this.scrumBoards.Sprints.list();
+            if (sprints) {
+                sprints.forEach((item) => {
+                    if (projectKey && (projectKey != item.ProjectKey)) return;
+                    if (item.State == state) {
+                        count++;
+                    }
+                });
+            }
+            return count;
+        }
+
     }
 
     export class ProjectListController {
 
-        public projects: models.IProject[] = [];
-
-        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService) {
+        constructor(public $rootScope: any, public $state: any, public $modal: any, public scrumBoards: app.common.services.ScrumBoardService) {
             this.init();
         }
 
         public init() {
-            this.scrumBoards.Projects.load().then((items) => {
-                this.projects = items;
-            }).finally(() => {
-                this.$rootScope.$applyAsync();
-            });
-
         }
     }
 
     export class ProjectItemController {
 
-        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) {}
+        public current: models.ISprint;
+        public sprints: models.ISprint[];
+
+        constructor(private $rootScope: any, private scrumBoards: app.common.services.ScrumBoardService, public project?: models.IProject) {
+            this.init();
+        }
+
+        public init() {
+            this.scrumBoards.Sprints.load().then((items) => {
+                var max: models.ISprint;
+                var sprints = [];
+                if (items) {
+                    items.forEach((item) => {
+                        if (!this.project) return;
+                        if (this.project.Key == item.ProjectKey) {
+                            sprints.push(item);
+                            if (max && (max.State == models.SprintState.Started)) return;
+                            if (!max || (max.Number < item.Number)) {
+                                if (max && (item.State == models.SprintState.Discarded)) return;
+                                if (max && (item.State == models.SprintState.Completed)) return;
+                                max = item;
+                            }
+                        }
+                    });
+                }
+                this.sprints = sprints;
+                this.current = max;
+            }).finally(() => {
+                this.$rootScope.$applyAsync();
+            });
+        }
 
     }
 

@@ -41,20 +41,170 @@ var Guid = (function () {
 var app;
 (function (app) {
     var data;
-    (function (data) {
+    (function (data_1) {
         var repositories;
         (function (repositories) {
             var AbstractRepository = (function () {
-                function AbstractRepository($q) {
+                function AbstractRepository(ident, $rootScope, $q, defaults) {
+                    this.ident = ident;
+                    this.$rootScope = $rootScope;
                     this.$q = $q;
+                    this.defaults = defaults;
+                    this.hasLocal = false;
+                    this.isOnline = false;
+                    this.keys = [];
                     this.memCache = [];
+                    this.init();
                 }
+                AbstractRepository.prototype.init = function () {
+                    var _this = this;
+                    this.hasLocal = typeof (Storage) !== "undefined";
+                    this.load().then(function (list) {
+                        console.debug(' - Store [ ' + _this.ident + ' ] Loaded.', _this.keys.length);
+                    });
+                };
+                AbstractRepository.prototype.load = function () {
+                    var _this = this;
+                    var deferred = this.$q.defer();
+                    try {
+                        if (this.memCache.length) {
+                            deferred.resolve(this.memCache);
+                        }
+                        else if (this.isOnline) {
+                            deferred.reject(new Error('Online Storage has not been implemented.'));
+                        }
+                        if (this.hasLocal) {
+                            var found = true;
+                            var local = localStorage.getItem(this.ident);
+                            if (local) {
+                                var cache = [];
+                                console.debug(' - Store [ ' + this.ident + ' ] Restoring...');
+                                this.keys = JSON.parse(local);
+                                this.keys.forEach(function (key) {
+                                    var storeKey = _this.ident + '[' + key + ']';
+                                    var storeItem = localStorage.getItem(storeKey);
+                                    if (storeItem) {
+                                        cache.push(JSON.parse(storeItem));
+                                    }
+                                });
+                                this.memCache = cache;
+                                deferred.resolve(cache);
+                            }
+                            else {
+                                found = false;
+                            }
+                        }
+                        if (!found) {
+                            var data = this.defaults ? this.defaults() : [];
+                            this.memCache = data;
+                            this.save().then(function () {
+                                deferred.resolve(data);
+                            });
+                        }
+                    }
+                    catch (ex) {
+                        deferred.reject(ex);
+                    }
+                    return deferred.promise;
+                };
+                AbstractRepository.prototype.reset = function () {
+                    var deferred = this.$q.defer();
+                    try {
+                        if (this.isOnline) {
+                            deferred.reject(new Error('Online Storage has not been implemented.'));
+                        }
+                        else {
+                            var data = this.defaults ? this.defaults() : [];
+                            console.debug(' - Store [ ' + this.ident + ' ] Reset.', data);
+                            this.memCache = data;
+                            this.save().then(function (item) {
+                                deferred.resolve(data);
+                            }).catch(function (err) {
+                                deferred.reject(err);
+                            });
+                        }
+                    }
+                    catch (ex) {
+                        deferred.reject(ex);
+                    }
+                    return deferred.promise;
+                };
+                AbstractRepository.prototype.save = function (item, updateModel) {
+                    var _this = this;
+                    if (updateModel === void 0) { updateModel = true; }
+                    var deferred = this.$q.defer();
+                    try {
+                        if (this.hasLocal) {
+                            // Save keys
+                            var keys = [];
+                            this.list().forEach(function (item) { return keys.push(item.Key); });
+                            localStorage.setItem(this.ident, JSON.stringify(this.keys));
+                            this.keys = keys;
+                        }
+                        if (!item) {
+                            // Save all
+                            var list = [];
+                            this.list().forEach(function (model) { return list.push(_this.save(model, false)); });
+                            this.$q.all(list).then(function () {
+                                deferred.resolve(null);
+                            });
+                        }
+                        else {
+                            // Save item
+                            var storeKey = this.ident + '[' + item.Key + ']';
+                            localStorage.setItem(storeKey, JSON.stringify(item));
+                            console.debug(' - Store [ ' + this.ident + ' ] Saved:', storeKey);
+                            if (updateModel) {
+                                var found = false;
+                                this.list().forEach(function (node) {
+                                    if (found)
+                                        return;
+                                    if (node.Key == item.Key) {
+                                        angular.extend(node, item);
+                                        found = true;
+                                    }
+                                });
+                            }
+                            deferred.resolve(item);
+                        }
+                    }
+                    catch (ex) {
+                        deferred.reject(ex);
+                    }
+                    return deferred.promise;
+                };
+                AbstractRepository.prototype.findByKey = function (key) {
+                    var _this = this;
+                    var found = false;
+                    var deferred = this.$q.defer();
+                    this.load().then(function (items) {
+                        if (items) {
+                            items.forEach(function (item) {
+                                if (found)
+                                    return;
+                                if (item.Key == key) {
+                                    deferred.resolve(item);
+                                    found = true;
+                                }
+                            });
+                        }
+                        if (!found) {
+                            deferred.resolve(null);
+                        }
+                    }).catch(function (error) {
+                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
+                    });
+                    return deferred.promise;
+                };
                 AbstractRepository.prototype.list = function () {
                     return this.memCache;
                 };
                 AbstractRepository.prototype.insert = function (item) {
-                    if (!item.Key) {
+                    if (!item.Key || Guid.Empty) {
                         item.Key = Guid.New();
+                    }
+                    if (!this.keys.indexOf(item.Key)) {
+                        this.keys.push(item.Key);
                     }
                     this.memCache.push(item);
                     return item;
@@ -62,13 +212,17 @@ var app;
                 AbstractRepository.prototype.remove = function (item) {
                     var index = this.memCache.indexOf(item);
                     if (index) {
+                        var key = this.keys.indexOf(item.Key);
+                        if (key >= 0) {
+                            this.keys.splice(key, 1);
+                        }
                         this.memCache.splice(index, 1);
                     }
                 };
                 return AbstractRepository;
             })();
             repositories.AbstractRepository = AbstractRepository;
-        })(repositories = data.repositories || (data.repositories = {}));
+        })(repositories = data_1.repositories || (data_1.repositories = {}));
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
 /// <reference path="IDataModel.ts" />
@@ -131,11 +285,14 @@ var app;
                     Key: Guid.New(),
                     Title: 'Simple Project',
                     Description: 'This is a basic project example.',
+                    StartedAt: new Date('2015-01-01'),
+                    ClosedAt: new Date('2015-11-01'),
                 },
                 {
                     Key: Guid.New(),
                     Title: 'Large Scale Project',
                     Description: 'This is a larger project with many groups, users and sprints.',
+                    StartedAt: new Date('2015-03-11'),
                 },
             ];
             SampleData.Sprints = [
@@ -395,6 +552,7 @@ var app;
                     GroupKey: null,
                 },
             ];
+            SampleData.Users = [];
             return SampleData;
         })();
         data.SampleData = SampleData;
@@ -418,13 +576,8 @@ var app;
         (function (repositories) {
             var ProjectRepository = (function (_super) {
                 __extends(ProjectRepository, _super);
-                function ProjectRepository($q) {
-                    var _this = this;
-                    _super.call(this, $q);
-                    this.load()
-                        .then(function (list) {
-                        _this.memCache = list;
-                    });
+                function ProjectRepository($rootScope, $q) {
+                    _super.call(this, 'projects', $rootScope, $q, function () { return data.SampleData.Projects; });
                 }
                 ProjectRepository.prototype.create = function (title, description) {
                     var item = {
@@ -434,45 +587,6 @@ var app;
                     };
                     this.insert(item);
                     return item;
-                };
-                ProjectRepository.prototype.load = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        deferred.resolve(data.SampleData.Projects);
-                    }
-                    return deferred.promise;
-                };
-                ProjectRepository.prototype.save = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        console.log(' - ToDo: Implement Save: ', this.memCache);
-                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-                    }
-                    return deferred.promise;
-                };
-                ProjectRepository.prototype.findByKey = function (key) {
-                    var _this = this;
-                    var found = false;
-                    var deferred = this.$q.defer();
-                    this.load()
-                        .then(function (items) {
-                        if (items) {
-                            items.forEach(function (item) {
-                                if (found)
-                                    return;
-                                if (item.Key == key) {
-                                    deferred.resolve(item);
-                                    found = true;
-                                }
-                            });
-                        }
-                        if (!found) {
-                            deferred.resolve(null);
-                        }
-                    }).catch(function (error) {
-                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
-                    });
-                    return deferred.promise;
                 };
                 return ProjectRepository;
             })(repositories.AbstractRepository);
@@ -488,12 +602,8 @@ var app;
         (function (repositories) {
             var SprintRepository = (function (_super) {
                 __extends(SprintRepository, _super);
-                function SprintRepository($q) {
-                    var _this = this;
-                    _super.call(this, $q);
-                    this.load().then(function (list) {
-                        _this.memCache = list;
-                    });
+                function SprintRepository($rootScope, $q) {
+                    _super.call(this, 'sprints', $rootScope, $q, function () { return data.SampleData.Sprints; });
                 }
                 SprintRepository.prototype.create = function (projectKey, number) {
                     var item = {
@@ -504,44 +614,6 @@ var app;
                     };
                     this.insert(item);
                     return item;
-                };
-                SprintRepository.prototype.load = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        deferred.resolve(data.SampleData.Sprints);
-                    }
-                    return deferred.promise;
-                };
-                SprintRepository.prototype.save = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        console.log(' - ToDo: Implement Save: ', this.memCache);
-                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-                    }
-                    return deferred.promise;
-                };
-                SprintRepository.prototype.findByKey = function (key) {
-                    var _this = this;
-                    var found = false;
-                    var deferred = this.$q.defer();
-                    this.load().then(function (items) {
-                        if (items) {
-                            items.forEach(function (item) {
-                                if (found)
-                                    return;
-                                if (item.Key == key) {
-                                    deferred.resolve(item);
-                                    found = true;
-                                }
-                            });
-                        }
-                        if (!found) {
-                            deferred.resolve(null);
-                        }
-                    }).catch(function (error) {
-                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
-                    });
-                    return deferred.promise;
                 };
                 SprintRepository.prototype.filterByProject = function (key) {
                     var _this = this;
@@ -563,13 +635,11 @@ var app;
                 };
                 SprintRepository.prototype.getNextSprintNumber = function (projectKey) {
                     var sprintMax = 0;
-                    if (this.memCache) {
-                        this.memCache.forEach(function (item) {
-                            if (item.ProjectKey == projectKey && item.Number > sprintMax) {
-                                sprintMax = item.Number;
-                            }
-                        });
-                    }
+                    this.list().forEach(function (item) {
+                        if (item.ProjectKey == projectKey && item.Number > sprintMax) {
+                            sprintMax = item.Number;
+                        }
+                    });
                     return sprintMax + 1;
                 };
                 return SprintRepository;
@@ -586,12 +656,8 @@ var app;
         (function (repositories) {
             var BoardRepository = (function (_super) {
                 __extends(BoardRepository, _super);
-                function BoardRepository($q) {
-                    var _this = this;
-                    _super.call(this, $q);
-                    this.load().then(function (list) {
-                        _this.memCache = list;
-                    });
+                function BoardRepository($rootScope, $q) {
+                    _super.call(this, 'boards', $rootScope, $q, function () { return data.SampleData.Boards; });
                 }
                 BoardRepository.prototype.create = function (type, title) {
                     var item = {
@@ -602,24 +668,9 @@ var app;
                     this.insert(item);
                     return item;
                 };
-                BoardRepository.prototype.load = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        deferred.resolve(data.SampleData.Boards);
-                    }
-                    return deferred.promise;
-                };
-                BoardRepository.prototype.save = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        console.log(' - ToDo: Implement Save: ', this.memCache);
-                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-                    }
-                    return deferred.promise;
-                };
                 BoardRepository.prototype.filterByProject = function (projectKey, type) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (item.ProjectKey != projectKey)
                             return;
                         if (!type) {
@@ -633,7 +684,7 @@ var app;
                 };
                 BoardRepository.prototype.filterBySprint = function (sprintKey, type) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (item.SprintKey != sprintKey)
                             return;
                         if (!type) {
@@ -647,36 +698,12 @@ var app;
                 };
                 BoardRepository.prototype.filterByType = function (type) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (item.TaskType == type) {
                             list.push(item);
                         }
                     });
                     return list;
-                };
-                BoardRepository.prototype.findByKey = function (key) {
-                    var _this = this;
-                    var found = false;
-                    var deferred = this.$q.defer();
-                    this.load()
-                        .then(function (items) {
-                        if (items) {
-                            items.forEach(function (item) {
-                                if (found)
-                                    return;
-                                if (item.Key == key) {
-                                    deferred.resolve(item);
-                                    found = true;
-                                }
-                            });
-                        }
-                        if (!found) {
-                            deferred.resolve(null);
-                        }
-                    }).catch(function (error) {
-                        deferred.reject(error || new Error('Item with key "' + key + '" could not be found. Type:' + typeof _this));
-                    });
-                    return deferred.promise;
                 };
                 return BoardRepository;
             })(repositories.AbstractRepository);
@@ -684,18 +711,23 @@ var app;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
+/// <reference path="../../common/utils/Guid.ts" />
+/// <reference path="AbstractRepository.ts" />
+/// <reference path="../models/IGroup.ts" />
+/// <reference path="../samples.ts" />
 var app;
 (function (app) {
     var data;
     (function (data) {
         var repositories;
         (function (repositories) {
-            var GroupRepository = (function () {
-                function GroupRepository($q) {
-                    this.$q = $q;
+            var GroupRepository = (function (_super) {
+                __extends(GroupRepository, _super);
+                function GroupRepository($rootScope, $q) {
+                    _super.call(this, 'groups', $rootScope, $q, function () { return data.SampleData.Groups; });
                 }
                 return GroupRepository;
-            })();
+            })(repositories.AbstractRepository);
             repositories.GroupRepository = GroupRepository;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
@@ -709,12 +741,8 @@ var app;
             var models = app.data.models;
             var TaskRepository = (function (_super) {
                 __extends(TaskRepository, _super);
-                function TaskRepository($q) {
-                    var _this = this;
-                    _super.call(this, $q);
-                    this.load().then(function (list) {
-                        _this.memCache = list;
-                    });
+                function TaskRepository($rootScope, $q) {
+                    _super.call(this, 'tasks', $rootScope, $q, function () { return data.SampleData.Tasks; });
                 }
                 TaskRepository.prototype.create = function (board, title, description) {
                     var item = {
@@ -727,24 +755,9 @@ var app;
                     this.insert(item);
                     return item;
                 };
-                TaskRepository.prototype.load = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        deferred.resolve(data.SampleData.Tasks);
-                    }
-                    return deferred.promise;
-                };
-                TaskRepository.prototype.save = function () {
-                    var deferred = this.$q.defer();
-                    {
-                        console.log(' - ToDo: Implement Save: ', this.memCache);
-                        deferred.reject(new Error('Save has not been implemented for: ' + typeof this));
-                    }
-                    return deferred.promise;
-                };
                 TaskRepository.prototype.filter = function (boardKey, groupKey) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (boardKey && boardKey != item.BoardKey)
                             return;
                         if (groupKey && groupKey != item.GroupKey)
@@ -755,7 +768,7 @@ var app;
                 };
                 TaskRepository.prototype.filterByProject = function (projectKey, groupKey) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (projectKey && projectKey != item.ProjectKey)
                             return;
                         if (groupKey && groupKey != item.GroupKey)
@@ -766,7 +779,7 @@ var app;
                 };
                 TaskRepository.prototype.filterBySprint = function (sprintKey, groupKey) {
                     var list = [];
-                    this.memCache.forEach(function (item) {
+                    this.list().forEach(function (item) {
                         if (sprintKey && sprintKey != item.SprintKey)
                             return;
                         if (groupKey && groupKey != item.GroupKey)
@@ -781,18 +794,24 @@ var app;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
 })(app || (app = {}));
+/// <reference path="IDataModel.ts" />
+/// <reference path="../../common/utils/Guid.ts" />
+/// <reference path="AbstractRepository.ts" />
+/// <reference path="../models/IUser.ts" />
+/// <reference path="../samples.ts" />
 var app;
 (function (app) {
     var data;
     (function (data) {
         var repositories;
         (function (repositories) {
-            var UserRepository = (function () {
-                function UserRepository($q) {
-                    this.$q = $q;
+            var UserRepository = (function (_super) {
+                __extends(UserRepository, _super);
+                function UserRepository($rootScope, $q) {
+                    _super.call(this, 'users', $rootScope, $q, function () { return data.SampleData.Users; });
                 }
                 return UserRepository;
-            })();
+            })(repositories.AbstractRepository);
             repositories.UserRepository = UserRepository;
         })(repositories = data.repositories || (data.repositories = {}));
     })(data = app.data || (app.data = {}));
@@ -811,14 +830,15 @@ var app;
         var services;
         (function (services) {
             var ScrumBoardService = (function () {
-                function ScrumBoardService($q) {
+                function ScrumBoardService($rootScope, $q) {
+                    this.$rootScope = $rootScope;
                     this.$q = $q;
-                    this.Projects = new app.data.repositories.ProjectRepository($q);
-                    this.Sprints = new app.data.repositories.SprintRepository($q);
-                    this.Boards = new app.data.repositories.BoardRepository($q);
-                    this.Groups = new app.data.repositories.GroupRepository($q);
-                    this.Tasks = new app.data.repositories.TaskRepository($q);
-                    this.Users = new app.data.repositories.UserRepository($q);
+                    this.Projects = new app.data.repositories.ProjectRepository($rootScope, $q);
+                    this.Sprints = new app.data.repositories.SprintRepository($rootScope, $q);
+                    this.Boards = new app.data.repositories.BoardRepository($rootScope, $q);
+                    this.Groups = new app.data.repositories.GroupRepository($rootScope, $q);
+                    this.Tasks = new app.data.repositories.TaskRepository($rootScope, $q);
+                    this.Users = new app.data.repositories.UserRepository($rootScope, $q);
                 }
                 return ScrumBoardService;
             })();
@@ -1233,6 +1253,7 @@ var app;
                 AddSprintController.prototype.init = function () {
                     var _this = this;
                     this.$scope.model = this.scrumBoardService;
+                    this.$scope.project = this.modalContext.project;
                     this.$scope.data = this.modalContext.sprint;
                     this.$scope.submit = function () {
                         _this.$modalInstance.close(_this.modalContext);
@@ -1240,6 +1261,9 @@ var app;
                     this.$scope.cancel = function () {
                         _this.$modalInstance.dismiss(_this.modalContext);
                     };
+                    if (this.modalContext.project) {
+                        this.$scope.data.ProjectKey = this.modalContext.project.Key;
+                    }
                 };
                 return AddSprintController;
             })();
@@ -1349,7 +1373,7 @@ var app;
 angular.module('myScrumBoard.common', [
     'myScrumBoard.directives',
 ])
-    .service('ScrumBoardService', ['$q', app.common.services.ScrumBoardService])
+    .service('ScrumBoardService', ['$rootScope', '$q', app.common.services.ScrumBoardService])
     .controller('AddProjectController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddProjectController])
     .controller('AddBoardController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddBoardController])
     .controller('AddSprintController', ['$scope', '$modalInstance', 'modalContext', 'ScrumBoardService', app.common.modal.AddSprintController])
@@ -1413,13 +1437,11 @@ var app;
                 // On Commit
                 // On Commit
                 function (modalContext) {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     _this.insert(modalContext.board);
                 }, 
                 // Dismissed
                 // Dismissed
                 function () {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     _this.index();
                 });
             };
@@ -1481,24 +1503,20 @@ var app;
                 // On Commit
                 // On Commit
                 function (modalContext) {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     _this.updateTask(modalContext.task);
                 }, 
                 // Dismissed
                 // Dismissed
                 function () {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     _this.cancelTask();
                 });
             };
             BacklogController.prototype.moveTask = function (boardKey, task) {
-                var _this = this;
                 if (task && !!boardKey) {
-                    this.$rootScope.$applyAsync(function () {
-                        console.log(' - Move:', task.Key, boardKey);
-                        task.BoardKey = boardKey;
-                        _this.updateTask(task);
-                    });
+                    console.log(' - Move:', task.Key, boardKey);
+                    task.BoardKey = boardKey;
+                    this.updateTask(task);
+                    this.$rootScope.$applyAsync(function () { });
                 }
             };
             BacklogController.prototype.editTask = function (task) {
@@ -1521,13 +1539,11 @@ var app;
                 // On Commit
                 // On Commit
                 function (modalContext) {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     _this.updateTask(modalContext.task);
                 }, 
                 // Dismissed
                 // Dismissed
                 function () {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     _this.cancelTask();
                 });
             };
@@ -1536,7 +1552,7 @@ var app;
                     task.Key = Guid.New();
                     this.scrumBoards.Tasks.insert(task);
                 }
-                this.scrumBoards.Tasks.save();
+                this.scrumBoards.Tasks.save(task);
                 this.newTask = null;
             };
             BacklogController.prototype.cancelTask = function () {
@@ -1583,12 +1599,25 @@ var app;
 (function (app) {
     var controllers;
     (function (controllers) {
+        var models = app.data.models;
         var ProjectsController = (function () {
-            function ProjectsController($state, $modal, scrumBoards) {
+            function ProjectsController($rootScope, $state, $modal, scrumBoards) {
+                this.$rootScope = $rootScope;
                 this.$state = $state;
                 this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
+                this.cache = {};
+                this.projects = [];
+                this.init();
             }
+            ProjectsController.prototype.init = function () {
+                var _this = this;
+                this.scrumBoards.Projects.load().then(function (items) {
+                    _this.projects = items;
+                }).finally(function () {
+                    _this.$rootScope.$applyAsync();
+                });
+            };
             ProjectsController.prototype.index = function () {
                 this.$state.go('projects.list');
             };
@@ -1619,13 +1648,11 @@ var app;
                 // On Commit
                 // On Commit
                 function (modalContext) {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     _this.update(modalContext.project);
                 }, 
                 // Dismissed
                 // Dismissed
                 function () {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     _this.cancel();
                 });
             };
@@ -1635,32 +1662,39 @@ var app;
                     project.Key = Guid.New(),
                         this.scrumBoards.Projects.insert(project);
                 }
-                else {
-                    this.scrumBoards.Projects.save().then(function () {
-                        _this.index();
-                    });
-                }
+                this.scrumBoards.Projects.save().finally(function () {
+                    _this.$state.go('projects.item', { projectKey: project.Key });
+                });
             };
             ProjectsController.prototype.cancel = function () {
                 this.index();
+            };
+            ProjectsController.prototype.countSprintsOfType = function (state, projectKey) {
+                var count = 0;
+                var sprints = this.scrumBoards.Sprints.list();
+                if (sprints) {
+                    sprints.forEach(function (item) {
+                        if (projectKey && (projectKey != item.ProjectKey))
+                            return;
+                        if (item.State == state) {
+                            count++;
+                        }
+                    });
+                }
+                return count;
             };
             return ProjectsController;
         })();
         controllers.ProjectsController = ProjectsController;
         var ProjectListController = (function () {
-            function ProjectListController($rootScope, scrumBoards) {
+            function ProjectListController($rootScope, $state, $modal, scrumBoards) {
                 this.$rootScope = $rootScope;
+                this.$state = $state;
+                this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
-                this.projects = [];
                 this.init();
             }
             ProjectListController.prototype.init = function () {
-                var _this = this;
-                this.scrumBoards.Projects.load().then(function (items) {
-                    _this.projects = items;
-                }).finally(function () {
-                    _this.$rootScope.$applyAsync();
-                });
             };
             return ProjectListController;
         })();
@@ -1670,7 +1704,37 @@ var app;
                 this.$rootScope = $rootScope;
                 this.scrumBoards = scrumBoards;
                 this.project = project;
+                this.init();
             }
+            ProjectItemController.prototype.init = function () {
+                var _this = this;
+                this.scrumBoards.Sprints.load().then(function (items) {
+                    var max;
+                    var sprints = [];
+                    if (items) {
+                        items.forEach(function (item) {
+                            if (!_this.project)
+                                return;
+                            if (_this.project.Key == item.ProjectKey) {
+                                sprints.push(item);
+                                if (max && (max.State == models.SprintState.Started))
+                                    return;
+                                if (!max || (max.Number < item.Number)) {
+                                    if (max && (item.State == models.SprintState.Discarded))
+                                        return;
+                                    if (max && (item.State == models.SprintState.Completed))
+                                        return;
+                                    max = item;
+                                }
+                            }
+                        });
+                    }
+                    _this.sprints = sprints;
+                    _this.current = max;
+                }).finally(function () {
+                    _this.$rootScope.$applyAsync();
+                });
+            };
             return ProjectItemController;
         })();
         controllers.ProjectItemController = ProjectItemController;
@@ -1711,8 +1775,9 @@ var app;
         })();
         controllers.ControllerUtils = ControllerUtils;
         var SprintController = (function () {
-            function SprintController($rootScope, $state, $modal, scrumBoards) {
+            function SprintController($rootScope, $q, $state, $modal, scrumBoards) {
                 this.$rootScope = $rootScope;
+                this.$q = $q;
                 this.$state = $state;
                 this.$modal = $modal;
                 this.scrumBoards = scrumBoards;
@@ -1760,13 +1825,11 @@ var app;
                 // On Commit
                 // On Commit
                 function (modalContext) {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     _this.updateTask(modalContext.task);
                 }, 
                 // Dismissed
                 // Dismissed
                 function () {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     _this.cancel();
                 });
             };
@@ -1828,18 +1891,28 @@ var app;
                 // On Commit
                 // On Commit
                 function (modalContext) {
-                    console.info(' - Modal closed. Updating sprint.', modalContext);
                     _this.updateSprint(modalContext.sprint);
                 }, 
                 // Dismissed
                 // Dismissed
                 function () {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     _this.cancel();
                 });
             };
             SprintController.prototype.addBacklogs = function (sprint, board) {
                 var _this = this;
+                if (!board) {
+                    board = this.firstOrDefaultBoard(sprint.Key, models.TaskType.Default, function (type) { return {
+                        Key: Guid.Empty,
+                        TaskType: type,
+                        SprintKey: sprint.Key,
+                        ProjectKey: sprint.ProjectKey,
+                        Title: ControllerUtils.TaskDescription(type),
+                    }; });
+                    this.scrumBoards.Boards.save(board).then(function () {
+                        _this.$rootScope.$applyAsync();
+                    });
+                }
                 // Open the modal dialog
                 var dialog = this.$modal.open({
                     size: 'md',
@@ -1860,30 +1933,24 @@ var app;
                 // On Commit
                 // On Commit
                 function (modalContext) {
+                    var list = [];
                     var result = modalContext.data;
-                    console.info(' - Modal closed. Updating sprint.', result);
                     if (result && result.length) {
                         result.forEach(function (item) {
-                            item.TaskType = models.TaskType.Default;
+                            item.TaskType = board ? board.TaskType : models.TaskType.Default;
                             item.SprintKey = sprint.Key;
                             item.ProjectKey = sprint.ProjectKey;
-                            item.BoardKey = board ? board.Key : _this.firstOrDefaultBoard(sprint.Key, models.TaskType.Default, function (type) { return {
-                                Key: Guid.Empty,
-                                TaskType: type,
-                                SprintKey: sprint.Key,
-                                ProjectKey: sprint.ProjectKey,
-                                Title: ControllerUtils.TaskDescription(type),
-                            }; }).Key;
-                        });
-                        _this.scrumBoards.Boards.save().then(function () {
-                            _this.scrumBoards.Tasks.save();
+                            item.BoardKey = board ? board.Key : null;
+                            list.push(_this.scrumBoards.Tasks.save(item));
                         });
                     }
+                    _this.$q.all(list).then(function () {
+                        _this.$rootScope.$applyAsync();
+                    });
                 }, 
                 // Dismissed
                 // Dismissed
                 function () {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     _this.cancel();
                 });
             };
@@ -1893,10 +1960,21 @@ var app;
                     task.Key = Guid.New();
                     this.scrumBoards.Tasks.insert(task);
                 }
-                this.scrumBoards.Tasks.save().finally(function () {
+                this.scrumBoards.Tasks.save(task).finally(function () {
                     _this.refreshData({ task: task });
                     _this.$rootScope.$applyAsync();
                 });
+            };
+            SprintController.prototype.getTaskCss = function (type) {
+                switch (type) {
+                    case models.TaskType.Default: return 'default';
+                    case models.TaskType.Backlog: return 'backlog';
+                    case models.TaskType.Canceled: return 'canceled';
+                    case models.TaskType.InProgress: return 'started';
+                    case models.TaskType.Testing: return 'testing';
+                    case models.TaskType.Completed: return 'completed';
+                }
+                return null;
             };
             SprintController.prototype.updateSprint = function (sprint) {
                 var _this = this;
@@ -1904,7 +1982,7 @@ var app;
                     sprint.Key = Guid.New();
                     this.scrumBoards.Sprints.insert(sprint);
                 }
-                this.scrumBoards.Sprints.save().finally(function () {
+                this.scrumBoards.Sprints.save(sprint).finally(function () {
                     _this.refreshData({ sprint: sprint });
                     _this.$rootScope.$applyAsync();
                 });
@@ -1993,13 +2071,11 @@ var app;
                 return target;
             };
             SprintController.prototype.moveTask = function (boardKey, task) {
-                var _this = this;
                 if (task && !!boardKey) {
-                    this.$rootScope.$applyAsync(function () {
-                        console.log(' - Move:', task.Key, boardKey);
-                        task.BoardKey = boardKey;
-                        _this.updateTask(task);
-                    });
+                    console.log(' - Move:', task.Key, boardKey);
+                    task.BoardKey = boardKey;
+                    this.updateTask(task);
+                    this.$rootScope.$applyAsync(function () { });
                 }
             };
             return SprintController;
@@ -2186,23 +2262,465 @@ var app;
         controllers.SprintEditController = SprintEditController;
     })(controllers = app.controllers || (app.controllers = {}));
 })(app || (app = {}));
+var app;
+(function (app) {
+    var controllers;
+    (function (controllers) {
+        var sprints;
+        (function (sprints_1) {
+            var directives;
+            (function (directives) {
+                var models = app.data.models;
+                function SprintBacklogDirective() {
+                    return {
+                        replace: true,
+                        restrict: 'AEMC',
+                        scope: {
+                            project: '=sprintBacklogView',
+                            sprint: '=sprintBacklogActive',
+                        },
+                        templateUrl: 'views/sprints/directives/backlogs.tpl.html',
+                        controller: 'SprintBacklogController',
+                        controllerAs: 'backlogCtrl',
+                    };
+                }
+                directives.SprintBacklogDirective = SprintBacklogDirective;
+                var SprintBacklogController = (function () {
+                    function SprintBacklogController($rootScope, $scope, $modal, scrumboardService) {
+                        this.$rootScope = $rootScope;
+                        this.$scope = $scope;
+                        this.$modal = $modal;
+                        this.scrumboardService = scrumboardService;
+                        this.showAll = true;
+                        this.cached = [];
+                        this.project = $scope.project;
+                        this.init();
+                    }
+                    Object.defineProperty(SprintBacklogController.prototype, "sprints", {
+                        get: function () { return this.cached; },
+                        enumerable: true,
+                        configurable: true
+                    });
+                    SprintBacklogController.prototype.init = function () {
+                        this.refresh();
+                    };
+                    SprintBacklogController.prototype.refresh = function () {
+                        var _this = this;
+                        this.scrumboardService.Sprints.load().then(function (items) {
+                            var max;
+                            var sprints = [];
+                            if (items) {
+                                items.forEach(function (item) {
+                                    if (!_this.project)
+                                        return;
+                                    if (_this.project.Key == item.ProjectKey) {
+                                        _this.cached.push(item);
+                                        if (max && (max.State == models.SprintState.Started))
+                                            return;
+                                        if (!max || (max.Number < item.Number)) {
+                                            if (max && (item.State == models.SprintState.Discarded))
+                                                return;
+                                            if (max && (item.State == models.SprintState.Completed))
+                                                return;
+                                            max = item;
+                                        }
+                                    }
+                                });
+                            }
+                            _this.sprints = sprints;
+                            _this.current = max;
+                        }).finally(function () {
+                            _this.$rootScope.$applyAsync();
+                        });
+                    };
+                    SprintBacklogController.prototype.getBoards = function (sprint) {
+                        var boards = [];
+                        return boards;
+                    };
+                    SprintBacklogController.prototype.isVisible = function (board) {
+                        if (!board)
+                            return false;
+                        if (this.current)
+                            return this.current.Key == board.SprintKey;
+                        return true;
+                    };
+                    SprintBacklogController.prototype.cancel = function () {
+                    };
+                    SprintBacklogController.prototype.addTaskToBoard = function (board) {
+                        var _this = this;
+                        if (!board)
+                            return;
+                        var task = {
+                            Key: Guid.Empty,
+                            TaskType: models.TaskType.Default,
+                            Title: '',
+                            Description: '',
+                            BoardKey: board.Key,
+                        };
+                        // Open the modal dialog
+                        var dialog = this.$modal.open({
+                            size: 'md',
+                            animation: true,
+                            templateUrl: 'views/common/modal/addTask.tpl.html',
+                            controller: 'AddTaskController',
+                            resolve: {
+                                modalContext: function () {
+                                    return {
+                                        task: task,
+                                    };
+                                },
+                            }
+                        }).result.then(
+                        // On Commit
+                        // On Commit
+                        function (modalContext) {
+                            _this.updateTask(modalContext.task);
+                        }, 
+                        // Dismissed
+                        // Dismissed
+                        function () {
+                            _this.cancel();
+                        });
+                    };
+                    SprintBacklogController.prototype.getStateDesc = function (state) {
+                        return controllers.ControllerUtils.StateDescription(state);
+                    };
+                    SprintBacklogController.prototype.moveTask = function (boardKey, task) {
+                        var _this = this;
+                        if (task && !!boardKey) {
+                            this.$rootScope.$applyAsync(function () {
+                                console.log(' - Move:', task.Key, boardKey);
+                                task.BoardKey = boardKey;
+                                _this.updateTask(task);
+                            });
+                        }
+                    };
+                    SprintBacklogController.prototype.addSprint = function (project, state) {
+                        var _this = this;
+                        var sprint = {
+                            Number: 0,
+                            Key: Guid.Empty,
+                            State: state ? state : models.SprintState.Started,
+                            ProjectKey: project != null ? project.Key : null,
+                        };
+                        // Open the modal dialog
+                        var dialog = this.$modal.open({
+                            size: 'md',
+                            animation: true,
+                            templateUrl: 'views/common/modal/addSprint.tpl.html',
+                            controller: 'AddSprintController',
+                            resolve: {
+                                modalContext: function () {
+                                    return {
+                                        sprint: sprint,
+                                    };
+                                },
+                            }
+                        }).result.then(
+                        // On Commit
+                        // On Commit
+                        function (modalContext) {
+                            _this.scrumboardService.Sprints.save(modalContext.sprint).then(function () {
+                                _this.$rootScope.$applyAsync();
+                            });
+                        }, 
+                        // Dismissed
+                        // Dismissed
+                        function () {
+                            _this.cancel();
+                        });
+                    };
+                    SprintBacklogController.prototype.updateTask = function (task) {
+                        var _this = this;
+                        if (task.Key == Guid.Empty) {
+                            task.Key = Guid.New();
+                            this.scrumboardService.Tasks.insert(task);
+                        }
+                        this.scrumboardService.Tasks.save(task).finally(function () {
+                            _this.refreshData({ task: task });
+                            _this.$rootScope.$applyAsync();
+                        });
+                    };
+                    SprintBacklogController.prototype.refreshData = function (ctx) {
+                        this.$rootScope.$broadcast('RefreshData', ctx);
+                    };
+                    SprintBacklogController.prototype.getTasks = function (board) {
+                        var tasks = this.scrumboardService.Tasks.filter(board.Key);
+                        //console.log(' - Tasks: ', board.Key, tasks);
+                        return tasks;
+                    };
+                    SprintBacklogController.prototype.editTask = function (task) {
+                        var _this = this;
+                        // Open the modal dialog
+                        var dialog = this.$modal.open({
+                            size: 'md',
+                            animation: true,
+                            templateUrl: 'views/common/modal/addTask.tpl.html',
+                            controller: 'AddTaskController',
+                            controllerAs: 'modalCtrl',
+                            resolve: {
+                                modalContext: function () {
+                                    return {
+                                        task: task,
+                                    };
+                                },
+                            }
+                        }).result.then(
+                        // On Commit
+                        // On Commit
+                        function (modalContext) {
+                            _this.updateTask(modalContext.task);
+                        }, 
+                        // Dismissed
+                        // Dismissed
+                        function () {
+                            _this.cancel();
+                        });
+                    };
+                    return SprintBacklogController;
+                })();
+                directives.SprintBacklogController = SprintBacklogController;
+            })(directives = sprints_1.directives || (sprints_1.directives = {}));
+        })(sprints = controllers.sprints || (controllers.sprints = {}));
+    })(controllers = app.controllers || (app.controllers = {}));
+})(app || (app = {}));
+var app;
+(function (app) {
+    var controllers;
+    (function (controllers) {
+        var sprints;
+        (function (sprints_2) {
+            var directives;
+            (function (directives) {
+                var models = app.data.models;
+                function SprintSummaryDirective() {
+                    return {
+                        replace: true,
+                        restrict: 'AEMC',
+                        scope: {
+                            project: '=sprintSummaryProject',
+                            sprint: '=sprintSummaryActive',
+                        },
+                        templateUrl: 'views/sprints/directives/summary.tpl.html',
+                        controller: 'SprintSummaryController',
+                        controllerAs: 'summryCtrl',
+                    };
+                }
+                directives.SprintSummaryDirective = SprintSummaryDirective;
+                var SprintSummaryController = (function () {
+                    function SprintSummaryController($rootScope, $scope, $modal, scrumboardService) {
+                        this.$rootScope = $rootScope;
+                        this.$scope = $scope;
+                        this.$modal = $modal;
+                        this.scrumboardService = scrumboardService;
+                        this.sprints = [];
+                        this.current = $scope.sprint;
+                        this.project = $scope.project;
+                        this.init();
+                    }
+                    SprintSummaryController.prototype.init = function () {
+                        this.refresh();
+                    };
+                    SprintSummaryController.prototype.refresh = function () {
+                        var _this = this;
+                        this.scrumboardService.Sprints.load().then(function (items) {
+                            var max;
+                            var sprints = [];
+                            if (items) {
+                                items.forEach(function (item) {
+                                    if (!_this.project)
+                                        return;
+                                    if (_this.project.Key == item.ProjectKey) {
+                                        sprints.push(item);
+                                        if (_this.current)
+                                            return;
+                                        if (max && (max.State == models.SprintState.Started))
+                                            return;
+                                        if (!max || (max.Number < item.Number)) {
+                                            if (max && (item.State == models.SprintState.Discarded))
+                                                return;
+                                            if (max && (item.State == models.SprintState.Completed))
+                                                return;
+                                            max = item;
+                                        }
+                                    }
+                                });
+                            }
+                            _this.sprints = sprints;
+                            _this.current = max;
+                        }).finally(function () {
+                            _this.$rootScope.$applyAsync();
+                        });
+                    };
+                    SprintSummaryController.prototype.countTasks = function (taskType) {
+                        var _this = this;
+                        var count = 0;
+                        this.scrumboardService.Tasks.filterByProject(this.project.Key).forEach(function (itm) {
+                            if (!_this.project || _this.project.Key != itm.ProjectKey)
+                                return;
+                            if (!_this.current || _this.current.Key != itm.SprintKey)
+                                return;
+                            if (itm.TaskType == taskType)
+                                count++;
+                        });
+                        return count;
+                    };
+                    SprintSummaryController.prototype.getTaskCss = function (type) {
+                        switch (type) {
+                            case models.TaskType.Default: return 'default';
+                            case models.TaskType.Backlog: return 'backlog';
+                            case models.TaskType.Canceled: return 'canceled';
+                            case models.TaskType.InProgress: return 'started';
+                            case models.TaskType.Testing: return 'testing';
+                            case models.TaskType.Completed: return 'completed';
+                        }
+                        return null;
+                    };
+                    SprintSummaryController.prototype.cancel = function () {
+                    };
+                    SprintSummaryController.prototype.prevSprint = function () {
+                        if (this.current) {
+                            var pilot = this.sprints.indexOf(this.current);
+                            if (pilot >= 1) {
+                                pilot--;
+                            }
+                            this.current = this.sprints[pilot];
+                        }
+                    };
+                    SprintSummaryController.prototype.nextSprint = function () {
+                        if (this.current) {
+                            var pilot = this.sprints.indexOf(this.current);
+                            if (pilot < (this.sprints.length - 1)) {
+                                pilot++;
+                            }
+                            this.current = this.sprints[pilot];
+                        }
+                    };
+                    SprintSummaryController.prototype.addSprint = function (project, state) {
+                        var _this = this;
+                        var sprint = {
+                            Number: project != null ? this.scrumboardService.Sprints.getNextSprintNumber(project.Key) : 1,
+                            Key: Guid.Empty,
+                            State: state ? state : models.SprintState.Default,
+                            ProjectKey: project != null ? project.Key : null,
+                        };
+                        // Open the modal dialog
+                        var dialog = this.$modal.open({
+                            size: 'md',
+                            animation: true,
+                            templateUrl: 'views/common/modal/addSprint.tpl.html',
+                            controller: 'AddSprintController',
+                            controllerAs: 'modalCtrl',
+                            resolve: {
+                                modalContext: function () {
+                                    return {
+                                        project: project,
+                                        sprint: sprint,
+                                    };
+                                },
+                            }
+                        }).result.then(
+                        // On Commit
+                        // On Commit
+                        function (modalContext) {
+                            _this.updateSprint(modalContext.sprint);
+                        }, 
+                        // Dismissed
+                        // Dismissed
+                        function () {
+                            _this.cancel();
+                        });
+                    };
+                    SprintSummaryController.prototype.updateSprint = function (sprint) {
+                        var _this = this;
+                        if (sprint.Key == Guid.Empty) {
+                            sprint.Key = Guid.New();
+                            this.scrumboardService.Sprints.insert(sprint);
+                        }
+                        this.scrumboardService.Sprints.save().finally(function () {
+                            _this.refresh();
+                            _this.$rootScope.$applyAsync();
+                        });
+                    };
+                    SprintSummaryController.prototype.getTaskSummary = function (sprint) {
+                        var _this = this;
+                        var key = sprint.Key;
+                        var init = function (taskType) { return _this.newBoard(sprint, taskType); };
+                        var boards = [
+                            this.firstOrDefaultBoard(key, models.TaskType.Default, init),
+                            this.firstOrDefaultBoard(key, models.TaskType.InProgress, init),
+                            this.firstOrDefaultBoard(key, models.TaskType.Testing, init),
+                            this.firstOrDefaultBoard(key, models.TaskType.Completed, init),
+                            this.firstOrDefaultBoard(key, models.TaskType.Backlog, init),
+                        ];
+                        return boards;
+                    };
+                    SprintSummaryController.prototype.newBoard = function (sprint, taskType) {
+                        return {
+                            Key: Guid.Empty,
+                            TaskType: taskType,
+                            SprintKey: sprint.Key,
+                            ProjectKey: sprint.ProjectKey,
+                            Title: controllers.ControllerUtils.TaskDescription(taskType),
+                        };
+                    };
+                    SprintSummaryController.prototype.firstOrDefaultBoard = function (sprintKey, type, defaults) {
+                        var _this = this;
+                        var target = null;
+                        var boards = this.scrumboardService.Boards.filterBySprint(sprintKey, type);
+                        if (boards.length) {
+                            boards.forEach(function (item) {
+                                if (target)
+                                    return;
+                                if (item.TaskType == type) {
+                                    target = item;
+                                }
+                            });
+                        }
+                        if (!target) {
+                            boards = defaults ? [defaults(type)] : [];
+                            boards.forEach(function (item) {
+                                if (item.Key == Guid.Empty) {
+                                    item.Key = Guid.New();
+                                    _this.scrumboardService.Boards.insert(item);
+                                }
+                                if (item.TaskType == type) {
+                                    target = item;
+                                }
+                            });
+                        }
+                        return target;
+                    };
+                    return SprintSummaryController;
+                })();
+                directives.SprintSummaryController = SprintSummaryController;
+            })(directives = sprints_2.directives || (sprints_2.directives = {}));
+        })(sprints = controllers.sprints || (controllers.sprints = {}));
+    })(controllers = app.controllers || (app.controllers = {}));
+})(app || (app = {}));
 /// <reference path="../common/module.ts" />
 /// <reference path="backlogs/BacklogController.ts" />
 /// <reference path="dashboard/DashboardController.ts" />
 /// <reference path="projects/ProjectsController.ts" />
 /// <reference path="sprints/SprintController.ts" />
+/// <reference path="sprints/directives/SprintBacklogDirective.ts" />
+/// <reference path="sprints/directives/SprintSummaryDirective.ts" />
 angular.module('myScrumBoard.controllers', [
     'myScrumBoard.common',
 ])
     .controller('DashboardController', ['ScrumBoardService', app.controllers.DashboardController])
-    .controller('ProjectsController', ['$state', '$modal', 'ScrumBoardService', app.controllers.ProjectsController])
-    .controller('ProjectListController', ['$rootScope', 'ScrumBoardService', app.controllers.ProjectListController])
+    .controller('ProjectsController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.ProjectsController])
+    .controller('ProjectListController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.ProjectListController])
     .controller('ProjectItemController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.ProjectItemController])
-    .controller('SprintController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.SprintController])
+    .controller('SprintController', ['$rootScope', '$q', '$state', '$modal', 'ScrumBoardService', app.controllers.SprintController])
     .controller('SprintsActiveController', ['$rootScope', 'ScrumBoardService', app.controllers.SprintsActiveController])
     .controller('SprintListController', ['$rootScope', 'ScrumBoardService', 'project', app.controllers.SprintListController])
     .controller('SprintItemController', ['$rootScope', 'ScrumBoardService', 'sprint', app.controllers.SprintItemController])
     .controller('SprintEditController', ['ScrumBoardService', 'sprint', app.controllers.SprintEditController])
+    .controller('SprintBacklogController', ['$rootScope', '$scope', '$modal', 'ScrumBoardService', app.controllers.sprints.directives.SprintBacklogController])
+    .controller('SprintSummaryController', ['$rootScope', '$scope', '$modal', 'ScrumBoardService', app.controllers.sprints.directives.SprintSummaryController])
+    .directive('sprintSummary', [app.controllers.sprints.directives.SprintSummaryDirective])
+    .directive('sprintBacklogView', [app.controllers.sprints.directives.SprintBacklogDirective])
     .controller('BacklogController', ['$rootScope', '$state', '$modal', 'ScrumBoardService', app.controllers.BacklogController])
     .controller('BacklogListController', ['ScrumBoardService', app.controllers.BacklogListController])
     .controller('BacklogItemController', ['ScrumBoardService', 'board', app.controllers.BacklogItemController]);
@@ -2386,6 +2904,27 @@ angular.module('myScrumBoard.routes', [
                 board: ['$stateParams', 'ScrumBoardService', function ($stateParams, svc) {
                         return $stateParams.key ? svc.Boards.findByKey($stateParams.key) : null;
                     }]
+            },
+        })
+            .state('reset', {
+            url: '/reset',
+            views: {
+                'main@': {
+                    controller: ['$state', '$q', 'ScrumBoardService', function ($state, $q, svc) {
+                            console.debug(' - Resetting all...');
+                            $q.all([
+                                svc.Projects.reset(),
+                                svc.Sprints.reset(),
+                                svc.Boards.reset(),
+                                svc.Groups.reset(),
+                                svc.Tasks.reset(),
+                                svc.Users.reset(),
+                            ]).then(function () {
+                                console.debug(' - Storage reset.');
+                                $state.go('default', {}, { reset: true });
+                            });
+                        }],
+                },
             },
         });
     }]);

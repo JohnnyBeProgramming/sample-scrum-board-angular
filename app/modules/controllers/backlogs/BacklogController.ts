@@ -54,12 +54,10 @@
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     this.insert(modalContext.board);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.index();
                 });
 
@@ -124,23 +122,20 @@
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     this.updateTask(modalContext.task);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.cancelTask();
                 });
         }
 
         public moveTask(boardKey: string, task: models.ITask) {
             if (task && !!boardKey) {
-                this.$rootScope.$applyAsync(() => {
-                    console.log(' - Move:', task.Key, boardKey);
-                    task.BoardKey = boardKey;
-                    this.updateTask(task);
-                });
+                console.log(' - Move:', task.Key, boardKey);
+                task.BoardKey = boardKey;
+                this.updateTask(task);
+                this.$rootScope.$applyAsync(() => {});
             }
         }
 
@@ -163,12 +158,10 @@
             }).result.then(
                 // On Commit
                 (modalContext) => {
-                    console.info(' - Modal closed. Updating task.', modalContext);
                     this.updateTask(modalContext.task);
                 },
                 // Dismissed
                 () => {
-                    console.info(' - Modal dismissed at: ' + new Date());
                     this.cancelTask();
                 });
         }
@@ -178,7 +171,7 @@
                 task.Key = Guid.New();
                 this.scrumBoards.Tasks.insert(task);
             }
-            this.scrumBoards.Tasks.save();
+            this.scrumBoards.Tasks.save(task);
             this.newTask = null;
         }
 

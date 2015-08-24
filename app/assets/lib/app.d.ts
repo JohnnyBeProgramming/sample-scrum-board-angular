@@ -17,12 +17,23 @@ declare module app.data.repositories {
     import IDataModel = app.data.models.IDataModel;
     interface IRepository<TModel> {
         load(): ng.IPromise<TModel[]>;
-        save(): ng.IPromise<boolean>;
+        save(): ng.IPromise<TModel>;
     }
-    class AbstractRepository<TModel extends IDataModel> {
+    class AbstractRepository<TModel extends IDataModel> implements IRepository<TModel> {
+        ident: string;
+        private $rootScope;
         $q: ng.IQService;
-        memCache: TModel[];
-        constructor($q: ng.IQService);
+        private defaults;
+        hasLocal: boolean;
+        isOnline: boolean;
+        private keys;
+        private memCache;
+        constructor(ident: string, $rootScope: ng.IRootScopeService, $q: ng.IQService, defaults?: () => TModel[]);
+        init(): void;
+        load(): ng.IPromise<TModel[]>;
+        reset(): ng.IPromise<TModel[]>;
+        save(item?: TModel, updateModel?: boolean): ng.IPromise<TModel>;
+        findByKey(key: string): ng.IPromise<TModel>;
         list(): TModel[];
         insert(item: TModel): TModel;
         remove(item: TModel): void;
@@ -38,6 +49,8 @@ declare module app.data.models {
         Key: string;
         Title: string;
         Description?: string;
+        StartedAt?: Date;
+        ClosedAt?: Date;
     }
 }
 declare module app.data.models {
@@ -96,69 +109,68 @@ declare module app.data {
         static Groups: models.IGroup[];
         static Boards: models.IBoard[];
         static Tasks: models.ITask[];
+        static Users: models.IUser[];
     }
 }
 declare module app.data.repositories {
     import IProject = app.data.models.IProject;
-    class ProjectRepository extends AbstractRepository<IProject> implements IRepository<IProject> {
-        constructor($q: ng.IQService);
+    class ProjectRepository extends AbstractRepository<IProject> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
         create(title: string, description?: string): IProject;
-        load(): ng.IPromise<IProject[]>;
-        save(): ng.IPromise<boolean>;
-        findByKey(key: string): ng.IPromise<IProject>;
     }
 }
 declare module app.data.repositories {
     import ISprint = app.data.models.ISprint;
-    class SprintRepository extends AbstractRepository<ISprint> implements IRepository<ISprint> {
-        constructor($q: ng.IQService);
+    class SprintRepository extends AbstractRepository<ISprint> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
         create(projectKey: string, number?: number): ISprint;
-        load(): ng.IPromise<ISprint[]>;
-        save(): ng.IPromise<boolean>;
-        findByKey(key: string): ng.IPromise<ISprint>;
         filterByProject(key: string): ng.IPromise<models.ISprint[]>;
         getNextSprintNumber(projectKey: string): number;
     }
 }
 declare module app.data.repositories {
     import IBoard = app.data.models.IBoard;
-    class BoardRepository extends AbstractRepository<IBoard> implements IRepository<IBoard> {
-        constructor($q: ng.IQService);
+    class BoardRepository extends AbstractRepository<IBoard> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
         create(type: app.data.models.TaskType, title?: string): IBoard;
-        load(): ng.IPromise<IBoard[]>;
-        save(): ng.IPromise<boolean>;
         filterByProject(projectKey: string, type?: app.data.models.TaskType): IBoard[];
         filterBySprint(sprintKey: string, type?: app.data.models.TaskType): IBoard[];
         filterByType(type: app.data.models.TaskType): IBoard[];
-        findByKey(key: string): ng.IPromise<IBoard>;
     }
 }
 declare module app.data.repositories {
-    class GroupRepository {
-        private $q;
-        constructor($q: any);
+    import IGroup = app.data.models.IGroup;
+    class GroupRepository extends AbstractRepository<IGroup> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
     }
 }
 declare module app.data.repositories {
     import models = app.data.models;
-    class TaskRepository extends AbstractRepository<models.ITask> implements IRepository<models.ITask> {
-        constructor($q: ng.IQService);
+    class TaskRepository extends AbstractRepository<models.ITask> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
         create(board: models.IBoard, title: string, description?: string): models.ITask;
-        load(): ng.IPromise<models.ITask[]>;
-        save(): ng.IPromise<boolean>;
         filter(boardKey: string, groupKey?: string): models.ITask[];
         filterByProject(projectKey: string, groupKey?: string): models.ITask[];
         filterBySprint(sprintKey: string, groupKey?: string): models.ITask[];
     }
 }
+declare module app.data.models {
+    interface IUser extends IDataModel {
+        DisplayName: string;
+        ProjectKeys: string[];
+        SprintKeys: string[];
+        BoardKeys: string[];
+        GroupKeys: string[];
+    }
+}
 declare module app.data.repositories {
-    class UserRepository {
-        private $q;
-        constructor($q: any);
+    class UserRepository extends AbstractRepository<models.IUser> {
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService);
     }
 }
 declare module app.common.services {
     class ScrumBoardService {
+        private $rootScope;
         private $q;
         Projects: app.data.repositories.ProjectRepository;
         Sprints: app.data.repositories.SprintRepository;
@@ -166,7 +178,7 @@ declare module app.common.services {
         Groups: app.data.repositories.GroupRepository;
         Tasks: app.data.repositories.TaskRepository;
         Users: app.data.repositories.UserRepository;
-        constructor($q: any);
+        constructor($rootScope: ng.IRootScopeService, $q: any);
     }
 }
 declare module app.common.directives {
@@ -331,28 +343,37 @@ declare module app.controllers {
 declare module app.controllers {
     import models = app.data.models;
     class ProjectsController {
-        private $state;
-        private $modal;
-        private scrumBoards;
-        constructor($state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
+        $rootScope: any;
+        $state: any;
+        $modal: any;
+        scrumBoards: app.common.services.ScrumBoardService;
+        cache: any;
+        projects: models.IProject[];
+        constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
+        init(): void;
         index(): void;
         openProject(project: models.IProject): void;
         newProject(): void;
         update(project: models.IProject): void;
         cancel(): void;
+        countSprintsOfType(state: models.SprintState, projectKey?: string): number;
     }
     class ProjectListController {
-        private $rootScope;
-        private scrumBoards;
-        projects: models.IProject[];
-        constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService);
+        $rootScope: any;
+        $state: any;
+        $modal: any;
+        scrumBoards: app.common.services.ScrumBoardService;
+        constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         init(): void;
     }
     class ProjectItemController {
         private $rootScope;
         private scrumBoards;
         project: models.IProject;
+        current: models.ISprint;
+        sprints: models.ISprint[];
         constructor($rootScope: any, scrumBoards: app.common.services.ScrumBoardService, project?: models.IProject);
+        init(): void;
     }
 }
 declare module app.controllers {
@@ -363,11 +384,12 @@ declare module app.controllers {
     }
     class SprintController {
         private $rootScope;
+        private $q;
         private $state;
         private $modal;
         private scrumBoards;
         projectCache: any;
-        constructor($rootScope: any, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
+        constructor($rootScope: any, $q: ng.IQService, $state: any, $modal: any, scrumBoards: app.common.services.ScrumBoardService);
         getSprints(): ng.IPromise<models.ISprint[]>;
         index(): void;
         cancel(): void;
@@ -378,6 +400,7 @@ declare module app.controllers {
         addSprint(project?: models.IProject, state?: models.SprintState): void;
         addBacklogs(sprint: models.ISprint, board?: models.IBoard): void;
         updateTask(task: models.ITask): void;
+        getTaskCss(type: models.TaskType): string;
         updateSprint(sprint: models.ISprint): void;
         refreshData(ctx: any): void;
         getProjectLabel(projectKey: string): string;
@@ -424,5 +447,80 @@ declare module app.controllers {
         private scrumBoards;
         sprint: models.ISprint;
         constructor(scrumBoards: app.common.services.ScrumBoardService, sprint?: models.ISprint);
+    }
+}
+declare module app.controllers.sprints.directives {
+    import models = app.data.models;
+    function SprintBacklogDirective(): {
+        replace: boolean;
+        restrict: string;
+        scope: {
+            project: string;
+            sprint: string;
+        };
+        templateUrl: string;
+        controller: string;
+        controllerAs: string;
+    };
+    class SprintBacklogController {
+        private $rootScope;
+        private $scope;
+        private $modal;
+        scrumboardService: app.common.services.ScrumBoardService;
+        showAll: boolean;
+        cached: models.ISprint[];
+        current: models.ISprint;
+        project: models.IProject;
+        sprints: models.ISprint[];
+        constructor($rootScope: any, $scope: any, $modal: any, scrumboardService: app.common.services.ScrumBoardService);
+        init(): void;
+        refresh(): void;
+        getBoards(sprint: models.ISprint): any[];
+        isVisible(board: models.IBoard): boolean;
+        cancel(): void;
+        addTaskToBoard(board?: models.IBoard): void;
+        getStateDesc(state: models.SprintState): string;
+        moveTask(boardKey: string, task: models.ITask): void;
+        addSprint(project?: models.IProject, state?: models.SprintState): void;
+        updateTask(task: models.ITask): void;
+        refreshData(ctx: any): void;
+        getTasks(board: models.IBoard): models.ITask[];
+        editTask(task: models.ITask): void;
+    }
+}
+declare module app.controllers.sprints.directives {
+    import models = app.data.models;
+    function SprintSummaryDirective(): {
+        replace: boolean;
+        restrict: string;
+        scope: {
+            project: string;
+            sprint: string;
+        };
+        templateUrl: string;
+        controller: string;
+        controllerAs: string;
+    };
+    class SprintSummaryController {
+        private $rootScope;
+        private $scope;
+        private $modal;
+        scrumboardService: app.common.services.ScrumBoardService;
+        project: models.IProject;
+        current: models.ISprint;
+        sprints: models.ISprint[];
+        constructor($rootScope: any, $scope: any, $modal: any, scrumboardService: app.common.services.ScrumBoardService);
+        init(): void;
+        refresh(): void;
+        countTasks(taskType: models.TaskType): number;
+        getTaskCss(type: models.TaskType): string;
+        cancel(): void;
+        prevSprint(): void;
+        nextSprint(): void;
+        addSprint(project?: models.IProject, state?: models.SprintState): void;
+        updateSprint(sprint: models.ISprint): void;
+        getTaskSummary(sprint: models.ISprint): models.IBoard[];
+        newBoard(sprint: models.ISprint, taskType: models.TaskType): models.IBoard;
+        firstOrDefaultBoard(sprintKey: string, type: models.TaskType, defaults?: (type: models.TaskType) => models.IBoard): models.IBoard;
     }
 }

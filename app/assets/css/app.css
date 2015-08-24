@@ -1,5 +1,6 @@
 body {
   height: 100%;
+  background-color: #FFF;
 }
 body *[draggable=true] {
   -moz-user-select: none;
@@ -94,6 +95,30 @@ body .backlog-group .group-body .task.selected {
   box-shadow: 0 0 3px 0 #0094ff;
   border-radius: 0;
 }
+body .reset:hover {
+  color: red;
+  text-shadow: 0 0 3px 0 red;
+}
+body .app-nav-bar {
+  margin: 0;
+  padding: 0;
+  color: silver;
+  background-color: black;
+}
+body .app-nav-bar a {
+  color: white;
+  text-decoration: none;
+}
+body .app-nav-bar .app-nav-header {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+}
+body .app-nav-bar .app-nav-aside {
+  margin: 0;
+  padding: 3px;
+  display: inline-block;
+}
 body .app-container {
   top: 0;
   left: 0;
@@ -153,6 +178,10 @@ body .app-container .app-panel .contained {
   margin: 0 0 8px 0;
   background: rgba(136, 136, 136, 0.25);
   border: solid 1px rgba(136, 136, 136, 0.5);
+  -webkit-box-shadow: 2px 2px 3px 0 #787878;
+  box-shadow: 2px 2px 3px 0 #787878;
+  border-radius: 6px;
+  min-height: 400px;
 }
 body .app-container .app-panel .contained h3,
 body .app-container .app-panel .contained h4 {
@@ -170,6 +199,9 @@ body .app-container .app-panel .contained h6 {
   margin-bottom: 3px;
   border-bottom: solid 1px silver;
 }
+body .app-container .app-panel .contained.tight {
+  min-height: initial;
+}
 body .app-container .app-panel .contained .container-title {
   margin: 0;
   padding: 0 3px;
@@ -177,13 +209,61 @@ body .app-container .app-panel .contained .container-title {
   font-size: 14px;
   font-weight: bold;
 }
+body .app-container .app-panel .tile {
+  margin: 3px;
+  padding: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  border: solid 1px rgba(136, 136, 136, 0.75);
+  border-radius: 6px;
+  font-size: xx-small;
+  -webkit-box-shadow: 1px 1px 1px 0 #787878;
+  box-shadow: 1px 1px 1px 0 #787878;
+}
+body .app-container .app-panel .tile:hover {
+  border-color: #303c4b;
+  -webkit-box-shadow: 1px 1px 2px 0 #303c4b;
+  box-shadow: 1px 1px 2px 0 #303c4b;
+}
+body .app-container .app-panel .tile p {
+  font-size: xx-small;
+}
+body .app-container .app-panel .tile a {
+  color: silver;
+}
+body .app-container .app-panel .tile a:hover {
+  color: black;
+}
+body .app-container .app-panel .tile.add {
+  opacity: 0.5;
+  display: block;
+  font-size: 16px;
+  line-height: 50px;
+  text-align: center;
+  border: dashed 1px rgba(136, 136, 136, 0.75);
+  -webkit-box-shadow: 1px 1px 3px 0 #e2e2e2;
+  box-shadow: 1px 1px 3px 0 #e2e2e2;
+}
+body .app-container .app-panel .tile.add:hover {
+  opacity: 1.0;
+}
+body .app-container .app-panel .tile.aside {
+  opacity: 0.5;
+  display: block;
+  font-size: 16px;
+  line-height: 24px;
+  text-align: center;
+  border: dashed 1px rgba(136, 136, 136, 0.75);
+}
+body .app-container .app-panel .tile.aside:hover {
+  opacity: 1.0;
+}
 body .app-container .app-panel .board {
   margin: 3px -8px;
   padding: 6px;
   display: block;
-  min-height: 500px;
   background: rgba(255, 255, 255, 0.95);
   border: solid 1px rgba(136, 136, 136, 0.75);
+  border-radius: 6px;
 }
 body .app-container .app-panel .board.add {
   opacity: 0.5;
@@ -195,43 +275,28 @@ body .app-container .app-panel .board.add {
 body .app-container .app-panel .board.add:hover {
   opacity: 1.0;
 }
-body .app-container .app-panel .board .tile {
-  margin: 3px;
-  padding: 6px;
-  background: rgba(255, 255, 255, 0.95);
-  border: solid 1px rgba(136, 136, 136, 0.75);
-  font-size: xx-small;
-}
-body .app-container .app-panel .board .tile p {
-  font-size: xx-small;
-}
-body .app-container .app-panel .board .tile.add {
-  opacity: 0.5;
-  display: block;
-  font-size: 16px;
-  line-height: 50px;
-  text-align: center;
-  border: dashed 1px rgba(136, 136, 136, 0.75);
-}
-body .app-container .app-panel .board .tile.add:hover {
-  opacity: 1.0;
-}
-body .app-container .app-panel .board .tile.aside {
-  opacity: 0.5;
-  display: block;
-  font-size: 16px;
-  line-height: 24px;
-  text-align: center;
-  border: dashed 1px rgba(136, 136, 136, 0.75);
-}
-body .app-container .app-panel .board .tile.aside:hover {
-  opacity: 1.0;
-}
 body .app-container .app-panel .board .board-group {
   margin: 0;
   padding: 0;
   font-size: 11px;
   font-weight: bold;
+}
+body .app-container .app-panel .board-summary {
+  display: block;
+}
+body .app-container .app-panel .board-summary .tile {
+  display: block;
+  margin: 1px 0 !important;
+  padding-left: 8px !important;
+  border-radius: 3px;
+  -webkit-box-shadow: 0 0 0 0 #787878;
+  box-shadow: 0 0 0 0 #787878;
+  font-size: 9px;
+  font-weight: bold;
+}
+body .app-container .app-panel .board-summary .tile.a,
+body .app-container .app-panel .board-summary .tile a {
+  text-decoration: none !important;
 }
 body .app-container .app-panel .project {
   padding: 6px;
@@ -240,6 +305,7 @@ body .app-container .app-panel .project {
   min-height: 160px;
   background: rgba(255, 255, 255, 0.95);
   border: solid 1px rgba(136, 136, 136, 0.75);
+  border-radius: 6px;
 }
 body .app-container .app-panel .project.add {
   opacity: 0.5;
@@ -269,6 +335,9 @@ body .app-container .app-panel .project .proj-info {
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: 200px;
+}
+body .app-container .app-panel .project .proj-info .ctrl {
+  font-size: 10px !important;
 }
 body .app-container .app-panel .project .proj-history {
   margin: 0 3px;

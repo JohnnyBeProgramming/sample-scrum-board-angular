@@ -8,12 +8,12 @@
 
 angular.module('myScrumBoard.common', [
     'myScrumBoard.directives',
-]) 
+])
 
-    .service('ScrumBoardService', ['$q', app.common.services.ScrumBoardService])
+    .service('ScrumBoardService', ['$rootScope', '$q', app.common.services.ScrumBoardService])
 
     .controller('AddProjectController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddProjectController])
     .controller('AddBoardController', ['$scope', '$modalInstance', 'modalContext', app.common.modal.AddBoardController])
     .controller('AddSprintController', ['$scope', '$modalInstance', 'modalContext', 'ScrumBoardService', app.common.modal.AddSprintController])
     .controller('AddTaskController', ['$rootScope', '$scope', '$modalInstance', 'modalContext', 'ScrumBoardService', app.common.modal.AddTaskController])
-    .controller('AddBacklogsController', ['$scope', '$modalInstance', 'modalContext', 'ScrumBoardService',  app.common.modal.AddBacklogsController])
+    .controller('AddBacklogsController', ['$scope', '$modalInstance', 'modalContext', 'ScrumBoardService', app.common.modal.AddBacklogsController])

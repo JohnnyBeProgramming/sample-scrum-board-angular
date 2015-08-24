@@ -1,8 +1,16 @@
-﻿module app.data.repositories {
+﻿/// <reference path="../../common/utils/Guid.ts" />
+/// <reference path="AbstractRepository.ts" />
+/// <reference path="../models/IUser.ts" />
+/// <reference path="../samples.ts" />
 
-    export class UserRepository {
+module app.data.repositories {
 
-        constructor(private $q: any) { }
+    export class UserRepository extends AbstractRepository<models.IUser> {
+
+        constructor($rootScope: ng.IRootScopeService, $q: ng.IQService) {
+            super('users', $rootScope, $q,() => SampleData.Users);
+        }       
+
     }
 
 }  

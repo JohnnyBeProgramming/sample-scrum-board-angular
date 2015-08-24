@@ -1,13 +1,18 @@
 ﻿<div>
-    <span class="pull-right">
+    <span ng-if="childCtrl.project" class="pull-right">
         <a class="btn btn-xs btn-default" href="" ng-click="viewCtrl.cancel()">Cancel</a>
         <a class="btn btn-xs btn-primary" href="" ng-click="viewCtrl.update(childCtrl.project)">Update</a>
     </span>
-    <h3>
-        Current Projects
-        <small>2 Items, 1 Active Sprint(s)</small>
+    <div ng-if="!childCtrl.project" class="inactive-fill">
+        <em>Project Not Found</em>
+    </div>
+    <h3 ng-if="childCtrl.project">
+        Project Details
+        <small ng-if="childCtrl.project">
+            {{ childCtrl.project.Description }}
+        </small>
     </h3>
-    <div class="row contained">
+    <div class="row contained tight" ng-if="childCtrl.project">
         <div class="col-md-12" ng-if="childCtrl.project">
             <div class="project">
                 <a class="pull-right ctrl"><i class="fa fa-trash"></i></a>
@@ -21,14 +26,10 @@
                     <div class="proj-logo">
                         No Logo
                     </div>
-                    <div class="proj-info">
-                        <h5>
-                            <i class="fa fa-tag"></i> Sprint #1
-                            <small>4 / 12 Points</small>
-                        </h5>
-                        <a href="" ui-sref="sprints.list({ projectKey: childCtrl.project.Key })" class="tile add">
-                            <i class="fa fa-plus"></i> Add Sprint
-                        </a>
+                    <div class="proj-info" 
+                         sprint-summary
+                         sprint-summary-project="childCtrl.project">
+                        <em>Loading Summary...</em>
                     </div>
                     <div class="proj-history">
                         <h5>
@@ -40,15 +41,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="proj-details">
-                    ...
-                </div>
             </div>
         </div>
-        <div class="col-md-12">
-            <a href="" class="project add">
-                <i class="fa fa-plus"></i> Create Project
-            </a>
-        </div>
+    </div>
+    <div ng-if="childCtrl.project"
+         sprint-backlog-view="childCtrl.project">
     </div>
 </div>
